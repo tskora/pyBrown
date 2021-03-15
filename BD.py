@@ -48,14 +48,10 @@ def main(input_filename):
 	i = InputData(input_filename, required_keywords, defaults)
 	timestamp( 'Input data:\n{}', i )
 
-	# box_length = i.input_data["box_length"]
 	str_filename = i.input_data["input_str_filename"]
 	xyz_filename = i.input_data["output_xyz_filename"]
 	dt = i.input_data["dt"]
 	
-	# T = i.input_data["T"]
-	# viscosity = i.input_data["viscosity"]
-	# hi = i.input_data["hydrodynamics"]
 	n_steps = i.input_data["number_of_steps"]
 	n_write = i.input_data["xyz_write_freq"]
 	n_diff = i.input_data["diff_freq"]
