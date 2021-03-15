@@ -38,9 +38,6 @@ def main(input_filename):
 
 	# here the dict of keywords:default values is provided
 	# if given keyword is absent in JSON, it is added with respective default value
-	# defaults = {"minimal_distance_between_surfaces":0.0, "max_bond_lengths":2.5e+07,
-	# 			"bond_lengths":'hydrodynamic_radii', "number_of_structures":1,
-	# 			"float_type": 32}
 	defaults = {"debug": False, "hydrodynamics": "nohi", "external_force": [0.0, 0.0, 0.0],
 				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0}
 
@@ -50,6 +47,14 @@ def main(input_filename):
 
 	str_filename = i.input_data["input_str_filename"]
 	xyz_filename = i.input_data["output_xyz_filename"]
+
+	if "filename_range" in i.input_data.keys():
+		str_filenames = [ str_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
+		xyz_filenames = [ xyz_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
+	else:
+		str_filenames = [ str_filename ]
+		xyz_filenames = [ xyz_filename ]
+
 	dt = i.input_data["dt"]
 	
 	n_steps = i.input_data["number_of_steps"]
@@ -58,24 +63,27 @@ def main(input_filename):
 	n_lub = i.input_data["lub_freq"]
 	n_chol = i.input_data["chol_freq"]
 
-	bs = read_str_file(str_filename)
+	for str_filename, xyz_filename in zip(str_filenames, xyz_filenames):
 
-	box = Box(bs, i.input_data)
-	
-	with open(xyz_filename, 'w') as output_file:
 		start = time.time()
-		for i in tqdm( range(n_steps) ):
-		# for i in range(n_steps):
-			if i % n_write == 0:
-				output_file.write('{}\n'.format(len(box.beads)))
-				output_file.write('{} time [ps] {}\n'.format(xyz_filename, i*dt))
-				for bead in box.beads:
-					output_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
-			box.propagate(dt, i%n_diff == 0, i%n_lub == 0, i%n_chol == 0)
+
+		bs = read_str_file(str_filename)
+
+		box = Box(bs, i.input_data)
 	
-	end = time.time()
+		with open(xyz_filename, 'w') as output_file:
+			for i in tqdm( range(n_steps) ):
+			# for i in range(n_steps):
+				if i % n_write == 0:
+					output_file.write('{}\n'.format(len(box.beads)))
+					output_file.write('{} time [ps] {}\n'.format(xyz_filename, i*dt))
+					for bead in box.beads:
+						output_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+				box.propagate(dt, i%n_diff == 0, i%n_lub == 0, i%n_chol == 0)
 	
-	print('{} seconds elapsed'.format(end-start))
+		end = time.time()
+	
+		print('{} seconds elapsed'.format(end-start))
 
 #-------------------------------------------------------------------------------
 
