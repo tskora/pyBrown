@@ -382,3 +382,106 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 		}
 	}
 }
+
+void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answer)
+{
+	double al, as;
+
+	if (ai > aj)
+	{
+		al = ai;
+		as = aj;
+	}
+	else
+	{
+		al = aj;
+		as = ai;
+	}
+	double dist2 = rx*rx + ry*ry + rz*rz;
+	double dist = sqrt(dist2);
+	double aij2 = ai*ai + aj*aj;
+
+	if (dist > (ai + aj))
+	{
+		double coef1 = 1.0 / 8 / M_PI / dist;
+		double coef2 = 1.0 + aij2 / 3 / dist2;
+		double coef3 = 1.0 - aij2 / dist2;
+
+		*(answer) = coef1 * ( coef2 + coef3 * rx * rx / dist2 );
+		*(answer+1) = coef1 * ( coef2 + coef3 * ry * ry / dist2 );
+		*(answer+2) = coef1 * ( coef2 + coef3 * rz * rz / dist2 );
+		*(answer+3) = coef1 * coef3 * rx * ry / dist2;
+		*(answer+4) = coef1 * coef3 * rx * rz / dist2;
+		*(answer+5) = coef1 * coef3 * ry * rz / dist2;
+	}
+	else if (dist <= (al - as))
+	{
+		*(answer) = 1.0 / 6 / M_PI / al;
+		*(answer+1) = 1.0 / 6 / M_PI / al;
+		*(answer+2) = 1.0 / 6 / M_PI / al;
+	}
+	else
+	{
+		double dist3 = dist2 * dist;
+
+		double coef1 = 1.0 / 6 / M_PI / ai / aj;
+		double coef2 = 16 * dist3 * ( ai + aj );
+		double coef3 = (ai - aj) * (ai - aj) + 3*dist2;
+		coef3 *= coef3;
+		double coef4 = (coef2 - coef3) / 32 / dist3;
+		double coef5 = ( (ai - aj)*(ai - aj) - dist2 );
+		coef5 *= 3 * coef5;
+		double coef6 = coef5 / 32 / dist3;
+
+		*(answer) = coef1 * ( coef4 + coef6 * rx * rx / dist2 );
+		*(answer+1) = coef1 * ( coef4 + coef6 * ry * ry / dist2 );
+		*(answer+2) = coef1 * ( coef4 + coef6 * rz * rz / dist2 );
+		*(answer+3) = coef1 * coef6 * rx * ry / dist2;
+		*(answer+4) = coef1 * coef6 * rx * rz / dist2;
+		*(answer+5) = coef1 * coef6 * ry * rz / dist2;
+	}
+}
+
+void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, double* answer)
+{
+	double coef1 = 1.0 / 6 / M_PI / a;
+	double coef2 = 3 * a / 4 / box_length;
+	double coef3 = a * a * a / box_length / box_length / box_length / 2;
+
+	double* comp1 = calloc(6, sizeof(double));
+	double* comp2 = calloc(6, sizeof(double));
+
+	Oii(a, box_length, alpha, m, n, comp1);
+	Qii(a, box_length, alpha, m, n, comp2);
+
+	for (int i = 0; i < 3; i++)
+	{
+		*(answer+i) = coef1 * ( 1.0 + coef2 * *(comp1+i) + coef3 * *(comp2+i) );
+	}
+	for (int i = 3; i < 6; i++)
+	{
+		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
+	}
+}
+
+void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m, int n, double* answer)
+{
+	double sigmax = rx / box_length;
+	double sigmay = ry / box_length;
+	double sigmaz = rz / box_length;
+
+	double coef1 = 1.0 / 6 / M_PI / ai;
+	double coef2 = 3 * ai / 4 / box_length;
+	double coef3 = ai * ai * ai / box_length / box_length / box_length / 2;
+
+	double* comp1 = calloc(6, sizeof(double));
+	double* comp2 = calloc(6, sizeof(double));
+
+	Oij(sigmax, sigmay, sigmaz, alpha, m, n, comp1);
+	Qij(sigmax, sigmay, sigmaz, alpha, m, n, comp2);
+
+	for (int i = 0; i < 6; i++)
+	{
+		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
+	}
+}

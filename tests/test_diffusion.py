@@ -23,6 +23,9 @@ import copy as cp
 
 from diffusion import O, O_python, Oii_pbc_smith, Oii_pbc_smith_python, Oij_pbc_smith, Oij_pbc_smith_python
 from diffusion import Q, Q_python, Qii_pbc_smith, Qii_pbc_smith_python, Qij_pbc_smith, Qij_pbc_smith_python
+from diffusion import Mij_rpy, Mij_rpy_python
+from diffusion import Mii_rpy_smith, Mii_rpy_smith_python
+from diffusion import Mij_rpy_smith, Mij_rpy_smith_python
 
 #-------------------------------------------------------------------------------
 
@@ -188,6 +191,71 @@ class TestDiffusion(unittest.TestCase):
 
 							for i in range(3):
 								for j in range(3):
-									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )	
+									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_Mij_python_vs_c(self):
+
+		for ai in [0.1, 1.0, 10.0]:
+			for aj in [0.1, 1.0, 10.0]:
+				for rx in [0, -0.1, 0.1, 10, -10, -100, 100]:
+					for ry in [0, -0.1, 0.1, 10, -10, -100, 100]:
+						for rz in [0, -0.1, 0.1, 10, -10, -100, 100]:
+
+							if rx==0 and ry==0 and rz==0: continue
+
+							r = np.array([rx, ry, rz])
+
+							c_ish = Mij_rpy(ai, aj, r)
+							python_ish = Mij_rpy_python(ai, aj, r)
+
+							for i in range(3):
+								for j in range(3):
+									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_Mii_rpy_smith_python_vs_c(self):
+
+		for a in [0.1, 1.0, 10.0]:
+			for L in [10, 100, 1000]:
+					for m in [0, 1, 2, 3, 4, 5]:
+						for n in [0, 1, 2, 3, 4, 5]:
+
+							alpha = np.sqrt(np.pi)
+
+							c_ish = Mii_rpy_smith(a, L, alpha, m, n)
+							python_ish = Mii_rpy_smith_python(a, L, alpha, m, n)
+
+							for i in range(3):
+								for j in range(3):
+									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_Mij_rpy_smith_python_vs_c(self):
+
+		for ai in [0.1, 1.0, 10.0]:
+			for aj in [0.1, 1.0, 10.0]:
+				for L in [10, 100, 1000]:
+					for rx in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+						for ry in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+							for rz in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+								for m in [0, 1, 2, 3, 4, 5]:
+									for n in [0, 1, 2, 3, 4, 5]:
+
+										if rx==0 and ry==0 and rz==0: continue
+
+										r = np.array([rx, ry, rz])
+
+										alpha = np.sqrt(np.pi)
+
+										c_ish = Mij_rpy_smith(ai, aj, r, L, alpha, m, n)
+										python_ish = Mij_rpy_smith_python(ai, aj, r, L, alpha, m, n)
+
+										for i in range(3):
+											for j in range(3):
+												self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )	
 
 

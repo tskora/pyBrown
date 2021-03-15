@@ -36,6 +36,30 @@ def Mii_rpy(a):
 # @timing
 def Mij_rpy(ai, aj, pointer):
 
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	ai_c = ctypes.c_double(ai)
+	aj_c = ctypes.c_double(aj)
+
+	rx = ctypes.c_double(pointer[0])
+
+	ry = ctypes.c_double(pointer[1])
+
+	rz = ctypes.c_double(pointer[2])
+
+	lib.Mij_rpy(ai_c, aj_c, rx, ry, rz, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+#-------------------------------------------------------------------------------
+
+# @timing
+def Mij_rpy_python(ai, aj, pointer):
+
 	Rh_larger = max( ai, aj )
 	Rh_smaller = min( ai, aj )
 
@@ -68,7 +92,7 @@ def Mij_rpy(ai, aj, pointer):
 		coef_1 = 1.0 / ( 6 * np.pi * ai * aj )
 		coef_2 = 16 * dist3 * ( ai + aj )
 		coef_3 = (ai - aj)**2 + 3 * dist2
-		coef3 *= coef3
+		coef_3 *= coef_3
 		coef_4 = ( coef_2 - coef_3 ) / ( 32 * dist3 )
 		coef_5 = 3 * ( (ai - aj)**2 - dist2 )**2
 		coef_6 = coef_5 / ( 32 * dist3 )
@@ -265,8 +289,31 @@ def Qii_pbc_smith_python(a, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-# @timing
+@timing
 def Mii_rpy_smith(a, box_length, alpha, m, n):
+
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	a_c = ctypes.c_double(a)
+
+	box_length_c = ctypes.c_double(box_length)
+
+	alpha_c = ctypes.c_double(alpha)
+
+	m_c = ctypes.c_int(m)
+
+	n_c = ctypes.c_int(n)
+
+	lib.Mii_rpy_smith(a_c, box_length_c, alpha_c, m_c, n_c, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+@timing
+def Mii_rpy_smith_python(a, box_length, alpha, m, n):
 
 	coef1 = 1.0 / ( 6 * np.pi * a )
 
@@ -402,8 +449,36 @@ def Qij_pbc_smith_python( sigma, alpha, m, n ):
 
 #-------------------------------------------------------------------------------
 
-# @timing
+@timing
 def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
+
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	ai_c = ctypes.c_double(ai)
+	aj_c = ctypes.c_double(aj)
+
+	rx = ctypes.c_double(pointer[0])
+	ry = ctypes.c_double(pointer[1])
+	rz = ctypes.c_double(pointer[2])
+
+	box_length_c = ctypes.c_double(box_length)
+
+	alpha_c = ctypes.c_double(alpha)
+
+	m_c = ctypes.c_int(m)
+
+	n_c = ctypes.c_int(n)
+
+	lib.Mij_rpy_smith(ai_c, aj_c, rx, ry, rz, box_length_c, alpha_c, m_c, n_c, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+@timing
+def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
 	sigma = np.array( pointer / box_length, float )
 
