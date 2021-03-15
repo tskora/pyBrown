@@ -62,17 +62,19 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 {
 	double mlen, mlen2, nlen, nlen2, mult;
 
+	int mx, my, mz, nx, ny, nz, i;
+
 	double* values = calloc(6, sizeof(double));
 
 	double sqrt_pi = sqrt(M_PI);
 
 	double alpha2 = alpha * alpha;
 
-	for (int mx = -m; mx <= m; mx++)
+	for (mx = -m; mx <= m; mx++)
 	{
-		for (int my = -m; my <= m; my++)
+		for (my = -m; my <= m; my++)
 		{
-			for (int mz = -m; mz <= m; mz++)
+			for (mz = -m; mz <= m; mz++)
 			{
 				if (abs(mx)+abs(my)+abs(mz)<=m)
 				{
@@ -86,7 +88,7 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 
 						mult = erfc( alpha*mlen );
 
-						for (int i = 0; i < 6; i++)
+						for (i = 0; i < 6; i++)
 						{
 							*(answer+i) += mult * *(values+i);
 						}
@@ -105,11 +107,11 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 		}
 	}
 
-	for (int nx = -n; nx <= n; nx++)
+	for (nx = -n; nx <= n; nx++)
 	{
-		for (int ny = -n; ny <= n; ny++)
+		for (ny = -n; ny <= n; ny++)
 		{
-			for (int nz = -n; nz <= n; nz++)
+			for (nz = -n; nz <= n; nz++)
 			{
 				if (abs(nx)+abs(ny)+abs(nz)<=n)
 				{
@@ -142,6 +144,8 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 {
 	double mlen, mlen2, nlen, nlen2, mult;
 
+	int mx, my, mz, nx, ny, nz, i;
+
 	double* values = calloc(6, sizeof(double));
 
 	double sqrt_pi = sqrt(M_PI);
@@ -154,11 +158,11 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	double box_length3 = box_length * box_length * box_length;
 
-	for (int mx = -m; mx <= m; mx++)
+	for (mx = -m; mx <= m; mx++)
 	{
-		for (int my = -m; my <= m; my++)
+		for (my = -m; my <= m; my++)
 		{
-			for (int mz = -m; mz <= m; mz++)
+			for (mz = -m; mz <= m; mz++)
 			{
 				if (abs(mx)+abs(my)+abs(mz)<=m)
 				{
@@ -172,7 +176,7 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 						mult = erfc( alpha * mlen ) + 2 * alpha / sqrt_pi * mlen * exp( -alpha2 * mlen2 );
 
-						for (int i = 0; i < 6; i++)
+						for (i = 0; i < 6; i++)
 						{
 							*(answer+i) += mult * *(values+i);
 						}
@@ -191,11 +195,11 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 		}
 	}
 
-	for (int nx = -n; nx <= n; nx++)
+	for (nx = -n; nx <= n; nx++)
 	{
-		for (int ny = -n; ny <= n; ny++)
+		for (ny = -n; ny <= n; ny++)
 		{
-			for (int nz = -n; nz <= n; nz++)
+			for (nz = -n; nz <= n; nz++)
 			{
 				if (abs(nx)+abs(ny)+abs(nz)<=n)
 				{
@@ -228,17 +232,19 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 {
 	double mslen, mslen2, nlen, nlen2, msx, msy, msz, nsdot, mult;
 
+	int mx, my, mz, nx, ny, nz, i;
+
 	double* values = calloc(6, sizeof(double));
 
 	double alpha2 = alpha * alpha;
 
 	double sqrt_pi = sqrt(M_PI);
 
-	for (int mx = -m; mx <= m; mx++)
+	for (mx = -m; mx <= m; mx++)
 	{
-		for (int my = -m; my <= m; my++)
+		for (my = -m; my <= m; my++)
 		{
-			for (int mz = -m; mz <= m; mz++)
+			for (mz = -m; mz <= m; mz++)
 			{
 				if (abs(mx)+abs(my)+abs(mz)<=m)
 				{
@@ -254,7 +260,7 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 					O(msx, msy, msz, values);
 
-					for (int i = 0; i < 6; i++)
+					for (i = 0; i < 6; i++)
 					{
 						*(answer+i) += mult * *(values+i);
 					}
@@ -272,11 +278,11 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 		}
 	}
 
-	for (int nx = -n; nx <= n; nx++)
+	for (nx = -n; nx <= n; nx++)
 	{
-		for (int ny = -n; ny <= n; ny++)
+		for (ny = -n; ny <= n; ny++)
 		{
-			for (int nz = -n; nz <= n; nz++)
+			for (nz = -n; nz <= n; nz++)
 			{
 				if (abs(nx)+abs(ny)+abs(nz)<=n)
 				{
@@ -306,6 +312,8 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 {
 	double mslen, mslen2, nlen, nlen2, msx, msy, msz, nsdot, mult;
 
+	int mx, my, mz, nx, ny, nz, i;
+
 	double* values = calloc(6, sizeof(double));
 
 	double alpha2 = alpha * alpha;
@@ -314,11 +322,11 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 	double sqrt_pi = sqrt(M_PI);
 
-	for (int mx = -m; mx <= m; mx++)
+	for (mx = -m; mx <= m; mx++)
 	{
-		for (int my = -m; my <= m; my++)
+		for (my = -m; my <= m; my++)
 		{
-			for (int mz = -m; mz <= m; mz++)
+			for (mz = -m; mz <= m; mz++)
 			{
 				if (abs(mx)+abs(my)+abs(mz)<=m)
 				{
@@ -334,7 +342,7 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 					Q(msx, msy, msz, values);
 
-					for (int i = 0; i < 6; i++)
+					for (i = 0; i < 6; i++)
 					{
 						*(answer+i) += mult * *(values+i);
 					}
@@ -352,11 +360,11 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 		}
 	}
 
-	for (int nx = -n; nx <= n; nx++)
+	for (nx = -n; nx <= n; nx++)
 	{
-		for (int ny = -n; ny <= n; ny++)
+		for (ny = -n; ny <= n; ny++)
 		{
-			for (int nz = -n; nz <= n; nz++)
+			for (nz = -n; nz <= n; nz++)
 			{
 				if (abs(nx)+abs(ny)+abs(nz)<=n)
 				{
@@ -444,6 +452,8 @@ void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answ
 
 void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, double* answer)
 {
+	int i;
+
 	double coef1 = 1.0 / 6 / M_PI / a;
 	double coef2 = 3 * a / 4 / box_length;
 	double coef3 = a * a * a / box_length / box_length / box_length / 2;
@@ -454,11 +464,11 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 	Oii(a, box_length, alpha, m, n, comp1);
 	Qii(a, box_length, alpha, m, n, comp2);
 
-	for (int i = 0; i < 3; i++)
+	for (i = 0; i < 3; i++)
 	{
 		*(answer+i) = coef1 * ( 1.0 + coef2 * *(comp1+i) + coef3 * *(comp2+i) );
 	}
-	for (int i = 3; i < 6; i++)
+	for (i = 3; i < 6; i++)
 	{
 		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
 	}
@@ -466,6 +476,8 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 
 void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m, int n, double* answer)
 {
+	int i;
+
 	double sigmax = rx / box_length;
 	double sigmay = ry / box_length;
 	double sigmaz = rz / box_length;
@@ -480,7 +492,7 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 	Oij(sigmax, sigmay, sigmaz, alpha, m, n, comp1);
 	Qij(sigmax, sigmay, sigmaz, alpha, m, n, comp2);
 
-	for (int i = 0; i < 6; i++)
+	for (i = 0; i < 6; i++)
 	{
 		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
 	}
