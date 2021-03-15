@@ -105,7 +105,7 @@ def Mij_rpy_python(ai, aj, pointer):
 
 #-------------------------------------------------------------------------------
 
-# @timing
+@timing
 def M_rpy(beads, pointers):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
@@ -289,7 +289,7 @@ def Qii_pbc_smith_python(a, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 	my_list = [0, 0, 0, 0, 0, 0]
@@ -312,7 +312,7 @@ def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
 
-@timing
+# @timing
 def Mii_rpy_smith_python(a, box_length, alpha, m, n):
 
 	coef1 = 1.0 / ( 6 * np.pi * a )
@@ -449,7 +449,7 @@ def Qij_pbc_smith_python( sigma, alpha, m, n ):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 	my_list = [0, 0, 0, 0, 0, 0]
@@ -477,7 +477,7 @@ def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
 
-@timing
+# @timing
 def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
 	sigma = np.array( pointer / box_length, float )
@@ -496,7 +496,7 @@ def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-# @timing
+@timing
 def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
@@ -513,6 +513,47 @@ def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 			M[j][i] = np.transpose( M[i][j] )
 
 	return np.block(M)
+
+def M_rpy_smith_indices(args):
+
+	indices, beads, pointers, box_length, alpha, m, n = args
+
+	results = []
+
+	for index in indices:
+		i, j = index
+		if i == j: results.append( Mii_rpy_smith(beads[i].a, box_length, alpha, m, n) )
+		else: results.append( Mij_rpy_smith(beads[i].a, beads[j].a, pointers[i][j], box_length, alpha, m, n) )
+
+	return results
+
+from multiprocessing import Pool
+
+@timing
+def M_rpy_smith_mp(beads, pointers, box_length, alpha, m, n):
+
+	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
+
+	indices = [ [i, j] for i in range(len(beads)) for j in range(i+1) ]
+
+	nproc = 2
+
+	indices_per_proc = len(indices) // nproc
+
+	args_for_proc = [ [ indices[m * indices_per_proc:( m + 1 ) * indices_per_proc], beads, pointers, box_length, alpha, m, n ] for m in range(nproc - 1) ] \
+					+ [ [ indices[ ( nproc - 1 ) * indices_per_proc:], beads, pointers, box_length, alpha, m, n ] ]
+
+	pool = Pool(processes=nproc)
+
+	results = pool.map( M_rpy_smith_indices, args_for_proc )
+
+	for i, a in enumerate( args_for_proc ):
+		for j, idx in enumerate( a[0] ):
+			m, n = idx
+			M[m][n] = results[i][j]
+			if i != j: M[n][m] = np.transpose(results[i][j])
+
+	return M
 
 #-------------------------------------------------------------------------------
 

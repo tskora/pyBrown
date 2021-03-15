@@ -1,5 +1,6 @@
-init:
+# init:
 # 	pip install -r requirements.txt
+init:
 	gcc -o diff_tensor.so -shared diff_tensor.c
 
 diff_tensor.so: diff_tensor.c
