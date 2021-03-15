@@ -55,7 +55,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	@timing
+	# @timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True, overlaps = True):
 
 		if self.hydrodynamics != "nohi": self.compute_rij_matrix()
@@ -109,7 +109,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	@timing
+	# @timing
 	def check_overlaps(self):
 
 		overlaps = False
@@ -133,7 +133,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	@timing
+	# @timing
 	def compute_rij_matrix(self, nearest = True):
 
 		self.rij = np.zeros((len(self.mobile_beads), len(self.mobile_beads), 3))
@@ -145,7 +145,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	@timing
+	# @timing
 	def compute_Dff_matrix(self):
 
 		if self.hydrodynamics == "rpy":
@@ -174,7 +174,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	@timing
+	# @timing
 	def compute_Dtot_matrix(self):
 
 		self.R = R_lub_corr(self.mobile_beads, self.rij) + self.Rff
@@ -183,7 +183,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	@timing
+	# @timing
 	def decompose_D_matrix(self):
 
 		self.B = np.linalg.cholesky(self.D)

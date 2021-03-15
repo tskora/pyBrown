@@ -26,14 +26,14 @@ lib = ctypes.cdll.LoadLibrary('./diff_tensor.so')
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Mii_rpy(a):
 
 	return np.identity(3) / ( 6 * np.pi * a )
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Mij_rpy(ai, aj, pointer):
 
 	Rh_larger = max( ai, aj )
@@ -81,7 +81,7 @@ def Mij_rpy(ai, aj, pointer):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def M_rpy(beads, pointers):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
@@ -157,7 +157,7 @@ def Q(r):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Oii_pbc_smith(a, box_length, alpha, m, n):
 
 	my_list = [0, 0, 0, 0, 0, 0]
@@ -182,7 +182,7 @@ def Oii_pbc_smith(a, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Oii_pbc_smith_python(a, box_length, alpha, m, n ):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) if not (mi == 0 and mj == 0 and mk == 0) ]
@@ -211,7 +211,7 @@ def Oii_pbc_smith_python(a, box_length, alpha, m, n ):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Qii_pbc_smith(a, box_length, alpha, m, n):
 
 	my_list = [0, 0, 0, 0, 0, 0]
@@ -236,7 +236,7 @@ def Qii_pbc_smith(a, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Qii_pbc_smith_python(a, box_length, alpha, m, n):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) if not (mi == 0 and mj == 0 and mk == 0) ]
@@ -265,7 +265,7 @@ def Qii_pbc_smith_python(a, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 	coef1 = 1.0 / ( 6 * np.pi * a )
@@ -284,7 +284,7 @@ def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Oij_pbc_smith(sigma, alpha, m, n):
 
 	my_list = [0, 0, 0, 0, 0, 0]
@@ -309,7 +309,7 @@ def Oij_pbc_smith(sigma, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Oij_pbc_smith_python(sigma, alpha, m, n):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) ]
@@ -342,7 +342,7 @@ def Oij_pbc_smith_python(sigma, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Qij_pbc_smith( sigma, alpha, m, n ):
 
 	my_list = [0, 0, 0, 0, 0, 0]
@@ -367,7 +367,7 @@ def Qij_pbc_smith( sigma, alpha, m, n ):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Qij_pbc_smith_python( sigma, alpha, m, n ):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) ]
@@ -402,7 +402,7 @@ def Qij_pbc_smith_python( sigma, alpha, m, n ):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 	sigma = np.array( pointer / box_length, float )
@@ -421,7 +421,7 @@ def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-@timing
+# @timing
 def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]

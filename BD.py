@@ -42,7 +42,7 @@ def main(input_filename):
 	# 			"bond_lengths":'hydrodynamic_radii', "number_of_structures":1,
 	# 			"float_type": 32}
 	defaults = {"debug": False, "hydrodynamics": "nohi", "external_force": [0.0, 0.0, 0.0],
-				"ewald_alpha": np.sqrt(np.pi)}, "ewald_real": 0, "ewald_imag": 0}
+				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0}
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults)
