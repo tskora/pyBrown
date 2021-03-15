@@ -14,19 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
 
+import ctypes
 import math
 import numpy as np
 
 from scipy.special import erfc
 
+from output import timing
+
+lib = ctypes.cdll.LoadLibrary('./diff_tensor.so')
+
 #-------------------------------------------------------------------------------
 
+@timing
 def Mii_rpy(a):
 
 	return np.identity(3) / ( 6 * np.pi * a )
 
 #-------------------------------------------------------------------------------
 
+@timing
 def Mij_rpy(ai, aj, pointer):
 
 	Rh_larger = max( ai, aj )
@@ -74,6 +81,7 @@ def Mij_rpy(ai, aj, pointer):
 
 #-------------------------------------------------------------------------------
 
+@timing
 def M_rpy(beads, pointers):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
@@ -93,7 +101,7 @@ def M_rpy(beads, pointers):
 
 #-------------------------------------------------------------------------------
 
-def O(r):
+def O_python(r):
 
 	dist = math.sqrt( r[0]**2 + r[1]**2 + r[2]**2 )
 
@@ -101,7 +109,27 @@ def O(r):
 
 #-------------------------------------------------------------------------------
 
-def Q(r):
+def O(r):
+
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	rx = ctypes.c_double(r[0])
+
+	ry = ctypes.c_double(r[1])
+
+	rz = ctypes.c_double(r[2])
+
+	lib.O(rx, ry, rz, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+#-------------------------------------------------------------------------------
+
+def Q_python(r):
 
 	dist = math.sqrt( r[0]**2 + r[1]**2 + r[2]**2 )
 
@@ -109,29 +137,67 @@ def Q(r):
 
 #-------------------------------------------------------------------------------
 
-def Oii_pbc_smith(a, box_length, alpha, m, n ):
+def Q(r):
 
-	### something is wrong here ###
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	rx = ctypes.c_double(r[0])
+
+	ry = ctypes.c_double(r[1])
+
+	rz = ctypes.c_double(r[2])
+
+	lib.Q(rx, ry, rz, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+#-------------------------------------------------------------------------------
+
+@timing
+def Oii_pbc_smith(a, box_length, alpha, m, n):
+
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	a_c = ctypes.c_double(a)
+
+	box_length_c = ctypes.c_double(box_length)
+
+	alpha_c = ctypes.c_double(alpha)
+
+	m_c = ctypes.c_int(m)
+
+	n_c = ctypes.c_int(n)
+
+	lib.Oii(a_c, box_length_c, alpha_c, m_c, n_c, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+#-------------------------------------------------------------------------------
+
+@timing
+def Oii_pbc_smith_python(a, box_length, alpha, m, n ):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) if not (mi == 0 and mj == 0 and mk == 0) ]
 
 	ns = [ np.array([ ni,nj,nk ], float) for ni in range(-n, n+1) for nj in range(-n, n+1) for nk in range(-n, n+1) if (np.abs(ni)+np.abs(nj)+np.abs(nk)<=n) if not (ni == 0 and nj == 0 and nk == 0) ]
 
-	answer = 0.0
+	answer = np.zeros((3, 3))
 
 	for mvec in ms:
 
 		mlength = math.sqrt( mvec[0]**2 + mvec[1]**2 + mvec[2]**2 )
-		# print(mvec)
-		# print( erfc( alpha * mlength ) * O(mvec) )
 
 		answer += erfc( alpha * mlength ) * O(mvec)
 
-		# print( 2.0 * alpha / math.sqrt(np.pi) * math.exp( - alpha**2 * mlength**2 ) * np.outer(mvec/mlength, mvec/mlength) )
-
 		answer += 2.0 * alpha / math.sqrt(np.pi) * math.exp( - alpha**2 * mlength**2 ) * np.outer(mvec/mlength, mvec/mlength)
-
-		# print()
 
 	for nvec in ns:
 
@@ -141,21 +207,43 @@ def Oii_pbc_smith(a, box_length, alpha, m, n ):
 
 		answer += 2.0 / ( np.pi * nlength**2 ) * math.exp( - np.pi**2 * nlength**2 / alpha**2 ) * mult
 
-	# print(answer)
-
-	# print( 3.0 * alpha * a / ( 2.0 * math.sqrt(np.pi) * box_length ) * np.identity(3) )
-
 	return answer - 3.0 * alpha * a / ( 2.0 * math.sqrt(np.pi) * box_length ) * np.identity(3)
 
 #-------------------------------------------------------------------------------
 
+@timing
 def Qii_pbc_smith(a, box_length, alpha, m, n):
+
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	a_c = ctypes.c_double(a)
+
+	box_length_c = ctypes.c_double(box_length)
+
+	alpha_c = ctypes.c_double(alpha)
+
+	m_c = ctypes.c_int(m)
+
+	n_c = ctypes.c_int(n)
+
+	lib.Qii(a_c, box_length_c, alpha_c, m_c, n_c, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+#-------------------------------------------------------------------------------
+
+@timing
+def Qii_pbc_smith_python(a, box_length, alpha, m, n):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) if not (mi == 0 and mj == 0 and mk == 0) ]
 
 	ns = [ np.array([ ni,nj,nk ], float) for ni in range(-n, n+1) for nj in range(-n, n+1) for nk in range(-n, n+1) if (np.abs(ni)+np.abs(nj)+np.abs(nk)<=n) if not (ni == 0 and nj == 0 and nk == 0) ]
 
-	answer = 0.0
+	answer = np.zeros((3, 3))
 
 	for mvec in ms:
 
@@ -177,6 +265,7 @@ def Qii_pbc_smith(a, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
+@timing
 def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 	coef1 = 1.0 / ( 6 * np.pi * a )
@@ -191,32 +280,43 @@ def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 	comp3 = Qii_pbc_smith( a, box_length, alpha, m, n )
 
-	# print(comp1)
-
-	# print(coef2*comp2)
-
-	# print(coef3*comp3)
-
-	# from scipy.constants import Boltzmann
-	# print(Boltzmann)
-
-	# print(19.86248532617/14.4/Boltzmann)
-
-	# 1/0
-
-	# 1/0
-
 	return coef1 * ( comp1 + coef2 * comp2 + coef3 * comp3 )
 
 #-------------------------------------------------------------------------------
 
+@timing
 def Oij_pbc_smith(sigma, alpha, m, n):
+
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	sigmax_c = ctypes.c_double(sigma[0])
+	sigmay_c = ctypes.c_double(sigma[1])
+	sigmaz_c = ctypes.c_double(sigma[2])
+
+	alpha_c = ctypes.c_double(alpha)
+
+	m_c = ctypes.c_int(m)
+
+	n_c = ctypes.c_int(n)
+
+	lib.Oij(sigmax_c, sigmay_c, sigmaz_c, alpha_c, m_c, n_c, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+#-------------------------------------------------------------------------------
+
+@timing
+def Oij_pbc_smith_python(sigma, alpha, m, n):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) ]
 
 	ns = [ np.array([ ni,nj,nk ], float) for ni in range(-n, n+1) for nj in range(-n, n+1) for nk in range(-n, n+1) if (np.abs(ni)+np.abs(nj)+np.abs(nk)<=n) if not (ni == 0 and nj == 0 and nk == 0) ]
 
-	answer = 0.0
+	answer = np.zeros((3, 3))
 
 	for mvec in ms:
 
@@ -242,13 +342,39 @@ def Oij_pbc_smith(sigma, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
+@timing
 def Qij_pbc_smith( sigma, alpha, m, n ):
+
+	my_list = [0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	sigmax_c = ctypes.c_double(sigma[0])
+	sigmay_c = ctypes.c_double(sigma[1])
+	sigmaz_c = ctypes.c_double(sigma[2])
+
+	alpha_c = ctypes.c_double(alpha)
+
+	m_c = ctypes.c_int(m)
+
+	n_c = ctypes.c_int(n)
+
+	lib.Qij(sigmax_c, sigmay_c, sigmaz_c, alpha_c, m_c, n_c, arr)
+
+	my_list = np.array(arr)
+
+	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
+
+#-------------------------------------------------------------------------------
+
+@timing
+def Qij_pbc_smith_python( sigma, alpha, m, n ):
 
 	ms = [ np.array([ mi,mj,mk ], float) for mi in range(-m, m+1) for mj in range(-m, m+1) for mk in range(-m, m+1) if (np.abs(mi)+np.abs(mj)+np.abs(mk)<=m) ]
 
 	ns = [ np.array([ ni,nj,nk ], float) for ni in range(-n, n+1) for nj in range(-n, n+1) for nk in range(-n, n+1) if (np.abs(ni)+np.abs(nj)+np.abs(nk)<=n) if not (ni == 0 and nj == 0 and nk == 0) ]
 
-	answer = 0.0
+	answer = np.zeros((3, 3))
 
 	for mvec in ms:
 
@@ -276,6 +402,7 @@ def Qij_pbc_smith( sigma, alpha, m, n ):
 
 #-------------------------------------------------------------------------------
 
+@timing
 def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 	sigma = np.array( pointer / box_length, float )
@@ -294,6 +421,7 @@ def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
+@timing
 def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]

@@ -17,6 +17,8 @@
 import math
 import numpy as np
 
+from output import timing
+
 #-------------------------------------------------------------------------------
 
 class Bead():
@@ -93,18 +95,6 @@ def distance_pbc(bead1, bead2, box_size):
 	return math.sqrt( np.sum( pointer**2 ) )
 
 #-------------------------------------------------------------------------------
-
-# def overlap_pbc(bead1, bead2, box_size):
-
-# 	pointer = bead1.r - bead2.r
-
-# 	for i in range(3):
-# 		while pointer[i] >= box_size/2:
-# 			pointer[i] -= box_size
-# 		while pointer[i] <= -box_size/2:
-# 			pointer[i] += box_size
-
-# 	return np.sum( pointer**2 ) <= ( bead1.a + bead2.a ) * ( bead1.a + bead2.a )
 
 def overlap_pbc(bead1, bead2, box_size):
 

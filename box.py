@@ -21,7 +21,7 @@ from scipy.constants import Boltzmann
 
 from bead import overlap_pbc, distance_pbc, pointer_pbc
 from diffusion import M_rpy, M_rpy_smith, R_lub_corr
-from output import timestamp
+from output import timestamp, timing
 
 #-------------------------------------------------------------------------------
 
@@ -34,67 +34,70 @@ class Box():
 
 		if "seed" in self.inp: np.random.seed(self.inp["seed"])
 
-		# self.mobile_beads = [ b for b in self.beads if b.mobile if bool(np.random.randint(0, 2)) ]
 		self.mobile_beads = [ b for b in self.beads if b.mobile ]
 		self.mobile_bead_indices = [ i for i, b in enumerate(self.beads) if b.mobile ]
-		# print(self.mobile_beads)
 		self.immobile_bead_indices = list( set([i for i in range(len(self.beads))]) - set(self.mobile_bead_indices) )
 		
 		self.box_length = self.inp["box_length"]
 		self.T = self.inp["T"]
 		self.viscosity = self.inp["viscosity"]
 		self.hydrodynamics = self.inp["hydrodynamics"]
+		self.Fex = np.array( self.inp["external_force"] )
 
 		if self.hydrodynamics == "nohi":
 			self.D = Boltzmann * self.T * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
 			self.B = np.sqrt( self.D )
 
+		if self.hydrodynamics == "rpy_smith" or "rpy_smith_lub":
+			self.alpha = self.inp["ewald_alpha"]
+			self.m_max = self.inp["ewald_real"]
+			self.n_max = self.inp["ewald_imag"]
+
 	#-------------------------------------------------------------------------------
 
+	@timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True, overlaps = True):
 
 		if self.hydrodynamics != "nohi": self.compute_rij_matrix()
 
 		if self.hydrodynamics == "rpy" or self.hydrodynamics == "rpy_smith":
-
 			if build_Dff:
 				self.compute_Dff_matrix()
 
 		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-
 			if build_Dff:
 				self.compute_Dff_matrix()
 			if build_Dnf:
 				self.compute_Dtot_matrix()
 
-		# print(list(self.D[0]))
-		# print(self.D)
-		# print(Boltzmann * self.T * 10**19 / self.viscosity / 6 / np.pi / self.mobile_beads[0].a)
-		# 1/0
-
 		if self.hydrodynamics != "nohi":
-
 			if cholesky:
 				self.decompose_D_matrix()
 		
 		while True:
 
+			# computing stochastic displacement
 			if self.hydrodynamics == "nohi":
 				BX = self.B * np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads)) * math.sqrt(2 * dt)
 			else:
 				BX = self.B @ np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads)) * math.sqrt(2 * dt)
 
-			# print(BX)
-			# 1/0
-
 			for i, bead in enumerate( self.mobile_beads ):
+				# stochastic step
 				bead.translate( BX[3 * i: 3 * (i + 1)] )
+				if not np.all(self.Fex == 0.0):
+					# deterministic step
+					bead.translate( dt / Boltzmann / T * self.D @ np.array( list(self.Fex)**len(self.mobile_beads) ) )
 
 			if overlaps:
 
 				if self.check_overlaps():
 					for i, bead in enumerate( self.mobile_beads ):
+						# undo stochastic step
 						bead.translate( -BX[3 * i: 3 * (i + 1)] )
+						if not np.all(self.Fex == 0.0):
+							# undo deterministic step
+							bead.translate( -dt / Boltzmann / T * self.D @ np.array( list(self.Fex)**len(self.mobile_beads) ) )
 				else:
 					for i, bead in enumerate( self.mobile_beads ):
 						bead.keep_in_box(self.box_length)
@@ -106,6 +109,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
+	@timing
 	def check_overlaps(self):
 
 		overlaps = False
@@ -129,6 +133,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
+	@timing
 	def compute_rij_matrix(self, nearest = True):
 
 		self.rij = np.zeros((len(self.mobile_beads), len(self.mobile_beads), 3))
@@ -140,6 +145,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
+	@timing
 	def compute_Dff_matrix(self):
 
 		if self.hydrodynamics == "rpy":
@@ -150,7 +156,7 @@ class Box():
 
 		if self.hydrodynamics == "rpy_smith":
 
-			self.D = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, np.sqrt( np.pi ), 2, 2)
+			self.D = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max)
 
 			self.D *= Boltzmann * self.T * 10**19 / self.viscosity
 
@@ -162,12 +168,13 @@ class Box():
 
 		if self.hydrodynamics == "rpy_smith_lub":
 
-			self.Dff = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, np.pi**(1/6), 2, 2)
+			self.Dff = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max)
 
 			self.Rff = np.linalg.inv( self.Dff )
 
 	#-------------------------------------------------------------------------------
 
+	@timing
 	def compute_Dtot_matrix(self):
 
 		self.R = R_lub_corr(self.mobile_beads, self.rij) + self.Rff
@@ -176,6 +183,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
+	@timing
 	def decompose_D_matrix(self):
 
 		self.B = np.linalg.cholesky(self.D)

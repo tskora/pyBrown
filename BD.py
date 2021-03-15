@@ -15,6 +15,7 @@
 # along with this program.  If not, see https://www.gnu.org/licenses.
 
 import click
+import numpy as np
 import time
 
 from scipy.constants import Boltzmann
@@ -40,7 +41,8 @@ def main(input_filename):
 	# defaults = {"minimal_distance_between_surfaces":0.0, "max_bond_lengths":2.5e+07,
 	# 			"bond_lengths":'hydrodynamic_radii', "number_of_structures":1,
 	# 			"float_type": 32}
-	defaults = {"debug": False, "hydrodynamics": "nohi"}
+	defaults = {"debug": False, "hydrodynamics": "nohi", "external_force": [0.0, 0.0, 0.0],
+				"ewald_alpha": np.sqrt(np.pi)}, "ewald_real": 0, "ewald_imag": 0}
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults)
