@@ -32,14 +32,13 @@ def main(input_filename):
 
 	# here the list of keywords that are required for program to work is provided
 	required_keywords = ["box_length", "output_xyz_filename", "input_str_filename",
-						 "dt", "T", "viscosity",
-						 "number_of_steps", "xyz_write_freq", "diff_freq", "lub_freq",
-						 "chol_freq"]
+						 "dt", "T", "viscosity", "number_of_steps"]
 
 	# here the dict of keywords:default values is provided
 	# if given keyword is absent in JSON, it is added with respective default value
 	defaults = {"debug": False, "hydrodynamics": "nohi", "external_force": [0.0, 0.0, 0.0],
-				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0}
+				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0, "diff_freq": 1,
+				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1}
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults)
