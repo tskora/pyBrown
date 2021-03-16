@@ -17,7 +17,7 @@
 import math
 import numpy as np
 
-from output import timing
+from pyBD.output import timing
 
 #-------------------------------------------------------------------------------
 

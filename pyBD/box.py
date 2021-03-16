@@ -19,9 +19,9 @@ import numpy as np
 
 from scipy.constants import Boltzmann
 
-from bead import overlap_pbc, distance_pbc, pointer_pbc
-from diffusion import M_rpy, M_rpy_smith, R_lub_corr
-from output import timestamp, timing
+from pyBD.bead import overlap_pbc, distance_pbc, pointer_pbc
+from pyBD.diffusion import M_rpy, M_rpy_smith, R_lub_corr
+from pyBD.output import timestamp, timing
 
 #-------------------------------------------------------------------------------
 

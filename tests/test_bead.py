@@ -21,7 +21,7 @@ sys.path.insert(0, '.')
 import numpy as np
 import copy as cp
 
-from bead import Bead, overlap_pbc, distance_pbc
+from pyBD.bead import Bead, overlap_pbc, distance_pbc
 
 #-------------------------------------------------------------------------------
 

@@ -20,9 +20,9 @@ import numpy as np
 
 from scipy.special import erfc
 
-from output import timing
+from pyBD.output import timing
 
-lib = ctypes.cdll.LoadLibrary('./diff_tensor.so')
+lib = ctypes.cdll.LoadLibrary('./Ccode/diff_tensor.so')
 
 #-------------------------------------------------------------------------------
 

@@ -21,9 +21,9 @@ import time
 from scipy.constants import Boltzmann
 from tqdm import tqdm
 
-from box import Box
-from input import read_str_file, InputData
-from output import timestamp
+from pyBD.box import Box
+from pyBD.input import read_str_file, InputData
+from pyBD.output import timestamp
 
 @click.command()
 @click.argument('input_filename',

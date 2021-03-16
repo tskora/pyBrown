@@ -1,10 +1,8 @@
-# init:
-# 	pip install -r requirements.txt
 init:
-	gcc -o diff_tensor.so -shared diff_tensor.c
+	pip3 install -r requirements.txt
 
-diff_tensor.so: diff_tensor.c
-	gcc -o diff_tensor.so -shared diff_tensor.c 
+Ccode/diff_tensor.so: Ccode/diff_tensor.c
+	gcc -o Ccode/diff_tensor.so -shared Ccode/diff_tensor.c 
 
 test:
 	pytest tests

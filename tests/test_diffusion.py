@@ -21,11 +21,11 @@ sys.path.insert(0, '.')
 import numpy as np
 import copy as cp
 
-from diffusion import O, O_python, Oii_pbc_smith, Oii_pbc_smith_python, Oij_pbc_smith, Oij_pbc_smith_python
-from diffusion import Q, Q_python, Qii_pbc_smith, Qii_pbc_smith_python, Qij_pbc_smith, Qij_pbc_smith_python
-from diffusion import Mij_rpy, Mij_rpy_python
-from diffusion import Mii_rpy_smith, Mii_rpy_smith_python
-from diffusion import Mij_rpy_smith, Mij_rpy_smith_python
+from pyBD.diffusion import O, O_python, Oii_pbc_smith, Oii_pbc_smith_python, Oij_pbc_smith, Oij_pbc_smith_python
+from pyBD.diffusion import Q, Q_python, Qii_pbc_smith, Qii_pbc_smith_python, Qij_pbc_smith, Qij_pbc_smith_python
+from pyBD.diffusion import Mij_rpy, Mij_rpy_python
+from pyBD.diffusion import Mii_rpy_smith, Mii_rpy_smith_python
+from pyBD.diffusion import Mij_rpy_smith, Mij_rpy_smith_python
 
 #-------------------------------------------------------------------------------
 
