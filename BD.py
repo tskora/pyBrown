@@ -55,7 +55,6 @@ def main(input_filename):
 		xyz_filenames = [ xyz_filename ]
 
 	dt = i.input_data["dt"]
-	
 	n_steps = i.input_data["number_of_steps"]
 	n_write = i.input_data["xyz_write_freq"]
 	n_diff = i.input_data["diff_freq"]
@@ -71,14 +70,14 @@ def main(input_filename):
 		box = Box(bs, i.input_data)
 	
 		with open(xyz_filename, 'w') as output_file:
-			for i in tqdm( range(n_steps) ):
-			# for i in range(n_steps):
-				if i % n_write == 0:
+			for j in tqdm( range(n_steps) ):
+			# for j in range(n_steps):
+				if j % n_write == 0:
 					output_file.write('{}\n'.format(len(box.beads)))
-					output_file.write('{} time [ps] {}\n'.format(xyz_filename, i*dt))
+					output_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
 					for bead in box.beads:
 						output_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
-				box.propagate(dt, i%n_diff == 0, i%n_lub == 0, i%n_chol == 0)
+				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 	
 		end = time.time()
 	
