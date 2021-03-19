@@ -477,6 +477,7 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m, int n, double* answer)
 {
 	int i;
+	double dist2 = rx*rx + ry*ry + rz*rz;
 
 	double sigmax = rx / box_length;
 	double sigmay = ry / box_length;
@@ -484,7 +485,15 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 
 	double coef1 = 1.0 / 6 / M_PI / ai;
 	double coef2 = 3 * ai / 4 / box_length;
-	double coef3 = ai * ai * ai / box_length / box_length / box_length / 2;
+	double coef3;
+	if (ai == aj)
+	{
+		coef3 = ai * ai * ai / box_length / box_length / box_length / 2;
+	}
+	else
+	{
+		coef3 = ai * ( ai * ai + aj * aj ) / box_length / box_length / box_length / 4;
+	}
 
 	double* comp1 = calloc(6, sizeof(double));
 	double* comp2 = calloc(6, sizeof(double));
@@ -495,5 +504,32 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 	for (i = 0; i < 6; i++)
 	{
 		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
+	}
+
+	if (dist2 < (ai + aj)*(ai + aj)) //new added
+	{
+		double dist = sqrt(dist2);
+
+		double aij2 = ai*ai + aj*aj;
+
+		double* Aij = calloc(6, sizeof(double));
+
+		Mij_rpy(ai, aj, rx, ry, rz, Aij);
+
+		for (i = 0; i < 6; i++)
+		{
+			*(answer+i) += *(Aij+i);
+		}
+
+		coef1 = 1.0 / 8 / M_PI / dist;
+		coef2 = 1.0 + aij2 / 3 / dist2;
+		coef3 = 1.0 - aij2 / dist2;
+
+		*(answer) -= coef1 * ( coef2 + coef3 * rx * rx / dist2 );
+		*(answer+1) -= coef1 * ( coef2 + coef3 * ry * ry / dist2 );
+		*(answer+2) -= coef1 * ( coef2 + coef3 * rz * rz / dist2 );
+		*(answer+3) -= coef1 * coef3 * rx * ry / dist2;
+		*(answer+4) -= coef1 * coef3 * rx * rz / dist2;
+		*(answer+5) -= coef1 * coef3 * ry * rz / dist2;
 	}
 }

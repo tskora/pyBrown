@@ -256,6 +256,37 @@ class TestDiffusion(unittest.TestCase):
 
 										for i in range(3):
 											for j in range(3):
-												self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )	
+												self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
+	#---------------------------------------------------------------------------
 
+	def test_Mij_rpy_smith_symmetry(self):
+
+		for ai in [0.1, 1.0, 10.0]:
+			for aj in [0.1, 1.0, 10.0]:
+				for L in [10, 100, 1000]:
+					for rx in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+						for ry in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+							for rz in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+								for m in [0, 1, 2, 3, 4, 5]:
+									for n in [0, 1, 2, 3, 4, 5]:
+
+										if rx==0 and ry==0 and rz==0: continue
+
+										alpha = np.sqrt(np.pi)
+
+										r = np.array([rx, ry, rz])
+
+										vij = Mij_rpy_smith(ai, aj, r, L, alpha, m, n)
+										vji = Mij_rpy_smith(aj, ai, r, L, alpha, m, n)
+
+										for i in range(3):
+											for j in range(3):
+												self.assertAlmostEqual( vij[i][j], vji[i][j], places = 7 )
+
+										vij = Mij_rpy_smith_python(ai, aj, r, L, alpha, m, n)
+										vji = Mij_rpy_smith_python(aj, ai, r, L, alpha, m, n)
+
+										for i in range(3):
+											for j in range(3):
+												self.assertAlmostEqual( vij[i][j], vji[i][j], places = 7 )

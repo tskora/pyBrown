@@ -486,13 +486,33 @@ def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
 	coef2 = 3.0 * ai / ( 4.0 * box_length )
 
-	coef3 = ( ai / box_length )**3 / 2.0
+	if ai == aj: coef3 = ( ai / box_length )**3 / 2.0
+
+	else: coef3 = ai * ( ai**2 + aj**2 ) / box_length**3 / 4
 
 	comp1 = Oij_pbc_smith( sigma, alpha, m, n )
 
 	comp2 = Qij_pbc_smith( sigma, alpha, m, n )
 
-	return coef1 * ( coef2 * comp1 + coef3 * comp2 )
+	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+
+	result = coef1 * ( coef2 * comp1 + coef3 * comp2 )
+
+	if dist2 < ( ai + aj ) * ( ai + aj ):
+
+		dist = math.sqrt(dist2)
+
+		outer = np.outer(pointer, pointer)/dist2
+
+		aij2 = ai**2 + aj**2
+
+		coef_1 = 1.0 / ( 8 * np.pi * dist )
+		coef_2 = 1.0 + aij2 / ( 3 * dist2 )
+		coef_3 = 1.0 - aij2 / dist2
+
+		result += Mij_rpy(ai, aj, pointer) - coef_1 * (coef_2 * np.identity(3) + coef_3 * outer) ###here i am
+
+	return result
 
 #-------------------------------------------------------------------------------
 
