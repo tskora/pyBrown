@@ -43,6 +43,7 @@ class Box():
 		self.viscosity = self.inp["viscosity"]
 		self.hydrodynamics = self.inp["hydrodynamics"]
 		self.Fex = np.array( self.inp["external_force"] )
+		self.F0 = no.array( list(self.Fex)**len(self.mobile_beads) )
 
 		if self.hydrodynamics == "nohi":
 			self.D = Boltzmann * self.T * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
@@ -52,6 +53,12 @@ class Box():
 			self.alpha = self.inp["ewald_alpha"]
 			self.m_max = self.inp["ewald_real"]
 			self.n_max = self.inp["ewald_imag"]
+
+	#-------------------------------------------------------------------------------
+
+	def __str__(self):
+
+		return 'a'
 
 	#-------------------------------------------------------------------------------
 
@@ -73,6 +80,17 @@ class Box():
 		if self.hydrodynamics != "nohi":
 			if cholesky:
 				self.decompose_D_matrix()
+
+		# computing displacement due to external force
+		if not np.all(self.Fex == 0.0):
+			if self.hydrodynamics != "nohi":
+				FX = dt / Boltzmann / self.T * self.D @ self.F0
+			else:
+				FX = dt / Boltzmann / self.T * self.D * self.F0
+
+			# deterministic step
+			for i, bead in enumerate( self.mobile_beads ):
+				bead.translate( FX[3 * i: 3 * (i + 1)] )
 		
 		while True:
 
@@ -85,9 +103,6 @@ class Box():
 			for i, bead in enumerate( self.mobile_beads ):
 				# stochastic step
 				bead.translate( BX[3 * i: 3 * (i + 1)] )
-				if not np.all(self.Fex == 0.0):
-					# deterministic step
-					bead.translate( dt / Boltzmann / T * self.D @ np.array( list(self.Fex)**len(self.mobile_beads) ) )
 
 			if overlaps:
 
@@ -95,9 +110,6 @@ class Box():
 					for i, bead in enumerate( self.mobile_beads ):
 						# undo stochastic step
 						bead.translate( -BX[3 * i: 3 * (i + 1)] )
-						if not np.all(self.Fex == 0.0):
-							# undo deterministic step
-							bead.translate( -dt / Boltzmann / T * self.D @ np.array( list(self.Fex)**len(self.mobile_beads) ) )
 				else:
 					for i, bead in enumerate( self.mobile_beads ):
 						bead.keep_in_box(self.box_length)
@@ -187,11 +199,5 @@ class Box():
 	def decompose_D_matrix(self):
 
 		self.B = np.linalg.cholesky(self.D)
-
-	#-------------------------------------------------------------------------------
-
-	def __str__(self):
-
-		return 'a'
 
 	#-------------------------------------------------------------------------------
