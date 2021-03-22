@@ -312,6 +312,8 @@ def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
 
+#-------------------------------------------------------------------------------
+
 # @timing
 def Mii_rpy_smith_python(a, box_length, alpha, m, n):
 
@@ -477,6 +479,8 @@ def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 	return np.array([[my_list[0], my_list[3], my_list[4]], [my_list[3], my_list[1], my_list[5]], [my_list[4], my_list[5], my_list[2]]])
 
+#-------------------------------------------------------------------------------
+
 # @timing
 def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
@@ -538,6 +542,18 @@ def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 
 def X_f_poly(l, rank):
 
+	l_c = ctypes.c_double(l)
+
+	rank_c = ctypes.c_int(rank)
+
+	lib.X_f_poly.restype = ctypes.c_double
+
+	return lib.X_f_poly(l_c, rank_c)
+
+#-------------------------------------------------------------------------------
+
+def X_f_poly_python(l, rank):
+
 	if rank == 0: return 1
 	if rank == 1: return 3 * l
 	if rank == 2: return 9 * l
@@ -555,6 +571,18 @@ def X_f_poly(l, rank):
 #-------------------------------------------------------------------------------
 
 def Y_f_poly(l, rank):
+
+	l_c = ctypes.c_double(l)
+
+	rank_c = ctypes.c_int(rank)
+
+	lib.Y_f_poly.restype = ctypes.c_double
+
+	return lib.Y_f_poly(l_c, rank_c)
+
+#-------------------------------------------------------------------------------
+
+def Y_f_poly_python(l, rank):
 
 	if rank == 0: return 1
 	if rank == 1: return 3 / 2 * l
@@ -574,6 +602,18 @@ def Y_f_poly(l, rank):
 
 def X_g_poly(l, rank):
 
+	l_c = ctypes.c_double(l)
+
+	rank_c = ctypes.c_int(rank)
+
+	lib.X_g_poly.restype = ctypes.c_double
+
+	return lib.X_g_poly(l_c, rank_c)
+
+#-------------------------------------------------------------------------------
+
+def X_g_poly_python(l, rank):
+
 	if rank == 1: return 2 * l**2 * ( 1 + l )**(-3)
 	if rank == 2: return 1 / 5 * l * ( 1 + 7 * l + l**2 ) * ( 1 + l )**(-3)
 	if rank == 3: return 1 / 42 * ( 1 + 18 * l - 29 * l**2 + 18 * l**3 + l**4 ) * ( 1 + l )**(-3)
@@ -583,6 +623,18 @@ def X_g_poly(l, rank):
 
 def Y_g_poly(l, rank):
 
+	l_c = ctypes.c_double(l)
+
+	rank_c = ctypes.c_int(rank)
+
+	lib.Y_g_poly.restype = ctypes.c_double
+
+	return lib.Y_g_poly(l_c, rank_c)
+
+#-------------------------------------------------------------------------------
+
+def Y_g_poly_python(l, rank):
+
 	if rank == 2: return 4 / 15 * l * ( 2 + l + 2 * l**2 ) * ( 1 + l )**(-3)
 	if rank == 3: return 2 / 375 * ( 16 - 45 * l + 58 * l**2 - 45 * l**3 + 16 * l**4 ) * ( 1 + l )**(-3)
 	else: return None
@@ -590,6 +642,17 @@ def Y_g_poly(l, rank):
 #-------------------------------------------------------------------------------
 
 def XA11(s, l):
+
+	s_c = ctypes.c_double(s)
+	l_c = ctypes.c_double(l)
+
+	lib.XA11.restype = ctypes.c_double
+
+	return lib.XA11(s_c, l_c)
+
+#-------------------------------------------------------------------------------
+
+def XA11_python(s, l):
 
 	answer = 0.0
 
@@ -618,6 +681,17 @@ def XA11(s, l):
 
 def YA11(s, l):
 
+	s_c = ctypes.c_double(s)
+	l_c = ctypes.c_double(l)
+
+	lib.YA11.restype = ctypes.c_double
+
+	return lib.YA11(s_c, l_c)
+
+#-------------------------------------------------------------------------------
+
+def YA11_python(s, l):
+
 	answer = 0.0
 
 	answer -= Y_g_poly(l, 2) * np.log( 1 - 4 * s**(-2) )
@@ -642,6 +716,17 @@ def YA11(s, l):
 #-------------------------------------------------------------------------------
 
 def XA12(s, l):
+
+	s_c = ctypes.c_double(s)
+	l_c = ctypes.c_double(l)
+
+	lib.XA12.restype = ctypes.c_double
+
+	return lib.XA12(s_c, l_c)
+
+#-------------------------------------------------------------------------------
+
+def XA12_python(s, l):
 
 	answer = 0.0
 
@@ -670,6 +755,17 @@ def XA12(s, l):
 
 def YA12(s, l):
 
+	s_c = ctypes.c_double(s)
+	l_c = ctypes.c_double(l)
+
+	lib.YA12.restype = ctypes.c_double
+
+	return lib.YA12(s_c, l_c)
+
+#-------------------------------------------------------------------------------
+
+def YA12_python(s, l):
+
 	answer = 0.0
 
 	answer += Y_g_poly(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
@@ -696,6 +792,35 @@ def YA12(s, l):
 #-------------------------------------------------------------------------------
 
 def R_jeffrey(ai, aj, pointer):
+
+	my_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+	arr = (ctypes.c_double * len(my_list))(*my_list)
+	
+	ai_c = ctypes.c_double(ai)
+
+	aj_c = ctypes.c_double(aj)
+
+	rx = ctypes.c_double(pointer[0])
+	ry = ctypes.c_double(pointer[1])
+	rz = ctypes.c_double(pointer[2])
+
+	lib.R_jeffrey(ai_c, aj_c, rx, ry, rz, arr)
+
+	my_list = np.array(arr)
+
+	row0 = [ my_list[0], my_list[3], my_list[4], my_list[12], my_list[15], my_list[16] ]
+	row1 = [ my_list[3], my_list[1], my_list[5], my_list[15], my_list[13], my_list[17] ]
+	row2 = [ my_list[4], my_list[5], my_list[2], my_list[16], my_list[17], my_list[14] ]
+	row3 = [ my_list[12], my_list[15], my_list[16], my_list[6], my_list[9], my_list[10] ]
+	row4 = [ my_list[15], my_list[13], my_list[17], my_list[9], my_list[7], my_list[11] ]
+	row5 = [ my_list[16], my_list[17], my_list[14], my_list[10], my_list[11], my_list[8] ]
+
+	return np.array([row0, row1, row2, row3, row4, row5])
+
+#-------------------------------------------------------------------------------
+
+def R_jeffrey_python(ai, aj, pointer):
 
 	dist = math.sqrt( pointer[0]**2 + pointer[1]**2 + pointer[2]**2 )
 

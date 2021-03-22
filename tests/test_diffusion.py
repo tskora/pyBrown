@@ -26,6 +26,10 @@ from pyBD.diffusion import Q, Q_python, Qii_pbc_smith, Qii_pbc_smith_python, Qij
 from pyBD.diffusion import Mij_rpy, Mij_rpy_python
 from pyBD.diffusion import Mii_rpy_smith, Mii_rpy_smith_python
 from pyBD.diffusion import Mij_rpy_smith, Mij_rpy_smith_python
+from pyBD.diffusion import X_f_poly, X_f_poly_python, Y_f_poly, Y_f_poly_python
+from pyBD.diffusion import X_g_poly, X_g_poly_python, Y_g_poly, Y_g_poly_python
+from pyBD.diffusion import XA11, XA11_python, YA11, YA11_python, XA12, XA12_python, YA12, YA12_python
+from pyBD.diffusion import R_jeffrey, R_jeffrey_python
 
 #-------------------------------------------------------------------------------
 
@@ -290,3 +294,67 @@ class TestDiffusion(unittest.TestCase):
 										for i in range(3):
 											for j in range(3):
 												self.assertAlmostEqual( vij[i][j], vji[i][j], places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_X_Y_polys(self):
+
+		for l in [0.1, 0.5, 1.0, 2.0, 10.0]:
+
+			for rank in range(12):
+
+				self.assertAlmostEqual( X_f_poly(l, rank), X_f_poly_python(l, rank), places = 7 )
+
+				self.assertAlmostEqual( Y_f_poly(l, rank), Y_f_poly_python(l, rank), places = 7 )
+
+				if rank in [1, 2, 3]:
+
+					self.assertAlmostEqual( X_g_poly(l, rank), X_g_poly_python(l, rank), places = 7 )
+
+					if rank != 1: self.assertAlmostEqual( Y_g_poly(l, rank), Y_g_poly_python(l, rank), places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_XA_YA(self):
+
+		for l in [0.1, 0.5, 1.0, 2.0, 10.0]:
+
+			for s in np.linspace(2.001, 10.0, 10):
+
+				self.assertAlmostEqual( XA11(s, l), XA11_python(s, l), places = 7 )
+
+				self.assertAlmostEqual( YA11(s, l), YA11_python(s, l), places = 7 )
+
+				self.assertAlmostEqual( XA12(s, l), XA12_python(s, l), places = 7 )
+
+				self.assertAlmostEqual( YA12(s, l), YA12_python(s, l), places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_R_jeffrey(self):
+
+		for ai in [0.1, 0.5, 1.0]:
+
+			for aj in [0.1, 0.5, 1.0]:
+
+				for rx in [-10.0, -2.1, 0.0, 2.1, 10.0]:
+
+					for ry in [-10.0, -2.1, 0.0, 2.1, 10.0]:
+
+						for rz in [-10.0, -2.1, 0.0, 2.1, 10.0]:
+
+							if rx == 0 and ry == 0 and rz == 0: continue
+
+							pointer = np.array([rx, ry, rz])
+
+							c_ish = R_jeffrey(ai, aj, pointer)
+
+							python_ish = R_jeffrey_python(ai, aj, pointer)
+
+							for i in range(6):
+
+								for j in range(6):
+
+									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+
+	#---------------------------------------------------------------------------
