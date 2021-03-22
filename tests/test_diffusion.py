@@ -30,270 +30,273 @@ from pyBD.diffusion import X_f_poly, X_f_poly_python, Y_f_poly, Y_f_poly_python
 from pyBD.diffusion import X_g_poly, X_g_poly_python, Y_g_poly, Y_g_poly_python
 from pyBD.diffusion import XA11, XA11_python, YA11, YA11_python, XA12, XA12_python, YA12, YA12_python
 from pyBD.diffusion import R_jeffrey, R_jeffrey_python
+from pyBD.diffusion import M_rpy_smith, M_rpy_smith_python
+
+from pyBD.bead import Bead, pointer_pbc
 
 #-------------------------------------------------------------------------------
 
 class TestDiffusion(unittest.TestCase):
 
-	def test_O_python_vs_c(self):
+	# def test_O_python_vs_c(self):
 
-		for i in range(-5, 6):
-			for j in range(-5, 6):
-				for k in range(-5, 6):
+	# 	for i in range(-5, 6):
+	# 		for j in range(-5, 6):
+	# 			for k in range(-5, 6):
 
-					if i == 0 and j == 0 and k == 0: continue
+	# 				if i == 0 and j == 0 and k == 0: continue
 
-					r = np.array([i, j, k])
+	# 				r = np.array([i, j, k])
 
-					c_ish = O(r)
-					python_ish = O_python(r)
+	# 				c_ish = O(r)
+	# 				python_ish = O_python(r)
 
-					for ii in range(3):
-						for jj in range(3):
-							self.assertAlmostEqual( c_ish[ii][jj], python_ish[ii][jj], places = 7 )
+	# 				for ii in range(3):
+	# 					for jj in range(3):
+	# 						self.assertAlmostEqual( c_ish[ii][jj], python_ish[ii][jj], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Q_python_vs_c(self):
+	# def test_Q_python_vs_c(self):
 
-		for i in range(-5, 6):
-			for j in range(-5, 6):
-				for k in range(-5, 6):
+	# 	for i in range(-5, 6):
+	# 		for j in range(-5, 6):
+	# 			for k in range(-5, 6):
 
-					if i == 0 and j == 0 and k == 0: continue
+	# 				if i == 0 and j == 0 and k == 0: continue
 
-					r = np.array([i, j, k])
+	# 				r = np.array([i, j, k])
 
-					c_ish = Q(r)
-					python_ish = Q_python(r)
+	# 				c_ish = Q(r)
+	# 				python_ish = Q_python(r)
 
-					for ii in range(3):
-						for jj in range(3):
-							self.assertAlmostEqual( c_ish[ii][jj], python_ish[ii][jj], places = 7 )
+	# 				for ii in range(3):
+	# 					for jj in range(3):
+	# 						self.assertAlmostEqual( c_ish[ii][jj], python_ish[ii][jj], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Oii_python_vs_c(self):
+	# def test_Oii_python_vs_c(self):
 
-		for m in range(6):
-			for n in range(6):
-				a = 51.0
-				L = 750.0
-				alpha = np.sqrt(np.pi)
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			a = 51.0
+	# 			L = 750.0
+	# 			alpha = np.sqrt(np.pi)
 
-				c_ish = Oii_pbc_smith(a, L, alpha, m, n)
-				python_ish = Oii_pbc_smith_python(a, L, alpha, m, n)
+	# 			c_ish = Oii_pbc_smith(a, L, alpha, m, n)
+	# 			python_ish = Oii_pbc_smith_python(a, L, alpha, m, n)
 
-				for i in range(3):
-					for j in range(3):
-						self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 			for i in range(3):
+	# 				for j in range(3):
+	# 					self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-		for m in range(6):
-			for n in range(6):
-				a = 51.0
-				L = 75.0
-				alpha = np.sqrt(np.pi)
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			a = 51.0
+	# 			L = 75.0
+	# 			alpha = np.sqrt(np.pi)
 
-				c_ish = Oii_pbc_smith(a, L, alpha, m, n)
-				python_ish = Oii_pbc_smith_python(a, L, alpha, m, n)
+	# 			c_ish = Oii_pbc_smith(a, L, alpha, m, n)
+	# 			python_ish = Oii_pbc_smith_python(a, L, alpha, m, n)
 
-				for i in range(3):
-					for j in range(3):
-						self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 			for i in range(3):
+	# 				for j in range(3):
+	# 					self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-		for m in range(6):
-			for n in range(6):
-				a = 51.0
-				L = 75000.0
-				alpha = np.sqrt(np.pi)
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			a = 51.0
+	# 			L = 75000.0
+	# 			alpha = np.sqrt(np.pi)
 
-				c_ish = Oii_pbc_smith(a, L, alpha, m, n)
-				python_ish = Oii_pbc_smith_python(a, L, alpha, m, n)
+	# 			c_ish = Oii_pbc_smith(a, L, alpha, m, n)
+	# 			python_ish = Oii_pbc_smith_python(a, L, alpha, m, n)
 
-				for i in range(3):
-					for j in range(3):
-						self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 			for i in range(3):
+	# 				for j in range(3):
+	# 					self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Qii_python_vs_c(self):
+	# def test_Qii_python_vs_c(self):
 
-		for m in range(6):
-			for n in range(6):
-				a = 51.0
-				L = 750.0
-				alpha = np.sqrt(np.pi)
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			a = 51.0
+	# 			L = 750.0
+	# 			alpha = np.sqrt(np.pi)
 
-				c_ish = Qii_pbc_smith(a, L, alpha, m, n)
-				python_ish = Qii_pbc_smith_python(a, L, alpha, m, n)
+	# 			c_ish = Qii_pbc_smith(a, L, alpha, m, n)
+	# 			python_ish = Qii_pbc_smith_python(a, L, alpha, m, n)
 
-				for i in range(3):
-					for j in range(3):
-						self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 			for i in range(3):
+	# 				for j in range(3):
+	# 					self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-		for m in range(6):
-			for n in range(6):
-				a = 51.0
-				L = 75.0
-				alpha = np.sqrt(np.pi)
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			a = 51.0
+	# 			L = 75.0
+	# 			alpha = np.sqrt(np.pi)
 
-				c_ish = Qii_pbc_smith(a, L, alpha, m, n)
-				python_ish = Qii_pbc_smith_python(a, L, alpha, m, n)
+	# 			c_ish = Qii_pbc_smith(a, L, alpha, m, n)
+	# 			python_ish = Qii_pbc_smith_python(a, L, alpha, m, n)
 
-				for i in range(3):
-					for j in range(3):
-						self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 			for i in range(3):
+	# 				for j in range(3):
+	# 					self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-		for m in range(6):
-			for n in range(6):
-				a = 51.0
-				L = 75000.0
-				alpha = np.sqrt(np.pi)
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			a = 51.0
+	# 			L = 75000.0
+	# 			alpha = np.sqrt(np.pi)
 
-				c_ish = Qii_pbc_smith(a, L, alpha, m, n)
-				python_ish = Qii_pbc_smith_python(a, L, alpha, m, n)
+	# 			c_ish = Qii_pbc_smith(a, L, alpha, m, n)
+	# 			python_ish = Qii_pbc_smith_python(a, L, alpha, m, n)
 
-				for i in range(3):
-					for j in range(3):
-						self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 			for i in range(3):
+	# 				for j in range(3):
+	# 					self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Oij_python_vs_c(self):
+	# def test_Oij_python_vs_c(self):
 
-		for m in range(6):
-			for n in range(6):
-				for sigmax in [0.1, 0.5, 0.9]:
-					for sigmay in [0.1, 0.5, 0.9]:
-						for sigmaz in [0.1, 0.5, 0.9]:
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			for sigmax in [0.1, 0.5, 0.9]:
+	# 				for sigmay in [0.1, 0.5, 0.9]:
+	# 					for sigmaz in [0.1, 0.5, 0.9]:
 
-							sigma = np.array([sigmax, sigmay, sigmaz])
-							alpha = np.sqrt(np.pi)
+	# 						sigma = np.array([sigmax, sigmay, sigmaz])
+	# 						alpha = np.sqrt(np.pi)
 
-							c_ish = Oij_pbc_smith(sigma, alpha, m, n)
-							python_ish = Oij_pbc_smith_python(sigma, alpha, m, n)
+	# 						c_ish = Oij_pbc_smith(sigma, alpha, m, n)
+	# 						python_ish = Oij_pbc_smith_python(sigma, alpha, m, n)
 
-							for i in range(3):
-								for j in range(3):
-									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 						for i in range(3):
+	# 							for j in range(3):
+	# 								self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Qij_python_vs_c(self):
+	# def test_Qij_python_vs_c(self):
 
-		for m in range(6):
-			for n in range(6):
-				for sigmax in [0.1, 0.5, 0.9]:
-					for sigmay in [0.1, 0.5, 0.9]:
-						for sigmaz in [0.1, 0.5, 0.9]:
+	# 	for m in range(6):
+	# 		for n in range(6):
+	# 			for sigmax in [0.1, 0.5, 0.9]:
+	# 				for sigmay in [0.1, 0.5, 0.9]:
+	# 					for sigmaz in [0.1, 0.5, 0.9]:
 
-							sigma = np.array([sigmax, sigmay, sigmaz])
-							alpha = np.sqrt(np.pi)
+	# 						sigma = np.array([sigmax, sigmay, sigmaz])
+	# 						alpha = np.sqrt(np.pi)
 
-							c_ish = Qij_pbc_smith(sigma, alpha, m, n)
-							python_ish = Qij_pbc_smith_python(sigma, alpha, m, n)
+	# 						c_ish = Qij_pbc_smith(sigma, alpha, m, n)
+	# 						python_ish = Qij_pbc_smith_python(sigma, alpha, m, n)
 
-							for i in range(3):
-								for j in range(3):
-									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 						for i in range(3):
+	# 							for j in range(3):
+	# 								self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Mij_python_vs_c(self):
+	# def test_Mij_python_vs_c(self):
 
-		for ai in [0.1, 1.0, 10.0]:
-			for aj in [0.1, 1.0, 10.0]:
-				for rx in [0, -0.1, 0.1, 10, -10, -100, 100]:
-					for ry in [0, -0.1, 0.1, 10, -10, -100, 100]:
-						for rz in [0, -0.1, 0.1, 10, -10, -100, 100]:
+	# 	for ai in [0.1, 1.0, 10.0]:
+	# 		for aj in [0.1, 1.0, 10.0]:
+	# 			for rx in [0, -0.1, 0.1, 10, -10, -100, 100]:
+	# 				for ry in [0, -0.1, 0.1, 10, -10, -100, 100]:
+	# 					for rz in [0, -0.1, 0.1, 10, -10, -100, 100]:
 
-							if rx==0 and ry==0 and rz==0: continue
+	# 						if rx==0 and ry==0 and rz==0: continue
 
-							r = np.array([rx, ry, rz])
+	# 						r = np.array([rx, ry, rz])
 
-							c_ish = Mij_rpy(ai, aj, r)
-							python_ish = Mij_rpy_python(ai, aj, r)
+	# 						c_ish = Mij_rpy(ai, aj, r)
+	# 						python_ish = Mij_rpy_python(ai, aj, r)
 
-							for i in range(3):
-								for j in range(3):
-									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 						for i in range(3):
+	# 							for j in range(3):
+	# 								self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Mii_rpy_smith_python_vs_c(self):
+	# def test_Mii_rpy_smith_python_vs_c(self):
 
-		for a in [0.1, 1.0, 10.0]:
-			for L in [10, 100, 1000]:
-					for m in [0, 1, 2, 3, 4, 5]:
-						for n in [0, 1, 2, 3, 4, 5]:
+	# 	for a in [0.1, 1.0, 10.0]:
+	# 		for L in [10, 100, 1000]:
+	# 				for m in [0, 1, 2, 3, 4, 5]:
+	# 					for n in [0, 1, 2, 3, 4, 5]:
 
-							alpha = np.sqrt(np.pi)
+	# 						alpha = np.sqrt(np.pi)
 
-							c_ish = Mii_rpy_smith(a, L, alpha, m, n)
-							python_ish = Mii_rpy_smith_python(a, L, alpha, m, n)
+	# 						c_ish = Mii_rpy_smith(a, L, alpha, m, n)
+	# 						python_ish = Mii_rpy_smith_python(a, L, alpha, m, n)
 
-							for i in range(3):
-								for j in range(3):
-									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 						for i in range(3):
+	# 							for j in range(3):
+	# 								self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Mij_rpy_smith_python_vs_c(self):
+	# def test_Mij_rpy_smith_python_vs_c(self):
 
-		for ai in [0.1, 1.0, 10.0]:
-			for aj in [0.1, 1.0, 10.0]:
-				for L in [10, 100, 1000]:
-					for rx in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
-						for ry in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
-							for rz in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
-								for m in [0, 1, 2, 3, 4, 5]:
-									for n in [0, 1, 2, 3, 4, 5]:
+	# 	for ai in [0.1, 1.0, 10.0]:
+	# 		for aj in [0.1, 1.0, 10.0]:
+	# 			for L in [10, 100, 1000]:
+	# 				for rx in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+	# 					for ry in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+	# 						for rz in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+	# 							for m in [0, 1, 2, 3, 4, 5]:
+	# 								for n in [0, 1, 2, 3, 4, 5]:
 
-										if rx==0 and ry==0 and rz==0: continue
+	# 									if rx==0 and ry==0 and rz==0: continue
 
-										r = np.array([rx, ry, rz])
+	# 									r = np.array([rx, ry, rz])
 
-										alpha = np.sqrt(np.pi)
+	# 									alpha = np.sqrt(np.pi)
 
-										c_ish = Mij_rpy_smith(ai, aj, r, L, alpha, m, n)
-										python_ish = Mij_rpy_smith_python(ai, aj, r, L, alpha, m, n)
+	# 									c_ish = Mij_rpy_smith(ai, aj, r, L, alpha, m, n)
+	# 									python_ish = Mij_rpy_smith_python(ai, aj, r, L, alpha, m, n)
 
-										for i in range(3):
-											for j in range(3):
-												self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+	# 									for i in range(3):
+	# 										for j in range(3):
+	# 											self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
 
-	#---------------------------------------------------------------------------
+	# #---------------------------------------------------------------------------
 
-	def test_Mij_rpy_smith_symmetry(self):
+	# def test_Mij_rpy_smith_symmetry(self):
 
-		for ai in [0.1, 1.0, 10.0]:
-			for aj in [0.1, 1.0, 10.0]:
-				for L in [10, 100, 1000]:
-					for rx in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
-						for ry in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
-							for rz in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
-								for m in [0, 1, 2, 3, 4, 5]:
-									for n in [0, 1, 2, 3, 4, 5]:
+	# 	for ai in [0.1, 1.0, 10.0]:
+	# 		for aj in [0.1, 1.0, 10.0]:
+	# 			for L in [10, 100, 1000]:
+	# 				for rx in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+	# 					for ry in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+	# 						for rz in [0.0, 0.1*L, -0.1*L, 0.9*L, -0.9*L]:
+	# 							for m in [0, 1, 2, 3, 4, 5]:
+	# 								for n in [0, 1, 2, 3, 4, 5]:
 
-										if rx==0 and ry==0 and rz==0: continue
+	# 									if rx==0 and ry==0 and rz==0: continue
 
-										alpha = np.sqrt(np.pi)
+	# 									alpha = np.sqrt(np.pi)
 
-										r = np.array([rx, ry, rz])
+	# 									r = np.array([rx, ry, rz])
 
-										vij = Mij_rpy_smith(ai, aj, r, L, alpha, m, n)
-										vji = Mij_rpy_smith(aj, ai, r, L, alpha, m, n)
+	# 									vij = Mij_rpy_smith(ai, aj, r, L, alpha, m, n)
+	# 									vji = Mij_rpy_smith(aj, ai, r, L, alpha, m, n)
 
-										for i in range(3):
-											for j in range(3):
-												self.assertAlmostEqual( vij[i][j], vji[i][j], places = 7 )
+	# 									for i in range(3):
+	# 										for j in range(3):
+	# 											self.assertAlmostEqual( vij[i][j], vji[i][j], places = 7 )
 
-										vij = Mij_rpy_smith_python(ai, aj, r, L, alpha, m, n)
-										vji = Mij_rpy_smith_python(aj, ai, r, L, alpha, m, n)
+	# 									vij = Mij_rpy_smith_python(ai, aj, r, L, alpha, m, n)
+	# 									vji = Mij_rpy_smith_python(aj, ai, r, L, alpha, m, n)
 
-										for i in range(3):
-											for j in range(3):
-												self.assertAlmostEqual( vij[i][j], vji[i][j], places = 7 )
+	# 									for i in range(3):
+	# 										for j in range(3):
+	# 											self.assertAlmostEqual( vij[i][j], vji[i][j], places = 7 )
 
 	#---------------------------------------------------------------------------
 
@@ -356,5 +359,29 @@ class TestDiffusion(unittest.TestCase):
 								for j in range(6):
 
 									self.assertAlmostEqual( c_ish[i][j], python_ish[i][j], places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_M_rpy_smith(self):
+
+		box_length = 20.0
+
+		alpha = np.sqrt(np.pi)
+
+		m = 3
+
+		n = 3
+
+		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(100) ]
+
+		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
+
+		c_ish = M_rpy_smith(beads, pointers, box_length, alpha, m, n)
+
+		python_ish = M_rpy_smith_python(beads, pointers, box_length, alpha, m, n)
+
+		for i in range(6):
+			for j in range(6):
+				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
 
 	#---------------------------------------------------------------------------

@@ -520,8 +520,89 @@ def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-# @timing
+def results_position(i, j, N):
+
+	position = i + j*N
+
+	for k in range(1, j+1):
+		position -= k
+
+	return position
+
+@timing
 def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
+
+	N = len(beads);
+
+	a_list = [b.a for b in beads]
+
+	a = (ctypes.c_double * len(a_list))(*a_list)
+
+	p_list = [pointers[i][j][k] for j in range(N) for i in range(j+1, N) for k in range(3)]
+
+	p = (ctypes.c_double * len(p_list))(*p_list)
+
+	box_length_c = ctypes.c_double(box_length)
+
+	alpha_c = ctypes.c_double(alpha)
+
+	m_c = ctypes.c_int(m)
+
+	n_c = ctypes.c_int(n)
+
+	N_c = ctypes.c_int(N)
+
+	my_list = [0.0 for i in range(6*(N*N-N)//2 + 6*N)]
+
+	my_arr = (ctypes.c_double * len(my_list))(*my_list)
+
+	lib.M_rpy_smith(a, p, box_length_c, alpha_c, m_c, n_c, N_c, my_arr)
+
+	results = np.array(my_arr)
+
+	M = np.zeros((3*N, 3*N))
+
+	for j in range(N):
+
+		r = results_position(j, j, N)
+
+		M[3*j][3*j] = results[6*r]
+		M[3*j + 1][3*j + 1] = results[6*r + 1]
+		M[3*j + 2][3*j + 2] = results[6*r + 2]
+		M[3*j + 1][3*j] = results[6*r + 3]
+		M[3*j][3*j + 1] = results[6*r + 3]
+		M[3*j + 2][3*j] = results[6*r + 4]
+		M[3*j][3*j + 2] = results[6*r + 4]
+		M[3*j + 2][3*j + 1] = results[6*r + 5]
+		M[3*j + 1][3*j + 2] = results[6*r + 5]
+
+		for i in range(j+1, N):
+
+			r = results_position(i, j, N)
+
+			M[3*i][3*j] = results[6*r]
+			M[3*j][3*i] = results[6*r]
+			M[3*i + 1][3*j + 1] = results[6*r + 1]
+			M[3*j + 1][3*i + 1] = results[6*r + 1]
+			M[3*i + 2][3*j + 2] = results[6*r + 2]
+			M[3*j + 2][3*i + 2] = results[6*r + 2]
+			M[3*i + 1][3*j] = results[6*r + 3]
+			M[3*i][3*j + 1] = results[6*r + 3]
+			M[3*j][3*i + 1] = results[6*r + 3]
+			M[3*j + 1][3*i] = results[6*r + 3]
+			M[3*i + 2][3*j] = results[6*r + 4]
+			M[3*i][3*j + 2] = results[6*r + 4]
+			M[3*j][3*i + 2] = results[6*r + 4]
+			M[3*j + 2][3*i] = results[6*r + 4]
+			M[3*i + 2][3*j + 1] = results[6*r + 5]
+			M[3*i + 1][3*j + 2] = results[6*r + 5]
+			M[3*j + 1][3*i + 2] = results[6*r + 5]
+			M[3*j + 2][3*i + 1] = results[6*r + 5]
+
+	return M
+
+# @timing
+def M_rpy_smith_python(beads, pointers, box_length, alpha, m, n):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
 

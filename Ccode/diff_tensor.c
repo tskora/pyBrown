@@ -554,6 +554,70 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 
 // -------------------------------------------------------------------------------
 
+int results_position(int i, int j, int N)
+{
+	int k;
+
+	int position = i + j*N;
+
+	// for (k = 1; k <= j; k++)
+	// {
+	// 	position -= k;
+	// }
+
+	return position - (j+1)/2*j;
+}
+
+// -------------------------------------------------------------------------------
+
+void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, int m, int n, int N, double* results)
+{
+	int i, j, k;
+
+	double* vector;
+
+	double* shifted_results;
+
+	double* shifted_pointers;
+
+	double rx, ry, rz;
+
+	for (j = 0; j < N; j++)
+	{
+		vector = calloc(6, sizeof(double));
+
+		Mii_rpy_smith(*(as+j), box_length, alpha, m, n, vector);
+
+		shifted_results = results + 6*results_position(j,j,N);
+
+		for (k = 0; k < 3; k++)
+		{
+			*(shifted_results + k) = *(vector + k);
+		}
+
+		for (i = j + 1; i < N; i++)
+		{
+			vector = calloc(6, sizeof(double));
+
+			shifted_results = results + 6*results_position(i,j,N);
+			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+
+			rx = *(shifted_pointers);
+			ry = *(shifted_pointers + 1);
+			rz = *(shifted_pointers + 2);
+
+			Mij_rpy_smith(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m, n, vector);
+
+			for (k = 0; k < 6; k++)
+			{
+				*(shifted_results + k) = *(vector + k);
+			}
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------
+
 double X_f_poly(double l, int rank)
 {
 	double answer;
