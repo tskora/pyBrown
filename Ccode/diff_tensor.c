@@ -26,17 +26,19 @@ void O(double rx, double ry, double rz, double* answer)
 
 	double dist = sqrt(dist2);
 
+	double dist3 = dist2 * dist;
+
 	*answer = ( 1 + rx*rx / dist2 ) / dist;
 
 	*(answer+1) = ( 1 + ry*ry / dist2 ) / dist;
 
 	*(answer+2) = ( 1 + rz*rz / dist2 ) / dist;
 
-	*(answer+3) = rx*ry / dist2 / dist;
+	*(answer+3) = rx*ry / dist3;
 
-	*(answer+4) = rx*rz / dist2 / dist;
+	*(answer+4) = rx*rz / dist3;
 
-	*(answer+5) = ry*rz / dist2 / dist;
+	*(answer+5) = ry*rz / dist3;
 }
 
 // -------------------------------------------------------------------------------
@@ -47,7 +49,9 @@ void Q(double rx, double ry, double rz, double* answer)
 
 	double dist = sqrt(dist2);
 
-	double dist3 = dist * dist2;
+	double dist3 = dist2 * dist;
+
+	double dist5 = dist3 * dist2;
 
 	*answer = ( 1 - 3 * rx*rx / dist2 ) / dist3;
 
@@ -55,20 +59,32 @@ void Q(double rx, double ry, double rz, double* answer)
 
 	*(answer+2) = ( 1 - 3 * rz*rz / dist2 ) / dist3;
 
-	*(answer+3) = -3 * rx*ry / dist2 / dist3;
+	*(answer+3) = -3 * rx*ry / dist5;
 
-	*(answer+4) = -3 * rx*rz / dist2 / dist3;
+	*(answer+4) = -3 * rx*rz / dist5;
 
-	*(answer+5) = -3 * ry*rz / dist2 / dist3;
+	*(answer+5) = -3 * ry*rz / dist5;
 }
 
 // -------------------------------------------------------------------------------
 
 void Oii(double a, double box_length, double alpha, int m, int n, double* answer)
 {
-	double mlen, mlen2, nlen, nlen2, mult;
+	double mlen, mlen2, nlen, nlen2, mult, temp;
 
-	int mx, my, mz, nx, ny, nz, i;
+	int mbis, mtris, nbis, ntris;
+
+	register int mx;
+
+	register int my;
+
+	register int mz;
+	
+	register int nx;
+	
+	register int ny;
+	
+	register int nz;
 
 	double* values = calloc(6, sizeof(double));
 
@@ -76,83 +92,98 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	double alpha2 = alpha * alpha;
 
+	double mult0 = 2 * alpha / sqrt_pi;
+
+	double exp_const = -M_PI*M_PI/alpha2;
+
 	for (mx = -m; mx <= m; mx++)
 	{
-		for (my = -m; my <= m; my++)
+		mbis = m - abs(mx);
+		for (my = -mbis; my <= mbis; my++)
 		{
-			for (mz = -m; mz <= m; mz++)
+			mtris = mbis - abs(my);
+			for (mz = -mtris; mz <= mtris; mz++)
 			{
-				if (abs(mx)+abs(my)+abs(mz)<=m)
+				if (!(mx==0 && my==0 && mz==0))
 				{
-					if (!(mx==0 && my==0 && mz==0))
-					{
-						mlen2 = mx*mx + my*my + mz*mz;
+					mlen2 = mx*mx + my*my + mz*mz;
+					mlen = sqrt(mlen2);
+					O(mx, my, mz, values);
+					mult = erfc( alpha*mlen );
 
-						mlen = sqrt(mlen2);
+					*(answer) += mult * *(values);
+					*(answer+1) += mult * *(values+1);
+					*(answer+2) += mult * *(values+2);
+					*(answer+3) += mult * *(values+3);
+					*(answer+4) += mult * *(values+4);
+					*(answer+5) += mult * *(values+5);
 
-						O(mx, my, mz, values);
+					mult = mult0 * exp( - alpha2 * mlen2 ) / mlen2;
 
-						mult = erfc( alpha*mlen );
-
-						for (i = 0; i < 6; i++)
-						{
-							*(answer+i) += mult * *(values+i);
-						}
-
-						mult = 2.0 * alpha / sqrt_pi * exp( - alpha2 * mlen2 );
-
-						*(answer) += mult * mx * mx / mlen2;
-						*(answer+1) += mult * my * my / mlen2;
-						*(answer+2) += mult * mz * mz / mlen2;
-						*(answer+3) += mult * mx * my / mlen2;
-						*(answer+4) += mult * mx * mz / mlen2;
-						*(answer+5) += mult * my * mz / mlen2;
-					}
+					*(answer) += mult * mx * mx;
+					*(answer+1) += mult * my * my;
+					*(answer+2) += mult * mz * mz;
+					*(answer+3) += mult * mx * my;
+					*(answer+4) += mult * mx * mz;
+					*(answer+5) += mult * my * mz;
 				}
 			}
 		}
 	}
+
+	mult0 = 2.0 / M_PI;
 
 	for (nx = -n; nx <= n; nx++)
 	{
-		for (ny = -n; ny <= n; ny++)
+		nbis = n - abs(nx);
+		for (ny = -nbis; ny <= nbis; ny++)
 		{
-			for (nz = -n; nz <= n; nz++)
+			ntris = nbis - abs(ny);
+			for (nz = -ntris; nz <= ntris; nz++)
 			{
-				if (abs(nx)+abs(ny)+abs(nz)<=n)
+				if (!(nx==0 && ny==0 && nz==0))
 				{
-					if (!(nx==0 && ny==0 && nz==0))
-					{
-						nlen2 = nx*nx + ny*ny + nz*nz;
+					nlen2 = nx*nx + ny*ny + nz*nz;
+					mult = mult0 / nlen2 * exp(exp_const * nlen2);
+					temp = 1.0 / nlen2 - exp_const;
 
-						nlen = sqrt(nlen2);
-
-						mult = 2.0 / M_PI / nlen2 * exp( -M_PI * M_PI * nlen2 / alpha / alpha);
-
-						*(answer) += mult * ( 1.0 - ( 1.0 + M_PI * M_PI * nlen2 / alpha2 ) * nx * nx / nlen2 );					
-						*(answer+1) += mult * ( 1.0 - ( 1.0 + M_PI * M_PI * nlen2 / alpha2 ) * ny * ny / nlen2 );					
-						*(answer+2) += mult * ( 1.0 - ( 1.0 + M_PI * M_PI * nlen2 / alpha2 ) * nz * nz / nlen2 );					
-						*(answer+3) += mult * ( - ( 1.0 + M_PI * M_PI * nlen2 / alpha2 ) * nx * ny / nlen2 );				
-						*(answer+4) += mult * ( - ( 1.0 + M_PI * M_PI * nlen2 / alpha2 ) * nx * nz / nlen2 );				
-						*(answer+5) += mult * ( - ( 1.0 + M_PI * M_PI * nlen2 / alpha2 ) * ny * nz / nlen2 );				
-					}
+					*(answer) += mult * ( 1.0 - temp * nx * nx );					
+					*(answer+1) += mult * ( 1.0 - temp * ny * ny );					
+					*(answer+2) += mult * ( 1.0 - temp * nz * nz );					
+					*(answer+3) += mult * ( - temp * nx * ny );				
+					*(answer+4) += mult * ( - temp * nx * nz );				
+					*(answer+5) += mult * ( - temp * ny * nz );				
 				}
 			}
 		}
 	}
 
-	*(answer) -= 3.0 * alpha * a / 2.0 / sqrt_pi / box_length;
-	*(answer+1) -= 3.0 * alpha * a / 2.0 / sqrt_pi / box_length;
-	*(answer+2) -= 3.0 * alpha * a / 2.0 / sqrt_pi / box_length;
+	temp = 1.5 * alpha * a / ( sqrt_pi * box_length );
+
+	*(answer) -= temp;
+	*(answer+1) -= temp;
+	*(answer+2) -= temp;
 }
 
 // -------------------------------------------------------------------------------
 
 void Qii(double a, double box_length, double alpha, int m, int n, double* answer)
 {
-	double mlen, mlen2, nlen, nlen2, mult;
+	double amlen, amlen2, expamlen2, mlen2, nlen, nlen2, mult;
 
-	int mx, my, mz, nx, ny, nz, i;
+	int mbis, mtris, nbis, ntris;
+
+	register int mx;
+
+	register int my;
+
+	register int mz;
+	
+	register int nx;
+	
+	register int ny;
+	
+	register int nz;
 
 	double* values = calloc(6, sizeof(double));
 
@@ -166,83 +197,101 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	double box_length3 = box_length * box_length * box_length;
 
+	double temp1 = 2 / sqrt_pi;
+
+	double temp2 = 2 * alpha3;
+
 	for (mx = -m; mx <= m; mx++)
 	{
-		for (my = -m; my <= m; my++)
+		mbis = m -abs(mx);
+		for (my = -mbis; my <= mbis; my++)
 		{
-			for (mz = -m; mz <= m; mz++)
+			mtris = mbis - abs(my);
+			for (mz = -mtris; mz <= mtris; mz++)
 			{
-				if (abs(mx)+abs(my)+abs(mz)<=m)
+				if (!(mx==0 && my==0 && mz==0))
 				{
-					if (!(mx==0 && my==0 && mz==0))
-					{
-						mlen2 = mx*mx + my*my + mz*mz;
+					mlen2 = mx*mx + my*my + mz*mz;
+					amlen = alpha * sqrt(mlen2);
+					amlen2 = amlen * amlen;
+					expamlen2 = exp( -amlen2 );
+					Q(mx, my, mz, values);
+					mult = erfc( amlen ) + temp1 * amlen * expamlen2;
 
-						mlen = sqrt(mlen2);
+					*(answer) += mult * *(values);
+					*(answer+1) += mult * *(values+1);
+					*(answer+2) += mult * *(values+2);
+					*(answer+3) += mult * *(values+3);
+					*(answer+4) += mult * *(values+4);
+					*(answer+5) += mult * *(values+5);
 
-						Q(mx, my, mz, values);
+					mult = temp1 * temp2 * expamlen2 / mlen2;
 
-						mult = erfc( alpha * mlen ) + 2 * alpha / sqrt_pi * mlen * exp( -alpha2 * mlen2 );
-
-						for (i = 0; i < 6; i++)
-						{
-							*(answer+i) += mult * *(values+i);
-						}
-
-						mult = 4 * alpha3 / sqrt_pi * exp(-alpha2*mlen2);
-
-						*(answer) -= mult * mx * mx / mlen2;
-						*(answer+1) -= mult * my * my / mlen2;
-						*(answer+2) -= mult * mz * mz / mlen2;
-						*(answer+3) -= mult * mx * my / mlen2;
-						*(answer+4) -= mult * mx * mz / mlen2;
-						*(answer+5) -= mult * my * mz / mlen2;
-					}
+					*(answer) -= mult * mx * mx;
+					*(answer+1) -= mult * my * my;
+					*(answer+2) -= mult * mz * mz;
+					*(answer+3) -= mult * mx * my;
+					*(answer+4) -= mult * mx * mz;
+					*(answer+5) -= mult * my * mz;
 				}
 			}
 		}
 	}
+
+	temp1 = -M_PI * M_PI / alpha2;
+
+	temp2 = 4 * M_PI;
 
 	for (nx = -n; nx <= n; nx++)
 	{
-		for (ny = -n; ny <= n; ny++)
+		nbis = n - abs(nx);
+		for (ny = -nbis; ny <= nbis; ny++)
 		{
-			for (nz = -n; nz <= n; nz++)
+			ntris = nbis - abs(ny);
+			for (nz = -ntris; nz <= ntris; nz++)
 			{
-				if (abs(nx)+abs(ny)+abs(nz)<=n)
+				if (!(nx==0 && ny==0 && nz==0))
 				{
-					if (!(nx==0 && ny==0 && nz==0))
-					{
-						nlen2 = nx*nx + ny*ny + nz*nz;
+					nlen2 = nx*nx + ny*ny + nz*nz;
+					mult = temp2 * exp( temp1 * nlen2 ) / nlen2;
 
-						nlen = sqrt(nlen2);
-
-						mult = 4 * M_PI * exp( -M_PI * M_PI * nlen2 / alpha2 );
-
-						*(answer) += mult * nx * nx / nlen2;
-						*(answer+1) += mult * ny * ny / nlen2;
-						*(answer+2) += mult * nz * nz / nlen2;
-						*(answer+3) += mult * nx * ny / nlen2;
-						*(answer+4) += mult * nx * nz / nlen2;
-						*(answer+5) += mult * ny * nz / nlen2;
-					}
+					*(answer) += mult * nx * nx;
+					*(answer+1) += mult * ny * ny;
+					*(answer+2) += mult * nz * nz;
+					*(answer+3) += mult * nx * ny;
+					*(answer+4) += mult * nx * nz;
+					*(answer+5) += mult * ny * nz;
 				}
 			}
 		}
 	}
 
-	*(answer) -= 1.0 / 3.0 / sqrt_pi * alpha3 * a3 / box_length3;
-	*(answer+1) -= 1.0 / 3.0 / sqrt_pi * alpha3 * a3 / box_length3;
-	*(answer+2) -= 1.0 / 3.0 / sqrt_pi * alpha3 * a3 / box_length3;	
+	temp1 = alpha3 * a3 / ( box_length3 * 3.0 * sqrt_pi );
+
+	*(answer) -= temp1;
+	*(answer+1) -= temp1;
+	*(answer+2) -= temp1;	
 }
 
 // -------------------------------------------------------------------------------
 
 void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n, double* answer)
 {
-	double mslen, mslen2, nlen, nlen2, msx, msy, msz, nsdot, mult;
+	double mslen, mslen2, nlen, nlen2, msx, msy, msz, nsdot, mult, mult2, exp_const;
 
-	int mx, my, mz, nx, ny, nz, i;
+	int mbis, mtris, nbis, ntris;
+
+	register int mx;
+
+	register int my;
+
+	register int mz;
+	
+	register int nx;
+	
+	register int ny;
+	
+	register int nz;
 
 	double* values = calloc(6, sizeof(double));
 
@@ -250,68 +299,70 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 	double sqrt_pi = sqrt(M_PI);
 
+	double temp = 2 * alpha / sqrt_pi;
+
 	for (mx = -m; mx <= m; mx++)
 	{
-		for (my = -m; my <= m; my++)
+		mbis = m - abs(mx);
+		for (my = -mbis; my <= mbis; my++)
 		{
-			for (mz = -m; mz <= m; mz++)
+			mtris = mbis - abs(my);
+			for (mz = -mtris; mz <= mtris; mz++)
 			{
-				if (abs(mx)+abs(my)+abs(mz)<=m)
-				{
-					msx = mx + sigmax;
-					msy = my + sigmay;
-					msz = mz + sigmaz;
+				msx = mx + sigmax;
+				msy = my + sigmay;
+				msz = mz + sigmaz;
 
-					mslen2 = msx*msx + msy*msy + msz*msz;
+				mslen2 = msx*msx + msy*msy + msz*msz;
+				mslen = sqrt(mslen2);
+				mult = erfc( alpha * mslen );
+				O(msx, msy, msz, values);
 
-					mslen = sqrt(mslen2);
+				*(answer) += mult * *(values);
+				*(answer+1) += mult * *(values+1);
+				*(answer+2) += mult * *(values+2);
+				*(answer+3) += mult * *(values+3);
+				*(answer+4) += mult * *(values+4);
+				*(answer+5) += mult * *(values+5);
 
-					mult = erfc( alpha * mslen );
+				mult = temp * exp( -alpha2 * mslen2 ) / mslen2;
 
-					O(msx, msy, msz, values);
-
-					for (i = 0; i < 6; i++)
-					{
-						*(answer+i) += mult * *(values+i);
-					}
-
-					mult = 2 * alpha / sqrt_pi * exp( -alpha2 * mslen2 );
-
-					*(answer) += mult * msx * msx / mslen2;
-					*(answer+1) += mult * msy * msy / mslen2;
-					*(answer+2) += mult * msz * msz / mslen2;
-					*(answer+3) += mult * msx * msy / mslen2;
-					*(answer+4) += mult * msx * msz / mslen2;
-					*(answer+5) += mult * msy * msz / mslen2;
-				}
+				*(answer) += mult * msx * msx;
+				*(answer+1) += mult * msy * msy;
+				*(answer+2) += mult * msz * msz;
+				*(answer+3) += mult * msx * msy;
+				*(answer+4) += mult * msx * msz;
+				*(answer+5) += mult * msy * msz;
 			}
 		}
 	}
 
+	temp = M_PI * M_PI / alpha2;
+
+	double temp2 = 2.0 / M_PI;
+
 	for (nx = -n; nx <= n; nx++)
 	{
-		for (ny = -n; ny <= n; ny++)
+		nbis = n - abs(nx);
+		for (ny = -nbis; ny <= nbis; ny++)
 		{
-			for (nz = -n; nz <= n; nz++)
+			ntris = nbis - abs(ny);
+			for (nz = -ntris; nz <= ntris; nz++)
 			{
-				if (abs(nx)+abs(ny)+abs(nz)<=n)
-				{
-					if (!(nx==0 && ny==0 && nz==0))
-					{	
-						nlen2 = nx*nx + ny*ny + nz*nz;
-						nlen = sqrt(nlen2);
+				if (!(nx==0 && ny==0 && nz==0))
+				{	
+					nlen2 = nx*nx + ny*ny + nz*nz;
+					nsdot = nx*sigmax + ny*sigmay + nz*sigmaz;
+					exp_const = temp * nlen2;
+					mult = temp2 / nlen2 * exp( -exp_const ) * cos(2 * M_PI * nsdot );
+					mult2 = (1.0 + exp_const) / nlen2;
 
-						nsdot = nx*sigmax + ny*sigmay + nz*sigmaz;
-
-						mult = 2.0 / M_PI / nlen2 * exp( -M_PI * M_PI * nlen2 / alpha2 ) * cos(2 * M_PI * nsdot );
-
-						*(answer) += mult * ( 1.0 - (1.0 + M_PI * M_PI * nlen2 / alpha2) * nx * nx / nlen2 );
-						*(answer+1) += mult * ( 1.0 - (1.0 + M_PI * M_PI * nlen2 / alpha2) * ny * ny / nlen2 );
-						*(answer+2) += mult * ( 1.0 - (1.0 + M_PI * M_PI * nlen2 / alpha2) * nz * nz / nlen2 );
-						*(answer+3) += mult * ( - (1.0 + M_PI * M_PI * nlen2 / alpha2) * nx * ny / nlen2 );
-						*(answer+4) += mult * ( - (1.0 + M_PI * M_PI * nlen2 / alpha2) * nx * nz / nlen2 );
-						*(answer+5) += mult * ( - (1.0 + M_PI * M_PI * nlen2 / alpha2) * ny * nz / nlen2 );
-					}
+					*(answer) += mult * ( 1.0 - mult2 * nx * nx );
+					*(answer+1) += mult * ( 1.0 - mult2 * ny * ny );
+					*(answer+2) += mult * ( 1.0 - mult2 * nz * nz );
+					*(answer+3) += mult * ( - mult2 * nx * ny );
+					*(answer+4) += mult * ( - mult2 * nx * nz );
+					*(answer+5) += mult * ( - mult2 * ny * nz );
 				}
 			}
 		}
@@ -322,9 +373,21 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n, double* answer)
 {
-	double mslen, mslen2, nlen, nlen2, msx, msy, msz, nsdot, mult;
+	double amslen, amslen2, mslen2, expamslen2, nlen, nlen2, msx, msy, msz, nsdot, mult;
 
-	int mx, my, mz, nx, ny, nz, i;
+	int mbis, mtris, nbis, ntris;
+
+	register int mx;
+
+	register int my;
+
+	register int mz;
+	
+	register int nx;
+	
+	register int ny;
+	
+	register int nz;
 
 	double* values = calloc(6, sizeof(double));
 
@@ -334,69 +397,72 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 	double sqrt_pi = sqrt(M_PI);
 
+	double temp1 = 2.0 / sqrt_pi;
+
+	double temp2 = 4 * alpha3 / sqrt_pi;
+
 	for (mx = -m; mx <= m; mx++)
 	{
-		for (my = -m; my <= m; my++)
+		mbis = m - abs(mx);
+		for (my = -mbis; my <= mbis; my++)
 		{
-			for (mz = -m; mz <= m; mz++)
+			mtris = mbis - abs(my);
+			for (mz = -mtris; mz <= mtris; mz++)
 			{
-				if (abs(mx)+abs(my)+abs(mz)<=m)
-				{
-					msx = mx + sigmax;
-					msy = my + sigmay;
-					msz = mz + sigmaz;
+				msx = mx + sigmax;
+				msy = my + sigmay;
+				msz = mz + sigmaz;
 
-					mslen2 = msx*msx + msy*msy + msz*msz;
+				mslen2 = msx*msx + msy*msy + msz*msz;
+				amslen = alpha * sqrt(mslen2);
+				amslen2 = amslen * amslen;
+				expamslen2 = exp( -amslen2 );
+				mult = erfc( amslen ) + temp1 * amslen * expamslen2;
+				Q(msx, msy, msz, values);
 
-					mslen = sqrt(mslen2);
+				*(answer) += mult * *(values);
+				*(answer+1) += mult * *(values+1);
+				*(answer+2) += mult * *(values+2);
+				*(answer+3) += mult * *(values+3);
+				*(answer+4) += mult * *(values+4);
+				*(answer+5) += mult * *(values+5);
 
-					mult = erfc( alpha * mslen ) + 2.0 * alpha / sqrt_pi * mslen * exp( -alpha2 * mslen2 );
+				mult = temp2 * expamslen2 / mslen2;
 
-					Q(msx, msy, msz, values);
-
-					for (i = 0; i < 6; i++)
-					{
-						*(answer+i) += mult * *(values+i);
-					}
-
-					mult = 4 * alpha3 / sqrt_pi * exp( -alpha2 * mslen2 );
-
-					*(answer) -= mult * msx * msx / mslen2;
-					*(answer+1) -= mult * msy * msy / mslen2;
-					*(answer+2) -= mult * msz * msz / mslen2;
-					*(answer+3) -= mult * msx * msy / mslen2;
-					*(answer+4) -= mult * msx * msz / mslen2;
-					*(answer+5) -= mult * msy * msz / mslen2;
-				}
+				*(answer) -= mult * msx * msx;
+				*(answer+1) -= mult * msy * msy;
+				*(answer+2) -= mult * msz * msz;
+				*(answer+3) -= mult * msx * msy;
+				*(answer+4) -= mult * msx * msz;
+				*(answer+5) -= mult * msy * msz;
 			}
 		}
 	}
 
+	temp1 = -M_PI*M_PI/alpha2;
+
+	temp2 = 4 * M_PI;
+
 	for (nx = -n; nx <= n; nx++)
 	{
-		for (ny = -n; ny <= n; ny++)
+		nbis = n - abs(nx);
+		for (ny = -nbis; ny <= nbis; ny++)
 		{
-			for (nz = -n; nz <= n; nz++)
+			ntris = nbis - abs(ny);
+			for (nz = -ntris; nz <= ntris; nz++)
 			{
-				if (abs(nx)+abs(ny)+abs(nz)<=n)
+				if (!(nx==0 && ny==0 && nz==0))
 				{
-					if (!(nx==0 && ny==0 && nz==0))
-					{
-						nlen2 = nx*nx + ny*ny + nz*nz;
+					nlen2 = nx*nx + ny*ny + nz*nz;
+					nsdot = nx*sigmax + ny*sigmay + nz*sigmaz;
+					mult = temp2 * exp(temp1 * nlen2) * cos(2*M_PI*nsdot) / nlen2;
 
-						nlen = sqrt(nlen2);
-
-						nsdot = nx*sigmax + ny*sigmay + nz*sigmaz;
-
-						mult = 4 * M_PI * exp( -M_PI * M_PI * nlen2 / alpha2 ) * cos(2*M_PI*nsdot);
-
-						*(answer) += mult * nx * nx / nlen2;
-						*(answer+1) += mult * ny * ny / nlen2;
-						*(answer+2) += mult * nz * nz / nlen2;
-						*(answer+3) += mult * nx * ny / nlen2;
-						*(answer+4) += mult * nx * nz / nlen2;
-						*(answer+5) += mult * ny * nz / nlen2;
-					}
+					*(answer) += mult * nx * nx;
+					*(answer+1) += mult * ny * ny;
+					*(answer+2) += mult * nz * nz;
+					*(answer+3) += mult * nx * ny;
+					*(answer+4) += mult * nx * nz;
+					*(answer+5) += mult * ny * nz;
 				}
 			}
 		}
@@ -425,42 +491,44 @@ void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answ
 
 	if (dist > (ai + aj))
 	{
-		double coef1 = 1.0 / 8 / M_PI / dist;
-		double coef2 = 1.0 + aij2 / 3 / dist2;
-		double coef3 = 1.0 - aij2 / dist2;
+		double coef1 = 1.0 / ( 8 * M_PI * dist );
+		double coef2 = 1.0 + aij2 / ( 3 * dist2 );
+		double coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
 
-		*(answer) = coef1 * ( coef2 + coef3 * rx * rx / dist2 );
-		*(answer+1) = coef1 * ( coef2 + coef3 * ry * ry / dist2 );
-		*(answer+2) = coef1 * ( coef2 + coef3 * rz * rz / dist2 );
-		*(answer+3) = coef1 * coef3 * rx * ry / dist2;
-		*(answer+4) = coef1 * coef3 * rx * rz / dist2;
-		*(answer+5) = coef1 * coef3 * ry * rz / dist2;
+		*(answer) = coef1 * ( coef2 + coef3 * rx * rx );
+		*(answer+1) = coef1 * ( coef2 + coef3 * ry * ry );
+		*(answer+2) = coef1 * ( coef2 + coef3 * rz * rz );
+		*(answer+3) = coef1 * coef3 * rx * ry;
+		*(answer+4) = coef1 * coef3 * rx * rz;
+		*(answer+5) = coef1 * coef3 * ry * rz;
 	}
 	else if (dist <= (al - as))
 	{
-		*(answer) = 1.0 / 6 / M_PI / al;
-		*(answer+1) = 1.0 / 6 / M_PI / al;
-		*(answer+2) = 1.0 / 6 / M_PI / al;
+		double temp = 1.0 / ( 6 * M_PI * al );
+
+		*(answer) = temp;
+		*(answer+1) = temp;
+		*(answer+2) = temp;
 	}
 	else
 	{
 		double dist3 = dist2 * dist;
 
-		double coef1 = 1.0 / 6 / M_PI / ai / aj;
+		double coef1 = 1.0 / ( 6 * M_PI * ai * aj );
 		double coef2 = 16 * dist3 * ( ai + aj );
 		double coef3 = (ai - aj) * (ai - aj) + 3*dist2;
 		coef3 *= coef3;
 		double coef4 = (coef2 - coef3) / 32 / dist3;
 		double coef5 = ( (ai - aj)*(ai - aj) - dist2 );
 		coef5 *= 3 * coef5;
-		double coef6 = coef5 / 32 / dist3;
+		double coef6 = coef5 / ( 32 * dist3 ) / dist2;
 
-		*(answer) = coef1 * ( coef4 + coef6 * rx * rx / dist2 );
-		*(answer+1) = coef1 * ( coef4 + coef6 * ry * ry / dist2 );
-		*(answer+2) = coef1 * ( coef4 + coef6 * rz * rz / dist2 );
-		*(answer+3) = coef1 * coef6 * rx * ry / dist2;
-		*(answer+4) = coef1 * coef6 * rx * rz / dist2;
-		*(answer+5) = coef1 * coef6 * ry * rz / dist2;
+		*(answer) = coef1 * ( coef4 + coef6 * rx * rx );
+		*(answer+1) = coef1 * ( coef4 + coef6 * ry * ry );
+		*(answer+2) = coef1 * ( coef4 + coef6 * rz * rz );
+		*(answer+3) = coef1 * coef6 * rx * ry;
+		*(answer+4) = coef1 * coef6 * rx * rz;
+		*(answer+5) = coef1 * coef6 * ry * rz;
 	}
 }
 
@@ -470,9 +538,9 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 {
 	int i;
 
-	double coef1 = 1.0 / 6 / M_PI / a;
-	double coef2 = 3 * a / 4 / box_length;
-	double coef3 = a * a * a / box_length / box_length / box_length / 2;
+	double coef1 = 1.0 / ( 6 * M_PI * a );
+	double coef2 = 3 * a / ( 4 * box_length );
+	double coef3 = a * a * a / ( 2 * box_length * box_length * box_length );
 
 	double* comp1 = calloc(6, sizeof(double));
 	double* comp2 = calloc(6, sizeof(double));
@@ -480,14 +548,13 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 	Oii(a, box_length, alpha, m, n, comp1);
 	Qii(a, box_length, alpha, m, n, comp2);
 
-	for (i = 0; i < 3; i++)
-	{
-		*(answer+i) = coef1 * ( 1.0 + coef2 * *(comp1+i) + coef3 * *(comp2+i) );
-	}
-	for (i = 3; i < 6; i++)
-	{
-		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
-	}
+	*(answer) = coef1 * ( 1.0 + coef2 * *(comp1) + coef3 * *(comp2) );
+	*(answer+1) = coef1 * ( 1.0 + coef2 * *(comp1+1) + coef3 * *(comp2+1) );
+	*(answer+2) = coef1 * ( 1.0 + coef2 * *(comp1+2) + coef3 * *(comp2+2) );
+
+	*(answer+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
+	*(answer+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
+	*(answer+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
 }
 
 // -------------------------------------------------------------------------------
@@ -501,17 +568,17 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 	double sigmay = ry / box_length;
 	double sigmaz = rz / box_length;
 
-	double coef1 = 1.0 / 6 / M_PI / ai;
-	double coef2 = 3 * ai / 4 / box_length;
+	double coef1 = 1.0 / ( 6 * M_PI * ai );
+	double coef2 = 3 * ai / ( 4 * box_length );
 	double coef3;
 
 	if (ai == aj)
 	{
-		coef3 = ai * ai * ai / box_length / box_length / box_length / 2;
+		coef3 = ai * ai * ai / ( 2 * box_length * box_length * box_length );
 	}
 	else
 	{
-		coef3 = ai * ( ai * ai + aj * aj ) / box_length / box_length / box_length / 4;
+		coef3 = ai * ( ai * ai + aj * aj ) / ( 4 * box_length * box_length * box_length );
 	}
 
 	double* comp1 = calloc(6, sizeof(double));
@@ -520,10 +587,13 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 	Oij(sigmax, sigmay, sigmaz, alpha, m, n, comp1);
 	Qij(sigmax, sigmay, sigmaz, alpha, m, n, comp2);
 
-	for (i = 0; i < 6; i++)
-	{
-		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
-	}
+	*(answer) = coef1 * ( coef2 * *(comp1) + coef3 * *(comp2) );
+	*(answer+1) = coef1 * ( coef2 * *(comp1+1) + coef3 * *(comp2+1) );
+	*(answer+2) = coef1 * ( coef2 * *(comp1+2) + coef3 * *(comp2+2) );
+	*(answer+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
+	*(answer+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
+	*(answer+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
+
 
 	if (dist2 < (ai + aj)*(ai + aj))
 	{
@@ -535,21 +605,23 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 
 		Mij_rpy(ai, aj, rx, ry, rz, Aij);
 
-		for (i = 0; i < 6; i++)
-		{
-			*(answer+i) += *(Aij+i);
-		}
+		*(answer) += *(Aij);
+		*(answer+1) += *(Aij+1);
+		*(answer+2) += *(Aij+2);
+		*(answer+3) += *(Aij+3);
+		*(answer+4) += *(Aij+4);
+		*(answer+5) += *(Aij+5);
 
-		coef1 = 1.0 / 8 / M_PI / dist;
-		coef2 = 1.0 + aij2 / 3 / dist2;
-		coef3 = 1.0 - aij2 / dist2;
+		coef1 = 1.0 / ( 8 * M_PI * dist );
+		coef2 = 1.0 + aij2 / ( 3 * dist2 );
+		coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
 
-		*(answer) -= coef1 * ( coef2 + coef3 * rx * rx / dist2 );
-		*(answer+1) -= coef1 * ( coef2 + coef3 * ry * ry / dist2 );
-		*(answer+2) -= coef1 * ( coef2 + coef3 * rz * rz / dist2 );
-		*(answer+3) -= coef1 * coef3 * rx * ry / dist2;
-		*(answer+4) -= coef1 * coef3 * rx * rz / dist2;
-		*(answer+5) -= coef1 * coef3 * ry * rz / dist2;
+		*(answer) -= coef1 * ( coef2 + coef3 * rx * rx);
+		*(answer+1) -= coef1 * ( coef2 + coef3 * ry * ry );
+		*(answer+2) -= coef1 * ( coef2 + coef3 * rz * rz );
+		*(answer+3) -= coef1 * coef3 * rx * ry;
+		*(answer+4) -= coef1 * coef3 * rx * rz;
+		*(answer+5) -= coef1 * coef3 * ry * rz;
 	}
 }
 
@@ -568,7 +640,9 @@ int results_position(int i, int j, int N)
 
 void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, int m, int n, int N, double* results)
 {
-	int i, j, k;
+	register int i = 0;
+
+	register int j = 0;
 
 	double* vector;
 
@@ -586,10 +660,9 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 		shifted_results = results + 6*results_position(j,j,N);
 
-		for (k = 0; k < 3; k++)
-		{
-			*(shifted_results + k) = *(vector + k);
-		}
+		*(shifted_results) = *(vector);
+		*(shifted_results + 1) = *(vector + 1);
+		*(shifted_results + 2) = *(vector + 2);
 
 		for (i = j + 1; i < N; i++)
 		{
@@ -602,21 +675,17 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 			ry = *(shifted_pointers + 1);
 			rz = *(shifted_pointers + 2);
 
-			// printf("r %lf %lf %lf\n", rx, ry, rz);
-
 			Mij_rpy_smith(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m, n, vector);
 
-			for (k = 0; k < 6; k++)
-			{
-				*(shifted_results + k) = *(vector + k);
-			}
+			*(shifted_results) = *(vector);
+			*(shifted_results + 1) = *(vector + 1);
+			*(shifted_results + 2) = *(vector + 2);
+			*(shifted_results + 3) = *(vector + 3);
+			*(shifted_results + 4) = *(vector + 4);
+			*(shifted_results + 5) = *(vector + 5);
+
 		}
 	}
-
-	// for (k = 0; k < 6*(N*N-N)/2 + 6*N; k++)
-	// {
-	// 	printf("%lf ", *(results+k));
-	// }
 }
 
 // -------------------------------------------------------------------------------

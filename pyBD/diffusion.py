@@ -522,9 +522,7 @@ def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
 def results_position(i, j, N):
 
-	position = i + j*N
-
-	return position - j*(j+1)//2
+	return i + j*N - j*(j+1)//2
 
 #-------------------------------------------------------------------------------
 
@@ -551,13 +549,12 @@ def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 
 	N_c = ctypes.c_int(N)
 
-	my_list = [0.0 for i in range(6*(N*N-N)//2 + 6*N)]
+	my_list = [0.0 for i in range(3*(N*N+N))]
 
 	my_arr = (ctypes.c_double * len(my_list))(*my_list)
 
 	lib.M_rpy_smith(a, p, box_length_c, alpha_c, m_c, n_c, N_c, my_arr)
 
-	# results = np.array(my_arr)
 	results = my_arr
 
 	M = np.zeros((3*N, 3*N))
