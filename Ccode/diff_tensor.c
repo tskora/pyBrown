@@ -504,6 +504,7 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 	double coef1 = 1.0 / 6 / M_PI / ai;
 	double coef2 = 3 * ai / 4 / box_length;
 	double coef3;
+
 	if (ai == aj)
 	{
 		coef3 = ai * ai * ai / box_length / box_length / box_length / 2;
@@ -524,7 +525,7 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 		*(answer+i) = coef1 * ( coef2 * *(comp1+i) + coef3 * *(comp2+i) );
 	}
 
-	if (dist2 < (ai + aj)*(ai + aj)) //new added
+	if (dist2 < (ai + aj)*(ai + aj))
 	{
 		double dist = sqrt(dist2);
 
@@ -560,12 +561,7 @@ int results_position(int i, int j, int N)
 
 	int position = i + j*N;
 
-	// for (k = 1; k <= j; k++)
-	// {
-	// 	position -= k;
-	// }
-
-	return position - (j+1)/2*j;
+	return position - j*(j+1)/2;
 }
 
 // -------------------------------------------------------------------------------
@@ -606,6 +602,8 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 			ry = *(shifted_pointers + 1);
 			rz = *(shifted_pointers + 2);
 
+			// printf("r %lf %lf %lf\n", rx, ry, rz);
+
 			Mij_rpy_smith(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m, n, vector);
 
 			for (k = 0; k < 6; k++)
@@ -614,6 +612,11 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 			}
 		}
 	}
+
+	// for (k = 0; k < 6*(N*N-N)/2 + 6*N; k++)
+	// {
+	// 	printf("%lf ", *(results+k));
+	// }
 }
 
 // -------------------------------------------------------------------------------
@@ -713,22 +716,6 @@ double X_f_poly(double l, int rank)
 }
 
 // -------------------------------------------------------------------------------
-
-// def Y_f_poly_python(l, rank):
-
-// 	if rank == 0: return 1
-// 	if rank == 1: return 3 / 2 * l
-// 	if rank == 2: return 9 / 4 * l
-// 	if rank == 3: return 2 * l + 27 / 8 * l**2 + 2 * l**3
-// 	if rank == 4: return 6 * l + 81 / 16 * l**2 + 18 * l**3
-// 	if rank == 5: return 63 / 2 * l**2 + 243 / 32 * l**3 + 63 / 2 * l**4
-// 	if rank == 6: return 4 * l + 54 * l**2 + 1241 / 64 * l**3 + 81 * l**4 + 72 * l**5
-// 	if rank == 7: return 144 * l**2 + 1053 / 8 * l**3 + 19083 / 128 * l**4 + 1053 / 8 * l**5 + 144 * l**6
-// 	if rank == 8: return 279 * l**2 + 4261 / 8 * l**3 + 126369 / 256 * l**4 - 117 / 8 * l**5 + 648 * l**6 + 288 * l**7
-// 	if rank == 9: return 576 * l**2 + 1134 * l**3 + 60443 / 32 * l**4 + 766179 / 512 * l**5 + 60443 / 32 * l**6 + 1134 * l**7 + 576 * l**8
-// 	if rank == 10: return 1152 * l**2 + 7857 / 4 * l**3 + 98487 / 16 * l**4 + 10548393 / 1024 * l**5 + 67617 / 8 * l**6 - 351 / 2 * l**7 + 3888 * l**8 + 1152 * l**9
-// 	if rank == 11: return 2304 * l**2 + 7128 * l**3 + 22071 / 2 * l**4 + 2744505 / 128 * l**5 + 95203835 / 2048 * l**6 + 2744505 / 128 * l**7 + 22071 / 2 * l**8 + 7128 * l**9 + 2304 * l**10
-// 	else: return None
 
 double Y_f_poly(double l, int rank)
 {
