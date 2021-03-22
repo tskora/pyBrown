@@ -43,7 +43,7 @@ class Box():
 		self.viscosity = self.inp["viscosity"]
 		self.hydrodynamics = self.inp["hydrodynamics"]
 		self.Fex = np.array( self.inp["external_force"] )
-		self.F0 = no.array( list(self.Fex)**len(self.mobile_beads) )
+		self.F0 = np.array( list(self.Fex)*len(self.mobile_beads) )
 
 		if self.hydrodynamics == "nohi":
 			self.D = Boltzmann * self.T * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
