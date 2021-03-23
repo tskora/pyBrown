@@ -34,7 +34,9 @@ class Box():
 
 		if "seed" in self.inp:
 			np.random.seed(self.inp["seed"])
-			self.draw_count = 0
+		else:
+			self.inp["seed"] = np.random.seed()
+		self.draw_count = 0
 
 		self.mobile_beads = [ b for b in self.beads if b.mobile ]
 		self.mobile_bead_indices = [ i for i, b in enumerate(self.beads) if b.mobile ]
