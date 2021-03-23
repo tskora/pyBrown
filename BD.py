@@ -16,6 +16,8 @@
 
 import click
 import numpy as np
+import pickle
+import shutil
 import time
 
 from scipy.constants import Boltzmann
@@ -61,7 +63,24 @@ def main(input_filename):
 	n_lub = i.input_data["lub_freq"]
 	n_chol = i.input_data["chol_freq"]
 
-	for str_filename, xyz_filename in zip(str_filenames, xyz_filenames):
+	if "rst_write_freq" in i.input_data.keys():
+		restart = True
+		n_restart = i.input_data["rst_write_freq"]
+		rst_filename = i.input_data["output_rst_filename"]
+		if "filename_range" in i.input_data.keys():
+			rst_filenames = [ rst_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
+		else:
+			rst_filenames = [ rst_filename ]
+	else:
+		restart = False
+
+	for index in range(len(str_filenames)):
+
+		str_filename = str_filenames[index]
+		xyz_filename = xyz_filenames[index]
+
+		if restart:
+			rst_filename = rst_filenames[index]
 
 		start = time.time()
 
@@ -69,7 +88,7 @@ def main(input_filename):
 
 		box = Box(bs, i.input_data)
 	
-		with open(xyz_filename, 'w') as output_file:
+		with open(xyz_filename, 'w', buffering = 1) as output_file:
 			for j in tqdm( range(n_steps) ):
 			# for j in range(n_steps):
 				if j % n_write == 0:
@@ -78,6 +97,17 @@ def main(input_filename):
 					for bead in box.beads:
 						output_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
+
+				if restart:
+					if j != 0 and j % n_restart == 0:
+						with open(rst_filename, 'wb', buffering = 0) as restart_file:
+							pickle.dump(index, restart_file)
+							pickle.dump(j, restart_file)
+							pickle.dump(box, restart_file)
+							with open(xyz_filename, "r") as copied_file:
+								pickle.dump(copied_file.read(), restart_file)
+						shutil.copy(rst_filename, rst_filename+"2")
+
 	
 		end = time.time()
 	

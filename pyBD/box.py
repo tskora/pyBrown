@@ -32,7 +32,9 @@ class Box():
 		self.beads = beads
 		self.inp = input_data
 
-		if "seed" in self.inp: np.random.seed(self.inp["seed"])
+		if "seed" in self.inp:
+			np.random.seed(self.inp["seed"])
+			self.draw_count = 0
 
 		self.mobile_beads = [ b for b in self.beads if b.mobile ]
 		self.mobile_bead_indices = [ i for i, b in enumerate(self.beads) if b.mobile ]
@@ -49,7 +51,7 @@ class Box():
 			self.D = Boltzmann * self.T * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
 			self.B = np.sqrt( self.D )
 
-		if self.hydrodynamics == "rpy_smith" or "rpy_smith_lub":
+		if self.hydrodynamics == "rpy_smith" or self.hydrodynamics == "rpy_smith_lub":
 			self.alpha = self.inp["ewald_alpha"]
 			self.m_max = self.inp["ewald_real"]
 			self.n_max = self.inp["ewald_imag"]
@@ -59,6 +61,14 @@ class Box():
 	def __str__(self):
 
 		return 'a'
+
+	#-------------------------------------------------------------------------------
+
+	def sync_seed(self):
+
+		np.random.seed(self.inp["seed"])
+
+		np.random.normal(0.0, 1.0, self.draw_count)
 
 	#-------------------------------------------------------------------------------
 
@@ -99,6 +109,7 @@ class Box():
 				BX = self.B * np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads)) * math.sqrt(2 * dt)
 			else:
 				BX = self.B @ np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads)) * math.sqrt(2 * dt)
+			self.draw_count += 3 * len(self.mobile_beads)
 
 			for i, bead in enumerate( self.mobile_beads ):
 				# stochastic step
