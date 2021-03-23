@@ -36,11 +36,46 @@ class TestBox(unittest.TestCase):
 		mock_input = {"seed": 1, "hydrodynamics": "nohi", "box_length": 35.0, "T": 298.0,
 					  "viscosity": 0.01, "external_force": [0, 0, 0]}
 
+		beads = [ Bead(np.array([i, j, k], float), 0.1) for i in range(5) for j in range(5) for k in range(5) ]
+
+		b = Box(beads, mock_input)
+
 		for M in range(4, 20):
 
-			beads = [ Bead(np.array([i, j, k], float), 0.1) for i in range(5) for j in range(5) for k in range(5) ]
+			for _ in range(M): b.propagate( 0.001 )
 
-			b = Box(beads, mock_input)
+			with open('test_box.txt', 'wb') as test_file:
+
+				pickle.dump(b, test_file)
+
+			for _ in range(M//2): b.propagate( 0.001 )
+
+			original = [ bead.r[i] for bead in b.beads for i in range(3) ]
+
+			del b
+
+			with open('test_box.txt', 'rb') as test_file:
+
+				b = pickle.load(test_file)
+
+			b.sync_seed()
+
+			for _ in range(M//2): b.propagate( 0.001 )
+
+			restarted = [ bead.r[i] for bead in b.beads for i in range(3) ]
+
+			self.assertSequenceEqual( original, restarted )
+
+	def test_seed_sync_implicit(self):
+
+		mock_input = {"hydrodynamics": "nohi", "box_length": 35.0, "T": 298.0,
+					  "viscosity": 0.01, "external_force": [0, 0, 0]}
+
+		beads = [ Bead(np.array([i, j, k], float), 0.1) for i in range(5) for j in range(5) for k in range(5) ]
+
+		b = Box(beads, mock_input)
+
+		for M in range(4, 20):
 
 			for _ in range(M): b.propagate( 0.001 )
 

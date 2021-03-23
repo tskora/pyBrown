@@ -16,6 +16,7 @@
 
 import math
 import numpy as np
+import sys
 
 from scipy.constants import Boltzmann
 
@@ -35,7 +36,9 @@ class Box():
 		if "seed" in self.inp:
 			np.random.seed(self.inp["seed"])
 		else:
-			self.inp["seed"] = np.random.seed()
+			seed = np.random.randint(2**32 - 1)
+			np.random.seed(seed)
+			self.inp["seed"] = seed
 		self.draw_count = 0
 
 		self.mobile_beads = [ b for b in self.beads if b.mobile ]
