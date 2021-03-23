@@ -37,7 +37,7 @@ class Box():
 		self.mobile_beads = [ b for b in self.beads if b.mobile ]
 		self.mobile_bead_indices = [ i for i, b in enumerate(self.beads) if b.mobile ]
 		self.immobile_bead_indices = list( set([i for i in range(len(self.beads))]) - set(self.mobile_bead_indices) )
-				
+
 		self.box_length = self.inp["box_length"]
 		self.T = self.inp["T"]
 		self.viscosity = self.inp["viscosity"]
@@ -84,9 +84,9 @@ class Box():
 		# computing displacement due to external force
 		if not np.all(self.Fex == 0.0):
 			if self.hydrodynamics != "nohi":
-				FX = dt / Boltzmann / self.T * self.D @ self.F0
+				FX = dt / ( Boltzmann * self.T ) * self.D @ self.F0
 			else:
-				FX = dt / Boltzmann / self.T * self.D * self.F0
+				FX = dt / ( Boltzmann * self.T ) * self.D * self.F0
 
 			# deterministic step
 			for i, bead in enumerate( self.mobile_beads ):
