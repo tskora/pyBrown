@@ -21,6 +21,8 @@ import time
 
 from tqdm import tqdm
 
+from pyBD.box import Box
+from pyBD.input import read_str_file
 from pyBD.output import timestamp
 
 @click.command()
@@ -45,7 +47,7 @@ def main(restart_filename):
 	if "filename_range" in input_data.keys():
 		str_filenames = [ str_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		xyz_filenames = [ xyz_filename.format(j) for j in range(*input_data["filename_range"]) ]
-		rst_filenames = [ rst_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
+		rst_filenames = [ rst_filename.format(j) for j in range(*input_data["filename_range"]) ]
 	else:
 		str_filenames = [ str_filename ]
 		xyz_filenames = [ xyz_filename ]
@@ -78,7 +80,7 @@ def main(restart_filename):
 			filemode = 'a'
 		else:
 			bs = read_str_file(str_filename)
-			box = Box(bs, i.input_data)
+			box = Box(bs, input_data)
 			j0 = 0
 			filemode = 'w'
 	
