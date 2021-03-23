@@ -638,11 +638,15 @@ int results_position(int i, int j, int N)
 
 // -------------------------------------------------------------------------------
 
-void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, int m, int n, int N, double* results)
+void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, int m, int n, int N, double* results2)
 {
 	register int i = 0;
 
 	register int j = 0;
+
+	int I, J, J1, J2, I1, I2;
+
+	int r;
 
 	double* vector;
 
@@ -651,6 +655,8 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 	double* shifted_pointers;
 
 	double rx, ry, rz;
+
+	double* results = calloc(3*(N*N+N), sizeof(double));
 
 	for (j = 0; j < N; j++)
 	{
@@ -686,6 +692,58 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 		}
 	}
+
+	int N3 = 3*N;
+
+	for (j = 0; j < N; j++)
+	{
+		r = 6*results_position(j, j, N);
+		J = 3*j;
+		J1 = J + 1;
+		J2 = J + 2;
+
+		results2[J + J*N3] = results[r];
+		results2[J1 + J1*N3] = results[r + 1];
+		results2[J2 + J2*N3] = results[r + 2];
+		results2[J1 + J*N3] = results[r + 3];
+		results2[J + J1*N3] = results[r + 3];
+		results2[J2 + J*N3] = results[r + 4];
+		results2[J + J2*N3] = results[r + 4];
+		results2[J2 + J1*N3] = results[r + 5];
+		results2[J1 + J2*N3] = results[r + 5];
+
+		for (i = j+1; i < N; i++)
+		{
+			r = 6*results_position(i, j, N);
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
+
+			results2[I + J*N3] = results[r];
+			results2[J + I*N3] = results[r];
+			results2[I1 + J1*N3] = results[r + 1];
+			results2[J1 + I1*N3] = results[r + 1];
+			results2[I2 + J2*N3] = results[r + 2];
+			results2[J2 + I2*N3] = results[r + 2];
+			results2[I1 + J*N3] = results[r + 3];
+			results2[I + J1*N3] = results[r + 3];
+			results2[J + I1*N3] = results[r + 3];
+			results2[J1 + I*N3] = results[r + 3];
+			results2[I2 + J*N3] = results[r + 4];
+			results2[I + J2*N3] = results[r + 4];
+			results2[J + I2*N3] = results[r + 4];
+			results2[J2 + I*N3] = results[r + 4];
+			results2[I2 + J1*N3] = results[r + 5];
+			results2[I1 + J2*N3] = results[r + 5];
+			results2[J1 + I2*N3] = results[r + 5];
+			results2[J2 + I1*N3] = results[r + 5];
+		}
+	}
+
+	// for (i = 0; i < 9*N*N; i++)
+	// {
+	// 	printf("%lf ", *(results2+i));
+	// }
 }
 
 // -------------------------------------------------------------------------------

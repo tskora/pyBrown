@@ -549,54 +549,56 @@ def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 
 	N_c = ctypes.c_int(N)
 
-	my_list = [0.0 for i in range(3*(N*N+N))]
+	my_list = [0.0 for i in range(9*N*N)]
 
 	my_arr = (ctypes.c_double * len(my_list))(*my_list)
 
 	lib.M_rpy_smith(a, p, box_length_c, alpha_c, m_c, n_c, N_c, my_arr)
 
-	results = my_arr
+	M = np.reshape(my_arr, (3*N, 3*N))
 
-	M = np.zeros((3*N, 3*N))
+	# print(M)
 
-	for j in range(N):
+	# M = np.zeros((3*N, 3*N))
 
-		r = 6*results_position(j, j, N)
-		J = 3*j
+	# for j in range(N):
 
-		M[J, J] = results[r]
-		M[J + 1, J + 1] = results[r + 1]
-		M[J + 2, J + 2] = results[r + 2]
-		M[J + 1, J] = results[r + 3]
-		M[J, J + 1] = results[r + 3]
-		M[J + 2, J] = results[r + 4]
-		M[J, J + 2] = results[r + 4]
-		M[J + 2, J + 1] = results[r + 5]
-		M[J + 1, J + 2] = results[r + 5]
+	# 	r = 6*results_position(j, j, N)
+	# 	J = 3*j
 
-		for i in range(j+1, N):
+	# 	M[J, J] = results[r]
+	# 	M[J + 1, J + 1] = results[r + 1]
+	# 	M[J + 2, J + 2] = results[r + 2]
+	# 	M[J + 1, J] = results[r + 3]
+	# 	M[J, J + 1] = results[r + 3]
+	# 	M[J + 2, J] = results[r + 4]
+	# 	M[J, J + 2] = results[r + 4]
+	# 	M[J + 2, J + 1] = results[r + 5]
+	# 	M[J + 1, J + 2] = results[r + 5]
 
-			r = 6*results_position(i, j, N)
-			I = 3*i
+	# 	for i in range(j+1, N):
 
-			M[I, J] = results[r]
-			M[J, I] = results[r]
-			M[I + 1, J + 1] = results[r + 1]
-			M[J + 1, I + 1] = results[r + 1]
-			M[I + 2, J + 2] = results[r + 2]
-			M[J + 2, I + 2] = results[r + 2]
-			M[I + 1, J] = results[r + 3]
-			M[I, J + 1] = results[r + 3]
-			M[J, I + 1] = results[r + 3]
-			M[J + 1, I] = results[r + 3]
-			M[I + 2, J] = results[r + 4]
-			M[I, J + 2] = results[r + 4]
-			M[J, I + 2] = results[r + 4]
-			M[J + 2, I] = results[r + 4]
-			M[I + 2, J + 1] = results[r + 5]
-			M[I + 1, J + 2] = results[r + 5]
-			M[J + 1, I + 2] = results[r + 5]
-			M[J + 2, I + 1] = results[r + 5]
+	# 		r = 6*results_position(i, j, N)
+	# 		I = 3*i
+
+	# 		M[I, J] = results[r]
+	# 		M[J, I] = results[r]
+	# 		M[I + 1, J + 1] = results[r + 1]
+	# 		M[J + 1, I + 1] = results[r + 1]
+	# 		M[I + 2, J + 2] = results[r + 2]
+	# 		M[J + 2, I + 2] = results[r + 2]
+	# 		M[I + 1, J] = results[r + 3]
+	# 		M[I, J + 1] = results[r + 3]
+	# 		M[J, I + 1] = results[r + 3]
+	# 		M[J + 1, I] = results[r + 3]
+	# 		M[I + 2, J] = results[r + 4]
+	# 		M[I, J + 2] = results[r + 4]
+	# 		M[J, I + 2] = results[r + 4]
+	# 		M[J + 2, I] = results[r + 4]
+	# 		M[I + 2, J + 1] = results[r + 5]
+	# 		M[I + 1, J + 2] = results[r + 5]
+	# 		M[J + 1, I + 2] = results[r + 5]
+	# 		M[J + 2, I + 1] = results[r + 5]
 
 	return M
 
