@@ -14,12 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
 
-import unittest
-
-import sys
-sys.path.insert(0, '.')
 import numpy as np
 import copy as cp
+import numpy as np
+import sys
+sys.path.insert(0, '.')
+import unittest
 
 from pyBD.bead import Bead, overlap_pbc, distance_pbc
 
@@ -140,4 +140,7 @@ class TestBead(unittest.TestCase):
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
+	
 	unittest.main()
+
+#-------------------------------------------------------------------------------
