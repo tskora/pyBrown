@@ -137,6 +137,34 @@ class TestBead(unittest.TestCase):
 		self.assertAlmostEqual( distance_pbc(self.b, Bead([0.0, -10.0, 10.0], 1.0), 5.0), 0.0, places = 7 )
 		self.assertAlmostEqual( distance_pbc(self.b, Bead([0.0, -10.0, -10.0], 1.0), 5.0), 0.0, places = 7 )
 
+	def test_translate_and_flux(self):
+
+		b1 = Bead([-1.0, 0.0, 0.0], 0.0)
+
+		vec = np.array([0.6, 0.0, 0.0])
+
+		normal = np.array([ 1.0, 0.0, 0.0 ])
+
+		normal_point = np.zeros(3)
+
+		self.assertEqual( b1.translate_and_return_flux(vec, normal, normal_point), 0 )
+
+		self.assertEqual( b1.translate_and_return_flux(vec, normal, normal_point), 1 )
+
+		vec = np.array([0.0, 20.0, 0.0])
+
+		self.assertEqual( b1.translate_and_return_flux(vec, normal, normal_point), 0 )
+
+		normal = np.array([ 0.0, 1.0, 0.0 ])
+
+		normal_point = np.array([0.0, 25.0, 0.0])
+
+		self.assertEqual( b1.translate_and_return_flux(vec, normal, normal_point), 1 )
+
+		vec = np.array([0.0, -400.0, 0.0])
+
+		self.assertEqual( b1.translate_and_return_flux(vec, normal, normal_point), -1 )
+
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':

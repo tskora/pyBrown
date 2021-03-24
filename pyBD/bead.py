@@ -38,6 +38,24 @@ class Bead():
 
 	#-------------------------------------------------------------------------------
 
+	def translate_and_return_flux(self, vector, normal, plane_point):
+
+		r0 = np.array( [self.r[0], self.r[1], self.r[2]] )
+
+		f0 = np.dot( normal, (r0 - plane_point) ) > 0.0
+
+		self.translate(vector)
+
+		f1 = np.dot( normal, (self.r - plane_point) ) > 0.0
+
+		if f0 == f1: return 0
+
+		if f0: return -1
+
+		else: return 1
+
+	#-------------------------------------------------------------------------------
+
 	def keep_in_box(self, box_length):
 
 		for i in range(3):

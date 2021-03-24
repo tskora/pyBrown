@@ -67,6 +67,12 @@ class Box():
 				self.is_external_force_region_z = True
 				self.Fex_region_z = self.inp["external_force_region"]["z"]
 
+		self.is_flux = False
+		if "measure_flux" in self.inp.keys():
+			self.is_flux = True
+			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
+			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
+
 		if self.hydrodynamics == "nohi":
 			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
 			self.B = np.sqrt( self.D )
@@ -94,6 +100,8 @@ class Box():
 
 	# @timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True, overlaps = True):
+
+		if self.is_flux: self.flux = np.zeros( len(self.mobile_beads), int )
 
 		if self.hydrodynamics != "nohi": self.compute_rij_matrix()
 
@@ -136,7 +144,8 @@ class Box():
 
 			# deterministic step
 			for i, bead in enumerate( self.mobile_beads ):
-				bead.translate( FX[3 * i: 3 * (i + 1)] )
+				if self.is_flux: self.flux[i] += bead.translate_and_return_flux( FX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+				else: bead.translate( FX[3 * i: 3 * (i + 1)] )
 		
 		while True:
 
@@ -149,14 +158,16 @@ class Box():
 
 			for i, bead in enumerate( self.mobile_beads ):
 				# stochastic step
-				bead.translate( BX[3 * i: 3 * (i + 1)] )
+				if self.is_flux: self.flux[i] += bead.translate_and_return_flux( BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+				else: bead.translate( BX[3 * i: 3 * (i + 1)] )
 
 			if overlaps:
 
 				if self.check_overlaps():
 					for i, bead in enumerate( self.mobile_beads ):
 						# undo stochastic step
-						bead.translate( -BX[3 * i: 3 * (i + 1)] )
+						if self.is_flux: self.flux[i] += bead.translate_and_return_flux( -BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+						else: bead.translate( -BX[3 * i: 3 * (i + 1)] )
 				else:
 					for i, bead in enumerate( self.mobile_beads ):
 						bead.keep_in_box(self.box_length)
@@ -164,7 +175,13 @@ class Box():
 
 			else:
 
+				for i, bead in enumerate( self.mobile_beads ):
+					bead.keep_in_box(self.box_length)
 				break
+
+		if self.is_flux:
+			print(self.flux)
+			print(np.sum(self.flux))
 
 	#-------------------------------------------------------------------------------
 
