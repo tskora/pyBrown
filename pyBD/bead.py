@@ -68,7 +68,10 @@ class Bead():
 
 	def __str__(self):
 
-		return "{}: {}, radius = {}".format(self.label, self.r, self.a)
+		if self.mobile: mobile_string = "mobile"
+		else: mobile_string = "immobile"
+
+		return "{}: {}, radius = {}, {}".format(self.label, self.r, self.a, mobile_string)
 
 	#-------------------------------------------------------------------------------
 

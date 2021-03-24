@@ -83,16 +83,25 @@ def read_str_file(input_str_filename):
 
         for line in str_file:
 
-            if line.split()[0] == 'sub':
-                label = line.split()[1]
-                coords = np.array([ float(line.split()[i]) for i in range(3, 6) ])
-                hydrodynamic_radius = float(line.split()[6])
-                charge = float(line.split()[7])
-                lennard_jones_radius = float(line.split()[8]) / 2
-                lennard_jones_energy = float(line.split()[9])
-                mass = float(line.split()[10])
+            line_segments = line.split()
 
-                beads.append( Bead(coords, hydrodynamic_radius, label) )
+            if line_segments[0] == 'sub':
+                label = line_segments[1]
+                coords = np.array([ float(line_segments[i]) for i in range(3, 6) ])
+                hydrodynamic_radius = float(line_segments[6])
+                charge = float(line_segments[7])
+                lennard_jones_radius = float(line_segments[8]) / 2
+                lennard_jones_energy = float(line_segments[9])
+                mass = float(line_segments[10])
+                if len(line_segments) > 11:
+                    if int( line_segments[11] ) == 1:
+                        mobile = True
+                    else:
+                        mobile = False
+                else:
+                    mobile = True
+
+                beads.append( Bead(coords = coords, hydrodynamic_radius = hydrodynamic_radius, label = label, mobile = mobile) )
 
     return beads
 
