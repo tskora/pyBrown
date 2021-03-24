@@ -40,11 +40,13 @@ def main(input_filename):
 	# if given keyword is absent in JSON, it is added with respective default value
 	defaults = {"debug": False, "hydrodynamics": "nohi", "external_force": [0.0, 0.0, 0.0],
 				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0, "diff_freq": 1,
-				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1}
+				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1, "progress_bar": False}
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults)
 	timestamp( 'Input data:\n{}', i )
+
+	disable_progress_bar = not i.input_data["progress_bar"]
 
 	str_filename = i.input_data["input_str_filename"]
 	xyz_filename = i.input_data["output_xyz_filename"]
@@ -89,8 +91,7 @@ def main(input_filename):
 		box = Box(bs, i.input_data)
 	
 		with open(xyz_filename, 'w', buffering = 1) as output_file:
-			for j in tqdm( range(n_steps) ):
-			# for j in range(n_steps):
+			for j in tqdm( range(n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
 					output_file.write('{}\n'.format(len(box.beads)))
 					output_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))

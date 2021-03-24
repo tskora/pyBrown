@@ -40,6 +40,8 @@ def main(restart_filename):
 
 	input_data = box_rst.inp
 
+	disable_progress_bar = not input_data["progress_bar"]
+
 	str_filename = input_data["input_str_filename"]
 	xyz_filename = input_data["output_xyz_filename"]
 	rst_filename = input_data["output_rst_filename"]
@@ -85,8 +87,7 @@ def main(restart_filename):
 			filemode = 'w'
 	
 		with open(xyz_filename, filemode, buffering = 1) as output_file:
-			for j in tqdm( range(j0, n_steps) ):
-			# for j in range(j0, n_steps):
+			for j in tqdm( range(j0, n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
 					output_file.write('{}\n'.format(len(box.beads)))
 					output_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
