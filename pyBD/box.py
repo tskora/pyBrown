@@ -34,11 +34,12 @@ class Box():
 		self.inp = input_data
 
 		if "seed" in self.inp:
-			np.random.seed(self.inp["seed"])
+			self.seed = self.inp["seed"]
+			np.random.seed(self.seed)
 		else:
-			seed = np.random.randint(2**32 - 1)
-			np.random.seed(seed)
-			self.inp["seed"] = seed
+			self.seed = np.random.randint(2**32 - 1)
+			np.random.seed(self.seed)
+			self.inp["seed"] = self.seed
 		self.draw_count = 0
 
 		self.mobile_beads = [ b for b in self.beads if b.mobile ]
@@ -47,13 +48,27 @@ class Box():
 
 		self.box_length = self.inp["box_length"]
 		self.T = self.inp["T"]
+		self.kBT = Boltzmann*self.T
 		self.viscosity = self.inp["viscosity"]
 		self.hydrodynamics = self.inp["hydrodynamics"]
 		self.Fex = np.array( self.inp["external_force"] )
 		self.F0 = np.array( list(self.Fex)*len(self.mobile_beads) )
 
+		self.is_external_force_region = False
+		if "external_force_region" in self.inp.keys():
+			self.is_external_force_region = True
+			if "x" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_x = True
+				self.Fex_region_x = self.inp["external_force_region"]["x"]
+			if "y" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_y = True
+				self.Fex_region_y = self.inp["external_force_region"]["y"]
+			if "z" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_z = True
+				self.Fex_region_z = self.inp["external_force_region"]["z"]
+
 		if self.hydrodynamics == "nohi":
-			self.D = Boltzmann * self.T * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
+			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
 			self.B = np.sqrt( self.D )
 
 		if self.hydrodynamics == "rpy_smith" or self.hydrodynamics == "rpy_smith_lub":
@@ -96,12 +111,28 @@ class Box():
 			if cholesky:
 				self.decompose_D_matrix()
 
+		if self.is_external_force_region:
+			for i, bead in enumerate(self.mobile_beads):
+				if self.is_external_force_region_x:
+					if bead.r[0] < self.Fex_region_x[0] or bead.r[0] > self.Fex_region_x[1]:
+						self.F0[3*i:3*i+3] = np.zeros(3)
+						continue
+				if self.is_external_force_region_y:
+					if bead.r[1] < self.Fex_region_y[0] or bead.r[1] > self.Fex_region_y[1]:
+						self.F0[3*i:3*i+3] = np.zeros(3)
+						continue
+				if self.is_external_force_region_z:
+					if bead.r[2] < self.Fex_region_z[0] or bead.r[2] > self.Fex_region_z[1]:
+						self.F0[3*i:3*i+3] = np.zeros(3)
+						continue
+				self.F0[3*i:3*i+3] = self.Fex
+
 		# computing displacement due to external force
 		if not np.all(self.Fex == 0.0):
 			if self.hydrodynamics != "nohi":
-				FX = dt / ( Boltzmann * self.T ) * self.D @ self.F0
+				FX = dt / self.kBT * self.D @ self.F0
 			else:
-				FX = dt / ( Boltzmann * self.T ) * self.D * self.F0
+				FX = dt / self.kBT * self.D * self.F0
 
 			# deterministic step
 			for i, bead in enumerate( self.mobile_beads ):
@@ -180,13 +211,13 @@ class Box():
 
 			self.D = M_rpy(self.mobile_beads, self.rij)
 
-			self.D *= Boltzmann * self.T * 10**19 / self.viscosity
+			self.D *= self.kBT * 10**19 / self.viscosity
 
 		if self.hydrodynamics == "rpy_smith":
 
 			self.D = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max)
 
-			self.D *= Boltzmann * self.T * 10**19 / self.viscosity
+			self.D *= self.kBT * 10**19 / self.viscosity
 
 		if self.hydrodynamics == "rpy_lub":
 
@@ -207,7 +238,7 @@ class Box():
 
 		self.R = R_lub_corr(self.mobile_beads, self.rij) + self.Rff
 
-		self.D = Boltzmann * self.T * 10**19 * np.linalg.inv(self.R) / self.viscosity
+		self.D = self.kBT * 10**19 * np.linalg.inv(self.R) / self.viscosity
 
 	#-------------------------------------------------------------------------------
 
