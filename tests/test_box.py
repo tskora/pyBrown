@@ -79,6 +79,8 @@ class TestBox(unittest.TestCase):
 
 	def test_seed_sync_implicit(self):
 
+		self.mock_input["seed"] = np.random.randint(2**32 - 1)
+
 		beads = [ Bead(np.array([i, j, k], float), 0.1) for i in range(5) for j in range(5) for k in range(5) ]
 
 		b = Box(beads, self.mock_input)
@@ -120,6 +122,8 @@ class TestBox(unittest.TestCase):
 		self.mock_input["external_force_region"] = xFr
 
 		self.mock_input["external_force"] = Fex
+
+		self.mock_input["seed"] = 0
 
 		beads = [ Bead(np.array([i, j, k], float), 0.1) for i in range(0,5)
 														for j in range(0,5)
