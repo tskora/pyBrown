@@ -21,7 +21,30 @@ Type following commands in a terminal:
 
 `make test`
 
-## 
+## Example input
+
+```json
+{
+	"input_str_filename": "test_{}.str",
+	"output_xyz_filename": "test_{}.xyz",
+	"output_rst_filename": "test_{}.rst",
+	"filename_range": [1, 2],
+	"number_of_steps": 100000,
+	"xyz_write_freq": 1000,
+	"rst_write_freq": 100,
+	"dt": 1.0,
+	"T": 293.15,
+	"viscosity": 0.01005,
+	"box_length": 750.0,
+	"hydrodynamics": "nohi",
+	"seed": 0,
+	"progress_bar": false,
+	"measure_flux": {
+		"normal": [1.0, 0.0, 0.0],
+		"plane_point": [0.0, 0.0, 0.0]
+	}
+}
+```
 
 ## Units
 
