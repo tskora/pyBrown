@@ -739,11 +739,6 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 			results2[J2 + I1*N3] = results[r + 5];
 		}
 	}
-
-	// for (i = 0; i < 9*N*N; i++)
-	// {
-	// 	printf("%lf ", *(results2+i));
-	// }
 }
 
 // -------------------------------------------------------------------------------
@@ -863,25 +858,25 @@ double Y_f_poly(double l, int rank)
 		case 3:
 			l2 = l*l;
 			l3 = l2*l;
-			answer = 2*l + 27.0/8*l2 + 2*l3;
+			answer = 2*l + 3.375*l2 + 2*l3;
 			break;
 		case 4:
 			l2 = l*l;
 			l3 = l2*l;
-			answer = 6*l + 81.0/16*l2 + 18*l3;
+			answer = 6*l + 5.0625*l2 + 18*l3;
 			break;
 		case 5:
 			l2 = l*l;
 			l3 = l2*l;
 			l4 = l2*l2;
-			answer = 63.0/2*l2 + 243.0/32*l3 + 63.0/2*l4;
+			answer = 31.5*l2 + 7.59375*l3 + 31.5*l4;
 			break;
 		case 6:
 			l2 = l*l;
 			l3 = l2*l;
 			l4 = l2*l2;
 			l5 = l3*l2;
-			answer = 4*l + 54*l2 + 1241.0/64*l3 + 81*l4 + 72*l5;
+			answer = 4*l + 54*l2 + 19.390625*l3 + 81*l4 + 72*l5;
 			break;
 		case 7:
 			l2 = l*l;
@@ -889,7 +884,7 @@ double Y_f_poly(double l, int rank)
 			l4 = l2*l2;
 			l5 = l3*l2;
 			l6 = l3*l3;
-			answer = 144*l2 + 1053.0/8*l3 + 19083.0/128*l4 + 1053.0/8*l5 + 144*l6;
+			answer = 144*l2 + 131.625*l3 + 149.0859375*l4 + 131.625*l5 + 144*l6;
 			break;
 		case 8:
 			l2 = l*l;
@@ -898,7 +893,7 @@ double Y_f_poly(double l, int rank)
 			l5 = l3*l2;
 			l6 = l3*l3;
 			l7 = l4*l3;
-			answer = 279*l2 + 4261.0/8*l3 + 126369.0/256*l4 - 117.0/8*l5 + 648*l6 + 288*l7;
+			answer = 279*l2 + 532.625*l3 + 493.62890625*l4 - 14.625*l5 + 648*l6 + 288*l7;
 			break;
 		case 9:
 			l2 = l*l;
@@ -908,7 +903,7 @@ double Y_f_poly(double l, int rank)
 			l6 = l3*l3;
 			l7 = l4*l3;
 			l8 = l4*l4;
-			answer = 576*l2 + 1134*l3 + 60443.0/32*l4 + 766179.0/512*l5 + 60443.0/32*l6 + 1134*l7 + 576*l8;
+			answer = 576*l2 + 1134*l3 + 1888.84375*l4 + 1496.443359375*l5 + 1888.84375*l6 + 1134*l7 + 576*l8;
 			break;
 		case 10:
 			l2 = l*l;
@@ -919,7 +914,7 @@ double Y_f_poly(double l, int rank)
 			l7 = l4*l3;
 			l8 = l4*l4;
 			l9 = l5*l4;
-			answer = 1152*l2 + 7857.0/4*l3 + 98487.0/16*l4 + 10548393.0/1024*l5 + 67617.0/8*l6 - 351.0/2*l7 + 3888*l8 + 1152*l9;
+			answer = 1152*l2 + 1964.25*l3 + 6155.4375*l4 + 10301.1650390625*l5 + 8452.125*l6 - 175.5*l7 + 3888*l8 + 1152*l9;
 			break;
 		case 11:
 			l2 = l*l;
@@ -931,7 +926,7 @@ double Y_f_poly(double l, int rank)
 			l8 = l4*l4;
 			l9 = l5*l4;
 			l10 = l5*l5;
-			answer = 2304*l2 + 7128*l3 + 22071.0/2*l4 + 2744505.0/128*l5 + 95203835.0/2048*l6 + 2744505.0/128*l7 + 22071.0/2*l8 + 7128*l9 + 2304*l10;
+			answer = 2304*l2 + 7128*l3 + 11035.5*l4 + 21441.4453125*l5 + 46486.24755859375*l6 + 21441.4453125*l7 + 11035.5*l8 + 7128*l9 + 2304*l10;
 			break;
 	}
 
@@ -954,7 +949,7 @@ double X_g_poly(double l, int rank)
 			answer = 2*l2/plus3;
 			break;
 		case 2:
-			answer = 1.0/5*l*(1 + 7*l + l2)/plus3;
+			answer = 0.2*l*(1 + 7*l + l2)/plus3;
 			break;
 		case 3:
 			l3 = l2*l;
@@ -996,17 +991,19 @@ double XA11(double s, double l)
 {
 	double answer = 0.0;
 
-	double s2 = 1.0 / s / s;
+	double s2 = 1.0 - 4.0 / ( s * s );
+
+	double logs2 = log(s2);
 
 	int m, m1;
 
 	double mult;
 
-	answer += X_g_poly(l, 1)/(1.0 - 4.0*s2);
+	answer += X_g_poly(l, 1)/s2;
 
-	answer -= X_g_poly(l, 2)*log(1.0 - 4.0*s2);
+	answer -= X_g_poly(l, 2)*logs2;
 
-	answer -= X_g_poly(l, 3)*(1.0 - 4.0*s2)*log(1.0 - 4.0*s2);
+	answer -= X_g_poly(l, 3)*s2*logs2;
 
 	answer += X_f_poly(l, 0) - X_g_poly(l, 1);
 
@@ -1031,7 +1028,7 @@ double XA11(double s, double l)
 
 			answer += mult * ( pow(2, -m) * pow(1+l, -m) * X_f_poly(l, m) - X_g_poly(l, 1) );
 
-			answer += mult * ( 4.0 / m / m1 * X_g_poly(l, 3) - 2.0 / m * X_g_poly(l, 2) );
+			answer += mult * ( 4.0 / ( m * m1 ) * X_g_poly(l, 3) - 2.0 / m * X_g_poly(l, 2) );
 		}
 	}
 
@@ -1044,15 +1041,17 @@ double YA11(double s, double l)
 {
 	double answer = 0.0;
 
-	double s2 = 1.0 / s / s;
+	double s2 = 1.0 - 4.0 / ( s * s );
+
+	double logs2 = log(s2);
 
 	int m, m1;
 
 	double mult;
 
-	answer -= Y_g_poly(l, 2)*log(1.0 - 4.0*s2 );
+	answer -= Y_g_poly(l, 2)*logs2;
 
-	answer -= Y_g_poly(l, 3)*(1.0 - 4.0*s2)*log(1.0 - 4.0*s2 );
+	answer -= Y_g_poly(l, 3)*s2*logs2;
 
 	answer += Y_f_poly(l, 0);
 
@@ -1077,7 +1076,7 @@ double YA11(double s, double l)
 
 			answer += mult * ( pow(2, -m)*pow(1+l, -m)*Y_f_poly(l, m) - 2.0/m*Y_g_poly(l, 2) );
 
-			answer += mult*4.0/m/m1*Y_g_poly(l, 3);
+			answer += mult*4.0/(m*m1)*Y_g_poly(l, 3);
 		}
 	}
 
@@ -1090,17 +1089,19 @@ double XA12(double s, double l)
 {
 	double answer = 0.0;
 
-	double s2 = 1.0 / s / s;
+	double s2 = 1.0 - 4.0 / ( s * s );
+
+	double logs = log((s + 2)/(s - 2));
 
 	int m, m1;
 
 	double mult, divisor;
 
-	answer += 2.0/s*X_g_poly(l, 1)/(1.0 - 4.0*s2);
+	answer += 2.0/s*X_g_poly(l, 1)/s2;
 
-	answer += X_g_poly(l, 2)*log((s + 2)/(s - 2));
+	answer += X_g_poly(l, 2)*logs;
 
-	answer += X_g_poly(l, 3)*(1.0 - 4.0*s2)*log((s + 2)/(s - 2)) + 4*X_g_poly(l, 3)/s;
+	answer += X_g_poly(l, 3)*s2*logs + 4*X_g_poly(l, 3)/s;
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1123,7 +1124,7 @@ double XA12(double s, double l)
 
 			answer += mult * ( pow(2, -m)*pow(1 + l, -m)*X_f_poly(l, m) - X_g_poly(l, 1) );
 
-			answer += mult * ( 4.0/m/m1 * X_g_poly(l, 3) - 2.0 / m * X_g_poly(l, 2) );
+			answer += mult * ( 4.0/(m*m1) * X_g_poly(l, 3) - 2.0 / m * X_g_poly(l, 2) );
 		}
 
 	}
@@ -1139,15 +1140,17 @@ double YA12(double s, double l)
 {
 	double answer = 0.0;
 
-	double s2 = 1.0 / s / s;
+	double s2 = 1.0 - 4.0 / ( s * s );
+
+	double logs = log((s + 2)/(s - 2));
 
 	int m, m1;
 
 	double mult, divisor;
 
-	answer += Y_g_poly(l, 2)*log((s + 2)/(s - 2));
+	answer += Y_g_poly(l, 2)*logs;
 
-	answer += Y_g_poly(l, 3)*(1.0 - 4.0*s2)*log((s + 2)/(s - 2));
+	answer += Y_g_poly(l, 3)*s2*logs;
 
 	answer += 4*Y_g_poly(l, 3)/s;
 
@@ -1172,7 +1175,7 @@ double YA12(double s, double l)
 
 			answer += mult*(pow(2, -m)*pow(1+l, -m)*Y_f_poly(l, m) - 2.0/m*Y_g_poly(l, 2));
 
-			answer += mult*(4.0/m/m1*Y_g_poly(l, 3));
+			answer += mult*(4.0/(m*m1)*Y_g_poly(l, 3));
 		}
 	}
 
@@ -1193,53 +1196,67 @@ void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* an
 
 	double l = aj/ai;
 
+	double xa11l = XA11(s, l);
+
+	double ya11l = YA11(s, l);
+
+	double xa11linv = XA11(s, 1/l);
+
+	double ya11linv = YA11(s, 1/l);
+
+	double xa12linv = XA12(s, 1/l);
+
+	double ya12linv = YA12(s, 1/l);
+
+	double mult = 3 * M_PI * ( ai + aj );
+
 	int i;
 
 	// block 00
 
-	*answer = XA11(s, l)*rx*rx/dist2 + YA11(s, l)*(1 - rx*rx/dist2); // 00
+	*answer = xa11l*rx*rx/dist2 + ya11l*(1 - rx*rx/dist2); // 00
 
-	*(answer+1) = XA11(s, l)*ry*ry/dist2 + YA11(s, l)*(1 - ry*ry/dist2); // 11
+	*(answer+1) = xa11l*ry*ry/dist2 + ya11l*(1 - ry*ry/dist2); // 11
 
-	*(answer+2) = XA11(s, l)*rz*rz/dist2 + YA11(s, l)*(1 - rz*rz/dist2); // 22
+	*(answer+2) = xa11l*rz*rz/dist2 + ya11l*(1 - rz*rz/dist2); // 22
 
-	*(answer+3) = (XA11(s, l) - YA11(s, l))*rx*ry/dist2; // 10
+	*(answer+3) = (xa11l - ya11l)*rx*ry/dist2; // 10
 
-	*(answer+4) = (XA11(s, l) - YA11(s, l))*rx*rz/dist2; // 20
+	*(answer+4) = (xa11l - ya11l)*rx*rz/dist2; // 20
 
-	*(answer+5) = (XA11(s, l) - YA11(s, l))*ry*rz/dist2; // 21
+	*(answer+5) = (xa11l - ya11l)*ry*rz/dist2; // 21
 
 	// block 11
 
-	*(answer+6) = XA11(s, 1/l)*rx*rx/dist2 + YA11(s, 1/l)*(1 - rx*rx/dist2); // 33
+	*(answer+6) = xa11linv*rx*rx/dist2 + ya11linv*(1 - rx*rx/dist2); // 33
 
-	*(answer+7) = XA11(s, 1/l)*ry*ry/dist2 + YA11(s, 1/l)*(1 - ry*ry/dist2); // 44
+	*(answer+7) = xa11linv*ry*ry/dist2 + ya11linv*(1 - ry*ry/dist2); // 44
 
-	*(answer+8) = XA11(s, 1/l)*rz*rz/dist2 + YA11(s, 1/l)*(1 - rz*rz/dist2); // 55
+	*(answer+8) = xa11linv*rz*rz/dist2 + ya11linv*(1 - rz*rz/dist2); // 55
 
-	*(answer+9) = (XA11(s, 1/l) - YA11(s, 1/l))*rx*ry/dist2; // 43
+	*(answer+9) = (xa11linv - ya11linv)*rx*ry/dist2; // 43
 
-	*(answer+10) = (XA11(s, 1/l) - YA11(s, 1/l))*rx*rz/dist2; // 53
+	*(answer+10) = (xa11linv - ya11linv)*rx*rz/dist2; // 53
 
-	*(answer+11) = (XA11(s, 1/l) - YA11(s, 1/l))*ry*rz/dist2; // 54
+	*(answer+11) = (xa11linv - ya11linv)*ry*rz/dist2; // 54
 
 	// block 10
 
-	*(answer+12) = XA12(s, 1/l)*rx*rx/dist2 + YA12(s, 1/l)*(1 - rx*rx/dist2); // 30
+	*(answer+12) = xa12linv*rx*rx/dist2 + ya12linv*(1 - rx*rx/dist2); // 30
 
-	*(answer+13) = XA12(s, 1/l)*ry*ry/dist2 + YA12(s, 1/l)*(1 - ry*ry/dist2); // 41
+	*(answer+13) = xa12linv*ry*ry/dist2 + ya12linv*(1 - ry*ry/dist2); // 41
 
-	*(answer+14) = XA12(s, 1/l)*rz*rz/dist2 + YA12(s, 1/l)*(1 - rz*rz/dist2); // 52
+	*(answer+14) = xa12linv*rz*rz/dist2 + ya12linv*(1 - rz*rz/dist2); // 52
 
-	*(answer+15) = (XA12(s, 1/l) - YA12(s, 1/l))*rx*ry/dist2; // 40
+	*(answer+15) = (xa12linv - ya12linv)*rx*ry/dist2; // 40
 
-	*(answer+16) = (XA12(s, 1/l) - YA12(s, 1/l))*rx*rz/dist2; // 50
+	*(answer+16) = (xa12linv - ya12linv)*rx*rz/dist2; // 50
 
-	*(answer+17) = (XA12(s, 1/l) - YA12(s, 1/l))*ry*rz/dist2; // 51
+	*(answer+17) = (xa12linv - ya12linv)*ry*rz/dist2; // 51
 
 	for (i = 0; i < 18; i++)
 	{
-		*(answer+i) *= 3 * M_PI * ( ai + aj );
+		*(answer+i) *= mult;
 	}
 }
 
