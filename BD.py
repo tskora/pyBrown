@@ -20,7 +20,6 @@ import pickle
 import shutil
 import time
 
-from scipy.constants import Boltzmann
 from tqdm import tqdm
 
 from pyBD.box import Box
@@ -40,7 +39,8 @@ def main(input_filename):
 	# if given keyword is absent in JSON, it is added with respective default value
 	defaults = {"debug": False, "hydrodynamics": "nohi", "external_force": [0.0, 0.0, 0.0],
 				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0, "diff_freq": 1,
-				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1, "progress_bar": False}
+				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1, "progress_bar": False,
+				"seed": np.random.randint(2**32 - 1)}
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults)

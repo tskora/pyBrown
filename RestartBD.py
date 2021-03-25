@@ -40,6 +40,8 @@ def main(restart_filename):
 
 	input_data = box_rst.inp
 
+	timestamp( 'Input data:\n{}', input_data )
+
 	disable_progress_bar = not input_data["progress_bar"]
 
 	str_filename = input_data["input_str_filename"]
