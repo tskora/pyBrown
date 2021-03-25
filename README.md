@@ -54,5 +54,4 @@ Type following commands in a terminal:
 | Viscosity | poise (*P*) |
 | Time | picosecond (*ps*) |
 | Distance | angstrom (*Å*) |
-| Energy | kilocalorie per mol (*kcal/mol*) |
-| Energy | kilocalorie per mol per angstrom (*kcal/mol/Å*) |
+| Force | joule per angstrom (*J/Å*) |
