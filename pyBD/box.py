@@ -37,15 +37,16 @@ class Box():
 		np.random.seed(self.seed)
 		self.draw_count = 0
 
-		self.mobile_beads = [ b for b in self.beads if b.mobile ]
-		self.mobile_bead_indices = [ i for i, b in enumerate(self.beads) if b.mobile ]
-		self.immobile_bead_indices = list( set([i for i in range(len(self.beads))]) - set(self.mobile_bead_indices) )
+		self.immobile_labels = self.inp["immobile_labels"]
+		self.handle_bead_mobility()
 
 		self.box_length = self.inp["box_length"]
 		self.T = self.inp["T"]
 		self.kBT = Boltzmann*self.T
 		self.viscosity = self.inp["viscosity"]
+
 		self.hydrodynamics = self.inp["hydrodynamics"]
+		
 		self.Fex = np.array( self.inp["external_force"] )
 		self.F0 = np.array( list(self.Fex)*len(self.mobile_beads) )
 
@@ -125,6 +126,27 @@ class Box():
 		np.random.seed(self.seed)
 
 		np.random.normal(0.0, 1.0, self.draw_count)
+
+	#-------------------------------------------------------------------------------
+
+	def handle_bead_mobility(self):
+
+		self.mobile_beads = []
+		self.immobile_beads = []
+		self.mobile_bead_indices = []
+		self.immobile_bead_indices = []
+
+		for i, bead in enumerate( self.beads ):
+
+			if bead.label in self.immobile_labels:
+				bead.mobile = False
+				self.immobile_beads.append(bead)
+				self.immobile_bead_indices.append(i)
+
+
+			else:
+				self.mobile_beads.append(bead)
+				self.mobile_bead_indices.append(i)
 
 	#-------------------------------------------------------------------------------
 

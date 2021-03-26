@@ -93,15 +93,8 @@ def read_str_file(input_str_filename):
                 lennard_jones_radius = float(line_segments[8]) / 2
                 lennard_jones_energy = float(line_segments[9])
                 mass = float(line_segments[10])
-                if len(line_segments) > 11:
-                    if int( line_segments[11] ) == 1:
-                        mobile = True
-                    else:
-                        mobile = False
-                else:
-                    mobile = True
 
-                beads.append( Bead(coords = coords, hydrodynamic_radius = hydrodynamic_radius, label = label, mobile = mobile) )
+                beads.append( Bead(coords = coords, hydrodynamic_radius = hydrodynamic_radius, label = label) )
 
     return beads
 
