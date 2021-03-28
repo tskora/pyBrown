@@ -1,0 +1,34 @@
+This is the MPLIB library. It provides the functions to calculate the
+binary and unary potentials arising from the Image Forces in Metalic
+nano-Pores, hence the name.
+
+Configure options:
+~~~~~~~~~~~~~~~~~~
+
+--disable-assertions: to disable all MPLIB assertion. Use it after the
+programs is tested and runs OK.
+
+--enable-optimize: switch onmore optimization. This uses -O3 (instead of
+the standard O3 optimization level) and removed -g flag. Not recomened
+to use on testing stage.
+
+The following functions are provided:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Raw interaction potentials to be used in MC simulations (and are
+actually used by towheemp):
+
+U1 = mplib_potentials_unary(z, L)
+U2 = mplib_potential_binary (z1, z2, L)
+
+2. Average potentials to be used in the DFT-like treatments:
+
+u1 = mplib_dft_u1 (z, L, LB): this is essentially U1 up to a constant
+but kept separatelly for clearness. u1 = - LB U1. LB is the Bjerrum
+length.
+
+u2 = mplib_dft_u2 (z1, z2, L,. LB, b): this is effective potential
+integrated in the two lateral directions. here b is the 'cut-out'
+radius. One can set it to be: b=0 (no short range correlations), b=d
+(ion diameter) or b = (4 pi rho/3)^{-1/3} for the cut-out sphere
+approximation.

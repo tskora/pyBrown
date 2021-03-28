@@ -1,0 +1,35 @@
+17 October 2010
+=================
+
+Release of version 1.5
+
+The following functions are added:
+
+- mplib_dft_u1(z, L, LB) for the self-energy `external' potential. To be
+used in the DFT calculations.
+
+- mplib_dft_u2 (z1, z2, L, LB, b) for the `effective' electrostatic
+interaction potential, integrated over the lateral directions. This is to
+be used in the DFT calculations.
+
+Two options are provided for configure script:
+
+--disable-assertions: to disable all MPLIB assertion. Use it after the
+programs is tested and runs OK.
+
+--enable-optimize: switch onmore optimization. This uses -O3 (instead of
+the standard O3 optimization level) and removed -g flag. Not recomened
+to use on testing stage.
+
+13 September 2010
+=================
+
+Release of version version 1.0
+
+The following functions are provided:
+
+- mplib_potential_unary(z, L) for the self-energy, and the fortran
+wrapper mplib_potential_unary_ (*z, *L);
+
+- mplib_potential_binary (z1, z2, R, L) for the ion-ion interaction
+potential, and the wrapper mplib_potential_binary_ (*z1, *z2, *R, *L).
