@@ -471,6 +471,13 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 // -------------------------------------------------------------------------------
 
+double Mii_rpy(double a)
+{
+	return 1.0 / ( 6 * M_PI * a );
+}
+
+// -------------------------------------------------------------------------------
+
 void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answer)
 {
 	double al, as;
@@ -634,6 +641,101 @@ int results_position(int i, int j, int N)
 	int position = i + j*N;
 
 	return position - j*(j+1)/2;
+}
+
+// -------------------------------------------------------------------------------
+
+void M_rpy(double* as, double* pointers, int N, double* results2)
+{
+	register int i = 0;
+
+	register int j = 0;
+
+	double* vector;
+
+	double* shifted_results;
+
+	double* shifted_pointers;
+
+	double rx, ry, rz, diag;
+
+	double* results = calloc(3*(N*N+N), sizeof(double));
+
+	int r, I, I1, I2, J, J1, J2;
+
+	int N3 = 3*N;
+
+	for (j = 0; j < N; j++)
+	{
+		diag = Mii_rpy(*(as+j));
+
+		shifted_results = results + 6*results_position(j,j,N);
+
+		*(shifted_results) = diag;
+		*(shifted_results + 1) = diag;
+		*(shifted_results + 2) = diag;
+
+		for (i = j + 1; i < N; i++)
+		{
+			vector = calloc(6, sizeof(double));
+
+			shifted_results = results + 6*results_position(i,j,N);
+			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+
+			rx = *(shifted_pointers);
+			ry = *(shifted_pointers + 1);
+			rz = *(shifted_pointers + 2);
+
+			Mij_rpy(*(as+i), *(as+j), rx, ry, rz, vector);
+
+			*(shifted_results) = *(vector);
+			*(shifted_results + 1) = *(vector + 1);
+			*(shifted_results + 2) = *(vector + 2);
+			*(shifted_results + 3) = *(vector + 3);
+			*(shifted_results + 4) = *(vector + 4);
+			*(shifted_results + 5) = *(vector + 5);
+
+		}
+	}
+
+	for (j = 0; j < N; j++)
+	{
+		r = 6*results_position(j, j, N);
+		J = 3*j;
+		J1 = J + 1;
+		J2 = J + 2;
+
+		results2[J + J*N3] = results[r];
+		results2[J1 + J1*N3] = results[r + 1];
+		results2[J2 + J2*N3] = results[r + 2];
+
+		for (i = j+1; i < N; i++)
+		{
+			r = 6*results_position(i, j, N);
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
+
+			results2[I + J*N3] = results[r];
+			results2[J + I*N3] = results[r];
+			results2[I1 + J1*N3] = results[r + 1];
+			results2[J1 + I1*N3] = results[r + 1];
+			results2[I2 + J2*N3] = results[r + 2];
+			results2[J2 + I2*N3] = results[r + 2];
+			results2[I1 + J*N3] = results[r + 3];
+			results2[I + J1*N3] = results[r + 3];
+			results2[J + I1*N3] = results[r + 3];
+			results2[J1 + I*N3] = results[r + 3];
+			results2[I2 + J*N3] = results[r + 4];
+			results2[I + J2*N3] = results[r + 4];
+			results2[J + I2*N3] = results[r + 4];
+			results2[J2 + I*N3] = results[r + 4];
+			results2[I2 + J1*N3] = results[r + 5];
+			results2[I1 + J2*N3] = results[r + 5];
+			results2[J1 + I2*N3] = results[r + 5];
+			results2[J2 + I1*N3] = results[r + 5];
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------
@@ -1261,3 +1363,156 @@ void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* an
 }
 
 // -------------------------------------------------------------------------------
+
+void R_lub_corr(double* as, double* pointers, int N, double* results2)
+{
+	register int i = 0;
+
+	register int j = 0;
+
+	double* nf2b;
+
+	double* ff2bij;
+
+	double diagi, diagj;
+
+	// int I, J, J1, J2, I1, I2;
+
+	// int r;
+
+	// double* vector;
+
+	// double* shifted_results;
+
+	// double* shifted_pointers;
+
+	// double rx, ry, rz;
+
+	double* results = calloc(3*(N*N+N), sizeof(double));
+
+	for (j = 0; j < N; j++)
+	{
+		// nf2b = calloc(18, sizeof(double));
+		// // ff2b11 = calloc(6, sizeof(double));
+		// // ff2b22 = calloc(6, sizeof(double));
+		// ff2b12 = calloc(6, sizeof(double));
+
+		// diag1 = Mii_rpy(*(as+j));
+		// diag2 = 
+
+	// 	shifted_results = results + 6*results_position(j,j,N);
+
+	// 	*(shifted_results) = *(vector);
+	// 	*(shifted_results + 1) = *(vector + 1);
+	// 	*(shifted_results + 2) = *(vector + 2);
+
+		for (i = j + 1; i < N; i++)
+		{
+			nf2b = calloc(18, sizeof(double));
+
+			ff2bij = calloc(6, sizeof(double));
+
+			diagj = Mii_rpy(*(as+j));
+
+			diagi = Mii_rpy(*(as+i));
+
+
+
+	// 		vector = calloc(6, sizeof(double));
+
+	// 		shifted_results = results + 6*results_position(i,j,N);
+	// 		shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+
+	// 		rx = *(shifted_pointers);
+	// 		ry = *(shifted_pointers + 1);
+	// 		rz = *(shifted_pointers + 2);
+
+	// 		Mij_rpy_smith(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m, n, vector);
+
+	// 		*(shifted_results) = *(vector);
+	// 		*(shifted_results + 1) = *(vector + 1);
+	// 		*(shifted_results + 2) = *(vector + 2);
+	// 		*(shifted_results + 3) = *(vector + 3);
+	// 		*(shifted_results + 4) = *(vector + 4);
+	// 		*(shifted_results + 5) = *(vector + 5);
+
+		}
+	}
+
+	// int N3 = 3*N;
+
+	// for (j = 0; j < N; j++)
+	// {
+	// 	r = 6*results_position(j, j, N);
+	// 	J = 3*j;
+	// 	J1 = J + 1;
+	// 	J2 = J + 2;
+
+	// 	results2[J + J*N3] = results[r];
+	// 	results2[J1 + J1*N3] = results[r + 1];
+	// 	results2[J2 + J2*N3] = results[r + 2];
+	// 	results2[J1 + J*N3] = results[r + 3];
+	// 	results2[J + J1*N3] = results[r + 3];
+	// 	results2[J2 + J*N3] = results[r + 4];
+	// 	results2[J + J2*N3] = results[r + 4];
+	// 	results2[J2 + J1*N3] = results[r + 5];
+	// 	results2[J1 + J2*N3] = results[r + 5];
+
+	// 	for (i = j+1; i < N; i++)
+	// 	{
+	// 		r = 6*results_position(i, j, N);
+	// 		I = 3*i;
+	// 		I1 = I + 1;
+	// 		I2 = I + 2;
+
+	// 		results2[I + J*N3] = results[r];
+	// 		results2[J + I*N3] = results[r];
+	// 		results2[I1 + J1*N3] = results[r + 1];
+	// 		results2[J1 + I1*N3] = results[r + 1];
+	// 		results2[I2 + J2*N3] = results[r + 2];
+	// 		results2[J2 + I2*N3] = results[r + 2];
+	// 		results2[I1 + J*N3] = results[r + 3];
+	// 		results2[I + J1*N3] = results[r + 3];
+	// 		results2[J + I1*N3] = results[r + 3];
+	// 		results2[J1 + I*N3] = results[r + 3];
+	// 		results2[I2 + J*N3] = results[r + 4];
+	// 		results2[I + J2*N3] = results[r + 4];
+	// 		results2[J + I2*N3] = results[r + 4];
+	// 		results2[J2 + I*N3] = results[r + 4];
+	// 		results2[I2 + J1*N3] = results[r + 5];
+	// 		results2[I1 + J2*N3] = results[r + 5];
+	// 		results2[J1 + I2*N3] = results[r + 5];
+	// 		results2[J2 + I1*N3] = results[r + 5];
+	// 	}
+	// }
+}
+
+
+
+
+// def R_lub_corr(beads, pointers):
+
+// 	corr = [ [ np.zeros((3,3)) for j in range( len(beads) ) ] for i in range( len(beads) ) ]
+
+// 	for i, bi in enumerate(beads):
+
+// 		for j in range(i):
+
+// 			bj = beads[j]
+
+// 			nf2b = R_jeffrey( bi.a, bj.a, pointers[i][j] )
+
+// 			ff2b = np.linalg.inv( M_rpy( [bi, bj], np.array([[pointers[i][i], pointers[i][j]], [pointers[j][i], pointers[j][j]]]) ) )
+
+// 			lub_corr = nf2b - ff2b
+
+// 			corrii = lub_corr[0:3,0:3]
+// 			corrjj = lub_corr[3:6,3:6]
+// 			corrij = lub_corr[3:6,0:3]
+
+// 			corr[i][i] += corrii
+// 			corr[j][j] += corrjj
+// 			corr[i][j] += corrij
+// 			corr[j][i] += np.transpose( corrij )
+
+// 	return np.block(corr)

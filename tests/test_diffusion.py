@@ -30,6 +30,7 @@ from pyBD.diffusion import X_f_poly, X_f_poly_python, Y_f_poly, Y_f_poly_python
 from pyBD.diffusion import X_g_poly, X_g_poly_python, Y_g_poly, Y_g_poly_python
 from pyBD.diffusion import XA11, XA11_python, YA11, YA11_python, XA12, XA12_python, YA12, YA12_python
 from pyBD.diffusion import R_jeffrey, R_jeffrey_python
+from pyBD.diffusion import M_rpy, M_rpy_python
 from pyBD.diffusion import M_rpy_smith, M_rpy_smith_python
 
 #-------------------------------------------------------------------------------
@@ -362,6 +363,8 @@ class TestDiffusion(unittest.TestCase):
 
 	def test_M_rpy_smith(self):
 
+		N_beads = 100
+
 		box_length = 20.0
 
 		alpha = np.sqrt(np.pi)
@@ -370,7 +373,7 @@ class TestDiffusion(unittest.TestCase):
 
 		n = 3
 
-		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(100) ]
+		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
 
 		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
 
@@ -378,8 +381,28 @@ class TestDiffusion(unittest.TestCase):
 
 		python_ish = M_rpy_smith_python(beads, pointers, box_length, alpha, m, n)
 
-		for i in range(6):
-			for j in range(6):
+		for i in range(3*N_beads):
+			for j in range(3*N_beads):
+				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_M_rpy(self):
+
+		N_beads = 100
+
+		box_length = 20.0
+
+		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
+
+		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
+
+		c_ish = M_rpy(beads, pointers)
+
+		python_ish = M_rpy_python(beads, pointers)
+
+		for i in range(3*N_beads):
+			for j in range(3*N_beads):
 				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
 
 #-------------------------------------------------------------------------------
