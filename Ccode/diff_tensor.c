@@ -1379,6 +1379,8 @@ void R_rpy(double ai, double aj, double rx, double ry, double rz, double* answer
 	*(answer+17) = *(matrix+16);
 }
 
+// -------------------------------------------------------------------------------
+
 void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* answer)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
@@ -1500,91 +1502,58 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 			for (k = 0; k < 18; k++)
 			{
-				printf("%f %f\n", *(nf2b+k), *(ff2b+k));
 				*(results+k) = *(nf2b+k) - *(ff2b+k);
 			}
 
-			r = 6*results_position(j, j, N);
 			J = 3*j;
 			J1 = J + 1;
 			J2 = J + 2;
 
-			results2[J + J*N3] += results[r];
-			results2[J1 + J1*N3] += results[r + 1];
-			results2[J2 + J2*N3] += results[r + 2];
-			results2[J1 + J*N3] += results[r + 3];
-			results2[J + J1*N3] += results[r + 3];
-			results2[J2 + J*N3] += results[r + 4];
-			results2[J + J2*N3] += results[r + 4];
-			results2[J2 + J1*N3] += results[r + 5];
-			results2[J1 + J2*N3] += results[r + 5];
+			results2[J + J*N3] += results[0];
+			results2[J1 + J1*N3] += results[1];
+			results2[J2 + J2*N3] += results[2];
+			results2[J1 + J*N3] += results[3];
+			results2[J + J1*N3] += results[3];
+			results2[J2 + J*N3] += results[4];
+			results2[J + J2*N3] += results[4];
+			results2[J2 + J1*N3] += results[5];
+			results2[J1 + J2*N3] += results[5];
 
-			// r = 6*results_position(i, i, N);
-			// printf("%d\n", r);
-			// I = 3*i;
-			// I1 = I + 1;
-			// I2 = I + 2;
+			r = 6;
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
 
-			// results2[I + I*N3] += results[r];
-			// results2[I1 + I1*N3] += results[r + 1];
-			// results2[I2 + I2*N3] += results[r + 2];
-			// results2[I1 + I*N3] += results[r + 3];
-			// results2[I + I1*N3] += results[r + 3];
-			// results2[I2 + I*N3] += results[r + 4];
-			// results2[I + I2*N3] += results[r + 4];
-			// results2[I2 + I1*N3] += results[r + 5];
-			// results2[I1 + I2*N3] += results[r + 5];
+			results2[I + I*N3] += results[r];
+			results2[I1 + I1*N3] += results[r + 1];
+			results2[I2 + I2*N3] += results[r + 2];
+			results2[I1 + I*N3] += results[r + 3];
+			results2[I + I1*N3] += results[r + 3];
+			results2[I2 + I*N3] += results[r + 4];
+			results2[I + I2*N3] += results[r + 4];
+			results2[I2 + I1*N3] += results[r + 5];
+			results2[I1 + I2*N3] += results[r + 5];
 
-			// r = 6*results_position(i, j, N);
+			r = 12;
 
-			// results2[I + J*N3] += results[r];
-			// results2[J + I*N3] += results[r];
-			// results2[I1 + J1*N3] += results[r + 1];
-			// results2[J1 + I1*N3] += results[r + 1];
-			// results2[I2 + J2*N3] += results[r + 2];
-			// results2[J2 + I2*N3] += results[r + 2];
-			// results2[I1 + J*N3] += results[r + 3];
-			// results2[I + J1*N3] += results[r + 3];
-			// results2[J + I1*N3] += results[r + 3];
-			// results2[J1 + I*N3] += results[r + 3];
-			// results2[I2 + J*N3] += results[r + 4];
-			// results2[I + J2*N3] += results[r + 4];
-			// results2[J + I2*N3] += results[r + 4];
-			// results2[J2 + I*N3] += results[r + 4];
-			// results2[I2 + J1*N3] += results[r + 5];
-			// results2[I1 + J2*N3] += results[r + 5];
-			// results2[J1 + I2*N3] += results[r + 5];
-			// results2[J2 + I1*N3] += results[r + 5];
+			results2[I + J*N3] += results[r];
+			results2[J + I*N3] += results[r];
+			results2[I1 + J1*N3] += results[r + 1];
+			results2[J1 + I1*N3] += results[r + 1];
+			results2[I2 + J2*N3] += results[r + 2];
+			results2[J2 + I2*N3] += results[r + 2];
+			results2[I1 + J*N3] += results[r + 3];
+			results2[I + J1*N3] += results[r + 3];
+			results2[J + I1*N3] += results[r + 3];
+			results2[J1 + I*N3] += results[r + 3];
+			results2[I2 + J*N3] += results[r + 4];
+			results2[I + J2*N3] += results[r + 4];
+			results2[J + I2*N3] += results[r + 4];
+			results2[J2 + I*N3] += results[r + 4];
+			results2[I2 + J1*N3] += results[r + 5];
+			results2[I1 + J2*N3] += results[r + 5];
+			results2[J1 + I2*N3] += results[r + 5];
+			results2[J2 + I1*N3] += results[r + 5];
 		}
 	}
 }
-
-
-
-
-// def R_lub_corr(beads, pointers):
-
-// 	corr = [ [ np.zeros((3,3)) for j in range( len(beads) ) ] for i in range( len(beads) ) ]
-
-// 	for i, bi in enumerate(beads):
-
-// 		for j in range(i):
-
-// 			bj = beads[j]
-
-// 			nf2b = R_jeffrey( bi.a, bj.a, pointers[i][j] )
-
-// 			ff2b = np.linalg.inv( M_rpy( [bi, bj], np.array([[pointers[i][i], pointers[i][j]], [pointers[j][i], pointers[j][j]]]) ) )
-
-// 			lub_corr = nf2b - ff2b
-
-// 			corrii = lub_corr[0:3,0:3]
-// 			corrjj = lub_corr[3:6,3:6]
-// 			corrij = lub_corr[3:6,0:3]
-
-// 			corr[i][i] += corrii
-// 			corr[j][j] += corrjj
-// 			corr[i][j] += corrij
-// 			corr[j][i] += np.transpose( corrij )
-
-// 	return np.block(corr)

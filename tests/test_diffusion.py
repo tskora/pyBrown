@@ -386,32 +386,33 @@ class TestDiffusion(unittest.TestCase):
 	# 		for j in range(3*N_beads):
 	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
 
+	# #---------------------------------------------------------------------------
+
+	# def test_M_rpy(self):
+
+	# 	N_beads = 100
+
+	# 	box_length = 20.0
+
+	# 	beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
+
+	# 	pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
+
+	# 	c_ish = M_rpy(beads, pointers)
+
+	# 	python_ish = M_rpy_python(beads, pointers)
+
+	# 	for i in range(3*N_beads):
+	# 		for j in range(3*N_beads):
+	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
 	#---------------------------------------------------------------------------
-
-	def test_M_rpy(self):
-
-		N_beads = 100
-
-		box_length = 20.0
-
-		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
-
-		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
-
-		c_ish = M_rpy(beads, pointers)
-
-		python_ish = M_rpy_python(beads, pointers)
-
-		for i in range(3*N_beads):
-			for j in range(3*N_beads):
-				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
 
 	def test_R_lub_corr(self):
 
 		box_length = 20.0
 
-		# beads = [ Bead([x, y, z], 1.0) for x in [-3,0,3] for y in [-3,0,3] for z in [-3,0,3] if x != y and x != z ]
-		beads = [ Bead([x, y, z], 1.0) for x in [0,30,6] for y in [0] for z in [0] if x != y and x != z ]
+		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
 
 		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
 
@@ -419,13 +420,54 @@ class TestDiffusion(unittest.TestCase):
 
 		python_ish = R_lub_corr_python(beads, pointers)
 
-		print(c_ish)
-
-		print(python_ish)
-
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):
 				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_R_symmetry(self):
+
+		box_length = 30.0
+
+		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+		pointers_1 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_1 ] for bi in beads_1 ]
+
+		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
+		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
+
+		c_ish_1 = R_lub_corr(beads_1, pointers_1)
+		c_ish_2 = R_lub_corr(beads_2, pointers_2)
+
+		python_ish_1 = R_lub_corr_python(beads_1, pointers_1)
+		python_ish_2 = R_lub_corr_python(beads_2, pointers_2)
+
+		N = 3*len(beads_1)
+
+		for i in range(N):
+			for j in range(N):
+				self.assertAlmostEqual(c_ish_1[i][j], c_ish_2[(i+3)%N][(j+3)%N], places = 7)
+				self.assertAlmostEqual(python_ish_1[i][j], python_ish_2[(i+3)%N][(j+3)%N], places = 7)
+
+		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0), Bead([10.0, 0.0, 0.0], 3.0) ]
+		pointers_1 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_1 ] for bi in beads_1 ]
+
+		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
+
+		c_ish_1 = R_lub_corr(beads_1, pointers_1)
+		c_ish_2 = R_lub_corr(beads_2, pointers_2)
+
+		python_ish_1 = R_lub_corr_python(beads_1, pointers_1)
+		python_ish_2 = R_lub_corr_python(beads_2, pointers_2)
+
+		N = 3*len(beads_1)
+
+		for i in range(N):
+			for j in range(N):
+				self.assertAlmostEqual(c_ish_1[i][j], c_ish_2[(i+3)%N][(j+3)%N], places = 7)
+				self.assertAlmostEqual(python_ish_1[i][j], python_ish_2[(i+3)%N][(j+3)%N], places = 7)
+
 
 #-------------------------------------------------------------------------------
 

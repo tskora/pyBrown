@@ -947,6 +947,8 @@ def R_lub_corr(beads, pointers):
 
 	return M
 
+#-------------------------------------------------------------------------------
+
 def R_lub_corr_python(beads, pointers):
 
 	corr = [ [ np.zeros((3,3)) for j in range( len(beads) ) ] for i in range( len(beads) ) ]
