@@ -30,9 +30,9 @@ AC_PROG_LIBTOOL
 
 #check for LAPACK dpotrf
 sinclude([ax_lapack.m4])
-AX_LAPACK
+AX_LAPACK()
 AS_IF([test "x$ax_lapack_ok" = xyes],
-      [LIBS+=" $LAPACK_LIBS"
+      [AC_SUBST(LAPACK_LIBS)
        AC_DEFINE([USE_LAPACK],[1],[Use LAPACK])],[AC_ERROR(This package requires LAPACK)])
 
 # 'Optimizization' must be beore all the other flags!
@@ -61,4 +61,26 @@ AC_CONFIG_FILES([Makefile
 		src/tools/Makefile
 		])
 AC_OUTPUT
+echo "=============================================================
+ Configuration summary :
+ 
+     COMPILER = ${CC}
+ 
+     CFLAGS  = ${CFLAGS}
+     LDFLAGS = ${LDFLAGS}
+     LIBS    = ${LIBS}"
+ 
+ if test -n "$LAPACK_LIBS";
+ then
+   echo -n "
+     LAPACK = $LAPACK_LIBS
+     "
+ else
+   echo -n "
+     WARNING: no lapack, I will use GSL!
+   "
+ fi
+echo "
+     PREFIX = ${prefix}
+ ============================================================="
 
