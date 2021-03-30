@@ -772,6 +772,8 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 	int r;
 
+	int N3 = 3*N;
+
 	double* vector;
 
 	double* shifted_results;
@@ -816,8 +818,6 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 		}
 	}
-
-	int N3 = 3*N;
 
 	for (j = 0; j < N; j++)
 	{
@@ -1461,6 +1461,8 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 	register int j = 0;
 
+	register int k = 0;
+
 	double* nf2b;
 
 	double* ff2b;
@@ -1469,19 +1471,11 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 	double rx, ry, rz;
 
+	int I, I1, I2, J, J1, J2, r;
 
-
-	// int I, J, J1, J2, I1, I2;
-
-	// int r;
-
-	// double* vector;
-
-	// double* shifted_results;
+	int N3 = 3*N;
 
 	double* shifted_pointers;
-
-	// double rx, ry, rz;
 
 	double* results = calloc(3*(N*N+N), sizeof(double));
 
@@ -1492,7 +1486,7 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 		{
 			nf2b = calloc(18, sizeof(double));
 
-			// ff2bij = calloc(6, sizeof(double));
+			ff2b = calloc(18, sizeof(double));
 
 			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
 
@@ -1504,81 +1498,65 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 			R_rpy(*(as+j), *(as+i), rx, ry, rz, ff2b);
 
-			// diagj = Mii_rpy(*(as+j));
+			for (k = 0; k < 18; k++)
+			{
+				printf("%f %f\n", *(nf2b+k), *(ff2b+k));
+				*(results+k) = *(nf2b+k) - *(ff2b+k);
+			}
 
-			// diagi = Mii_rpy(*(as+i));
+			r = 6*results_position(j, j, N);
+			J = 3*j;
+			J1 = J + 1;
+			J2 = J + 2;
 
-			// Rij_rpy(*(as+j), *(as+i), rx, ry, rz, ff2bij);
+			results2[J + J*N3] += results[r];
+			results2[J1 + J1*N3] += results[r + 1];
+			results2[J2 + J2*N3] += results[r + 2];
+			results2[J1 + J*N3] += results[r + 3];
+			results2[J + J1*N3] += results[r + 3];
+			results2[J2 + J*N3] += results[r + 4];
+			results2[J + J2*N3] += results[r + 4];
+			results2[J2 + J1*N3] += results[r + 5];
+			results2[J1 + J2*N3] += results[r + 5];
 
+			// r = 6*results_position(i, i, N);
+			// printf("%d\n", r);
+			// I = 3*i;
+			// I1 = I + 1;
+			// I2 = I + 2;
 
+			// results2[I + I*N3] += results[r];
+			// results2[I1 + I1*N3] += results[r + 1];
+			// results2[I2 + I2*N3] += results[r + 2];
+			// results2[I1 + I*N3] += results[r + 3];
+			// results2[I + I1*N3] += results[r + 3];
+			// results2[I2 + I*N3] += results[r + 4];
+			// results2[I + I2*N3] += results[r + 4];
+			// results2[I2 + I1*N3] += results[r + 5];
+			// results2[I1 + I2*N3] += results[r + 5];
 
-	// 		vector = calloc(6, sizeof(double));
+			// r = 6*results_position(i, j, N);
 
-	// 		shifted_results = results + 6*results_position(i,j,N);
-	// 		shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
-
-	// 		rx = *(shifted_pointers);
-	// 		ry = *(shifted_pointers + 1);
-	// 		rz = *(shifted_pointers + 2);
-
-	// 		Mij_rpy_smith(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m, n, vector);
-
-	// 		*(shifted_results) = *(vector);
-	// 		*(shifted_results + 1) = *(vector + 1);
-	// 		*(shifted_results + 2) = *(vector + 2);
-	// 		*(shifted_results + 3) = *(vector + 3);
-	// 		*(shifted_results + 4) = *(vector + 4);
-	// 		*(shifted_results + 5) = *(vector + 5);
-
+			// results2[I + J*N3] += results[r];
+			// results2[J + I*N3] += results[r];
+			// results2[I1 + J1*N3] += results[r + 1];
+			// results2[J1 + I1*N3] += results[r + 1];
+			// results2[I2 + J2*N3] += results[r + 2];
+			// results2[J2 + I2*N3] += results[r + 2];
+			// results2[I1 + J*N3] += results[r + 3];
+			// results2[I + J1*N3] += results[r + 3];
+			// results2[J + I1*N3] += results[r + 3];
+			// results2[J1 + I*N3] += results[r + 3];
+			// results2[I2 + J*N3] += results[r + 4];
+			// results2[I + J2*N3] += results[r + 4];
+			// results2[J + I2*N3] += results[r + 4];
+			// results2[J2 + I*N3] += results[r + 4];
+			// results2[I2 + J1*N3] += results[r + 5];
+			// results2[I1 + J2*N3] += results[r + 5];
+			// results2[J1 + I2*N3] += results[r + 5];
+			// results2[J2 + I1*N3] += results[r + 5];
 		}
 	}
-
-	// int N3 = 3*N;
-
-	// for (j = 0; j < N; j++)
-	// {
-	// 	r = 6*results_position(j, j, N);
-	// 	J = 3*j;
-	// 	J1 = J + 1;
-	// 	J2 = J + 2;
-
-	// 	results2[J + J*N3] = results[r];
-	// 	results2[J1 + J1*N3] = results[r + 1];
-	// 	results2[J2 + J2*N3] = results[r + 2];
-	// 	results2[J1 + J*N3] = results[r + 3];
-	// 	results2[J + J1*N3] = results[r + 3];
-	// 	results2[J2 + J*N3] = results[r + 4];
-	// 	results2[J + J2*N3] = results[r + 4];
-	// 	results2[J2 + J1*N3] = results[r + 5];
-	// 	results2[J1 + J2*N3] = results[r + 5];
-
-	// 	for (i = j+1; i < N; i++)
-	// 	{
-	// 		r = 6*results_position(i, j, N);
-	// 		I = 3*i;
-	// 		I1 = I + 1;
-	// 		I2 = I + 2;
-
-	// 		results2[I + J*N3] = results[r];
-	// 		results2[J + I*N3] = results[r];
-	// 		results2[I1 + J1*N3] = results[r + 1];
-	// 		results2[J1 + I1*N3] = results[r + 1];
-	// 		results2[I2 + J2*N3] = results[r + 2];
-	// 		results2[J2 + I2*N3] = results[r + 2];
-	// 		results2[I1 + J*N3] = results[r + 3];
-	// 		results2[I + J1*N3] = results[r + 3];
-	// 		results2[J + I1*N3] = results[r + 3];
-	// 		results2[J1 + I*N3] = results[r + 3];
-	// 		results2[I2 + J*N3] = results[r + 4];
-	// 		results2[I + J2*N3] = results[r + 4];
-	// 		results2[J + I2*N3] = results[r + 4];
-	// 		results2[J2 + I*N3] = results[r + 4];
-	// 		results2[I2 + J1*N3] = results[r + 5];
-	// 		results2[I1 + J2*N3] = results[r + 5];
-	// 		results2[J1 + I2*N3] = results[r + 5];
-	// 		results2[J2 + I1*N3] = results[r + 5];
-	// 	}
-	// }
 }
 
 
