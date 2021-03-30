@@ -1,7 +1,7 @@
-SUBDIRS=Ccode tests
-dist_bin_SCRIPTS = BD.py  RestartBD.py
+SUBDIRS = clib tests
+dist_bin_SCRIPTS = BB.py  BD-restart.py
 
-PYTHON_LIB_DIR=pyBD
+PYTHON_LIB_DIR=pyBrown
 PYTHON_LIB = $(PYTHON_LIB_DIR)/bead.py\
 	$(PYTHON_LIB_DIR)/box.py\
 	$(PYTHON_LIB_DIR)/diffusion.py\

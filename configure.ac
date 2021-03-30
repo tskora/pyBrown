@@ -2,12 +2,12 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(pyBD, 0.1)
-AC_CONFIG_SRCDIR([src/bdsim/Ccode/diff_tensor.c])
+AC_INIT(pyBrown, 0.1)
+AC_CONFIG_SRCDIR([src/bdsim/clib/diff_tensor.c])
 
 AM_PATH_PYTHON([3.4])
 
-PACKAGE=pyBD
+PACKAGE=pyBrown
 VERSION=0.1
 
 dnl IFACE_NUMBER (current) : REV : AGE (< IFACE_NUMBER)
@@ -27,6 +27,13 @@ AC_PROG_CXX
 
 #AC_PROG_RANLIB
 AC_PROG_LIBTOOL
+
+#check for LAPACK dpotrf
+sinclude([ax_lapack.m4])
+AX_LAPACK
+AS_IF([test "x$ax_lapack_ok" = xyes],
+      [LIBS+=" $LAPACK_LIBS"
+       AC_DEFINE([USE_LAPACK],[1],[Use LAPACK])],[])
 
 # 'Optimizization' must be beore all the other flags!
 AC_ARG_ENABLE([optimize],
@@ -49,7 +56,7 @@ fi
 AC_CONFIG_FILES([Makefile
 		src/Makefile
 		src/bdsim/Makefile
-		src/bdsim/Ccode/Makefile
+		src/bdsim/clib/Makefile
 		src/bdsim/tests/Makefile
 		src/tools/Makefile
 		])

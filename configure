@@ -15960,6 +15960,19 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# find lapack
+#AX_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+
+#check for LAPACK dpotrf
+
+AX_LAPACK
+if test "x$ax_lapack_ok" = xyes; then :
+  LIBS+=" $LAPACK_LIBS"
+
+$as_echo "#define USE_LAPACK 1" >>confdefs.h
+
+fi
+
 # 'Optimizization' must be beore all the other flags!
 # Check whether --enable-optimize was given.
 if test "${enable_optimize+set}" = set; then :

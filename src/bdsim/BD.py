@@ -1,4 +1,4 @@
-# pyBD is a Brownian and Stokesian dynamics simulation tool
+# pyBrownis a Brownian and Stokesian dynamics simulation tool
 # Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@ import time
 
 from tqdm import tqdm
 
-from pyBD.box import Box
-from pyBD.input import read_str_file, InputData
-from pyBD.output import timestamp
+from pyBrown.box import Box
+from pyBrown.input import read_str_file, InputData
+from pyBrown.output import timestamp
 
 @click.command()
 @click.argument('input_filename',
