@@ -18,6 +18,28 @@
 #include <stdlib.h>
 #include <math.h>
 
+// LU decomoposition of a general matrix
+void dgetrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO);
+
+// generate inverse of a matrix given its LU decomposition
+void dgetri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO);
+
+// -------------------------------------------------------------------------------
+
+void inverse(double* A, int N)
+{
+    int *IPIV = calloc(N, sizeof(int));
+    int LWORK = N*N;
+    double *WORK = calloc(LWORK, sizeof(double));
+    int INFO;
+
+    dgetrf_(&N,&N,A,&N,IPIV,&INFO);
+    dgetri_(&N,A,&N,IPIV,WORK,&LWORK,&INFO);
+
+    free(IPIV);
+    free(WORK);
+}
+
 // -------------------------------------------------------------------------------
 
 void O(double rx, double ry, double rz, double* answer)
@@ -1288,6 +1310,75 @@ double YA12(double s, double l)
 
 // -------------------------------------------------------------------------------
 
+void R_rpy(double ai, double aj, double rx, double ry, double rz, double* answer)
+{
+	double Mi = Mii_rpy(ai);
+
+	double Mj = Mii_rpy(aj);
+
+	double* Mij = calloc(6, sizeof(double));
+
+	Mij_rpy(ai, aj, rx, ry, rz, Mij);
+
+	double* matrix = calloc(6*6, sizeof(double));
+
+	*matrix = Mi;
+	*(matrix+7) = Mi;
+	*(matrix+14) = Mi;
+	*(matrix+21) = Mj;
+	*(matrix+28) = Mj;
+	*(matrix+35) = Mj;
+
+	*(matrix+3) = *(Mij);
+	*(matrix+4) = *(Mij+3);
+	*(matrix+5) = *(Mij+4);
+	*(matrix+9) = *(Mij+3);
+	*(matrix+10) = *(Mij+1);
+	*(matrix+11) = *(Mij+5);
+	*(matrix+15) = *(Mij+4);
+	*(matrix+16) = *(Mij+5);
+	*(matrix+17) = *(Mij+2);
+
+	*(matrix+18) = *(Mij);
+	*(matrix+19) = *(Mij+3);
+	*(matrix+20) = *(Mij+4);
+	*(matrix+24) = *(Mij+3);
+	*(matrix+25) = *(Mij+1);
+	*(matrix+26) = *(Mij+5);
+	*(matrix+30) = *(Mij+4);
+	*(matrix+31) = *(Mij+5);
+	*(matrix+32) = *(Mij+2);
+
+	inverse(matrix,6);
+
+	// block 00
+
+	*(answer) = *matrix;
+	*(answer+1) = *(matrix+7);
+	*(answer+2) = *(matrix+14);
+	*(answer+3) = *(matrix+6);
+	*(answer+4) = *(matrix+12);
+	*(answer+5) = *(matrix+13);
+
+	// block 11
+
+	*(answer+6) = *(matrix+21);
+	*(answer+7) = *(matrix+28);
+	*(answer+8) = *(matrix+35);
+	*(answer+9) = *(matrix+27);
+	*(answer+10) = *(matrix+33);
+	*(answer+11) = *(matrix+34);
+
+	// block 10
+
+	*(answer+12) = *(matrix+3);
+	*(answer+13) = *(matrix+10);
+	*(answer+14) = *(matrix+17);
+	*(answer+15) = *(matrix+9);
+	*(answer+16) = *(matrix+15);
+	*(answer+17) = *(matrix+16);
+}
+
 void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* answer)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
@@ -1372,9 +1463,13 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 	double* nf2b;
 
-	double* ff2bij;
+	double* ff2b;
 
 	double diagi, diagj;
+
+	double rx, ry, rz;
+
+
 
 	// int I, J, J1, J2, I1, I2;
 
@@ -1384,7 +1479,7 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 	// double* shifted_results;
 
-	// double* shifted_pointers;
+	double* shifted_pointers;
 
 	// double rx, ry, rz;
 
@@ -1392,29 +1487,28 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 	for (j = 0; j < N; j++)
 	{
-		// nf2b = calloc(18, sizeof(double));
-		// // ff2b11 = calloc(6, sizeof(double));
-		// // ff2b22 = calloc(6, sizeof(double));
-		// ff2b12 = calloc(6, sizeof(double));
-
-		// diag1 = Mii_rpy(*(as+j));
-		// diag2 = 
-
-	// 	shifted_results = results + 6*results_position(j,j,N);
-
-	// 	*(shifted_results) = *(vector);
-	// 	*(shifted_results + 1) = *(vector + 1);
-	// 	*(shifted_results + 2) = *(vector + 2);
 
 		for (i = j + 1; i < N; i++)
 		{
 			nf2b = calloc(18, sizeof(double));
 
-			ff2bij = calloc(6, sizeof(double));
+			// ff2bij = calloc(6, sizeof(double));
 
-			diagj = Mii_rpy(*(as+j));
+			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
 
-			diagi = Mii_rpy(*(as+i));
+			rx = *(shifted_pointers);
+			ry = *(shifted_pointers+1);
+			rz = *(shifted_pointers+2);
+
+			R_jeffrey(*(as+j), *(as+i), rx, ry, rz, nf2b);
+
+			R_rpy(*(as+j), *(as+i), rx, ry, rz, ff2b);
+
+			// diagj = Mii_rpy(*(as+j));
+
+			// diagi = Mii_rpy(*(as+i));
+
+			// Rij_rpy(*(as+j), *(as+i), rx, ry, rz, ff2bij);
 
 
 
