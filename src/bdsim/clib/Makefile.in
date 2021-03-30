@@ -88,9 +88,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = src/bdsim/Ccode
+subdir = src/bdsim/clib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/ax_lapack.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -126,16 +127,16 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libpybd_la_LIBADD =
-am_libpybd_la_OBJECTS = diff_tensor.lo
-libpybd_la_OBJECTS = $(am_libpybd_la_OBJECTS)
+libpyBrown_la_LIBADD =
+am_libpyBrown_la_OBJECTS = diff_tensor.lo
+libpyBrown_la_OBJECTS = $(am_libpyBrown_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libpybd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+libpyBrown_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libpybd_la_LDFLAGS) $(LDFLAGS) -o $@
+	$(libpyBrown_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -170,8 +171,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libpybd_la_SOURCES)
-DIST_SOURCES = $(libpybd_la_SOURCES)
+SOURCES = $(libpyBrown_la_SOURCES)
+DIST_SOURCES = $(libpyBrown_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -328,9 +329,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libpybd.la
-libpybd_la_SOURCES = diff_tensor.c
-libpybd_la_LDFLAGS = -version-info @PYBD_LT_VERSION@ -pedantic -ansi -fwritable-strings -lm -g
+lib_LTLIBRARIES = libpyBrown.la
+libpyBrown_la_SOURCES = diff_tensor.c
+libpyBrown_la_LDFLAGS = -version-info @PYBD_LT_VERSION@ -pedantic -ansi -fwritable-strings -lm -g
 AM_CFLAGS = -Wall 
 AM_LDFLAGS = -pedantic -ansi -fwritable-strings -lm -g
 all: all-am
@@ -346,9 +347,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/bdsim/Ccode/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/bdsim/clib/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu src/bdsim/Ccode/Makefile
+	  $(AUTOMAKE) --gnu src/bdsim/clib/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -402,8 +403,8 @@ clean-libLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-libpybd.la: $(libpybd_la_OBJECTS) $(libpybd_la_DEPENDENCIES) $(EXTRA_libpybd_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libpybd_la_LINK) -rpath $(libdir) $(libpybd_la_OBJECTS) $(libpybd_la_LIBADD) $(LIBS)
+libpyBrown.la: $(libpyBrown_la_OBJECTS) $(libpyBrown_la_DEPENDENCIES) $(EXTRA_libpyBrown_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libpyBrown_la_LINK) -rpath $(libdir) $(libpyBrown_la_OBJECTS) $(libpyBrown_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

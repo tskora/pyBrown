@@ -1,5 +1,5 @@
 SUBDIRS = clib tests
-dist_bin_SCRIPTS = BB.py  BD-restart.py
+dist_bin_SCRIPTS = BD.py  BD-restart.py
 
 PYTHON_LIB_DIR=pyBrown
 PYTHON_LIB = $(PYTHON_LIB_DIR)/bead.py\
