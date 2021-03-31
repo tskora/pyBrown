@@ -48,6 +48,11 @@ def main(input_filename):
 
 	disable_progress_bar = not i.input_data["progress_bar"]
 
+	if "measure_flux" in i.input_data.keys():
+		flux = True
+		n_flux = i.input_data["flux_freq"]
+		flux_filename = i.input_data[""]
+
 	str_filename = i.input_data["input_str_filename"]
 	xyz_filename = i.input_data["output_xyz_filename"]
 
