@@ -20,6 +20,7 @@ import pickle
 import shutil
 import time
 
+from contextlib import ExitStack
 from tqdm import tqdm
 
 from pyBD.box import Box
@@ -94,11 +95,14 @@ def main(input_filename):
 		bs = read_str_file(str_filename)
 
 		box = Box(bs, i.input_data)
-	
-		with open(xyz_filename, 'w', buffering = 1) as output_file:
+
+		with ExitStack() as stack:
+
+			xyz_file = stack.enter_context(open(xyz_filename, "w", buffering = 1))
+
 			for j in tqdm( range(n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
-					write_to_xyz_file(output_file, xyz_filename, j, dt, box.beads)
+					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 

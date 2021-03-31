@@ -19,6 +19,7 @@ import pickle
 import shutil
 import time
 
+from contextlib import ExitStack
 from tqdm import tqdm
 
 from BD import write_to_xyz_file, write_to_restart_file
@@ -89,16 +90,20 @@ def main(restart_filename):
 			box = Box(bs, input_data)
 			j0 = 0
 			filemode = 'w'
-	
-		with open(xyz_filename, filemode, buffering = 1) as output_file:
+
+		with ExitStack() as stack:
+
+			xyz_file = stack.enter_context(open(xyz_filename, filemode, buffering = 1))
+
 			for j in tqdm( range(j0, n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
-					write_to_xyz_file(output_file, xyz_filename, j, dt, box.beads)
-						
+					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
+
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
-				if j != 0 and j % n_restart == 0:
-					write_to_restart_file(rst_filename, index, j, box, xyz_filename)
+				if restart:
+					if j != 0 and j % n_restart == 0:
+						write_to_restart_file(rst_filename, index, j, box, xyz_filename)
 	
 		end = time.time()
 	
