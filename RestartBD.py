@@ -21,6 +21,8 @@ import time
 
 from tqdm import tqdm
 
+from BD import write_to_xyz_file, write_to_restart_file
+
 from pyBD.box import Box
 from pyBD.input import read_str_file
 from pyBD.output import timestamp
@@ -91,20 +93,12 @@ def main(restart_filename):
 		with open(xyz_filename, filemode, buffering = 1) as output_file:
 			for j in tqdm( range(j0, n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
-					output_file.write('{}\n'.format(len(box.beads)))
-					output_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
-					for bead in box.beads:
-						output_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+					write_to_xyz_file(output_file, xyz_filename, j, dt, box.beads)
+						
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
 				if j != 0 and j % n_restart == 0:
-					with open(rst_filename, 'wb', buffering = 0) as restart_file:
-						pickle.dump(index, restart_file)
-						pickle.dump(j, restart_file)
-						pickle.dump(box, restart_file)
-						with open(xyz_filename, "r") as copied_file:
-							pickle.dump(copied_file.read(), restart_file)
-					shutil.copy(rst_filename, rst_filename+"2")
+					write_to_restart_file(rst_filename, index, j, box, xyz_filename)
 	
 		end = time.time()
 	

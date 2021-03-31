@@ -98,26 +98,39 @@ def main(input_filename):
 		with open(xyz_filename, 'w', buffering = 1) as output_file:
 			for j in tqdm( range(n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
-					output_file.write('{}\n'.format(len(box.beads)))
-					output_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
-					for bead in box.beads:
-						output_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+					write_to_xyz_file(output_file, xyz_filename, j, dt, box.beads)
+
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
 				if restart:
 					if j != 0 and j % n_restart == 0:
-						with open(rst_filename, 'wb', buffering = 0) as restart_file:
-							pickle.dump(index, restart_file)
-							pickle.dump(j, restart_file)
-							pickle.dump(box, restart_file)
-							with open(xyz_filename, "r") as copied_file:
-								pickle.dump(copied_file.read(), restart_file)
-						shutil.copy(rst_filename, rst_filename+"2")
+						write_to_restart_file(rst_filename, index, j, box, xyz_filename)
 
 	
 		end = time.time()
 	
 		print('{} seconds elapsed'.format(end-start))
+
+#-------------------------------------------------------------------------------
+
+def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads):
+
+	xyz_file.write('{}\n'.format(len(beads)))
+	xyz_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
+	for bead in beads:
+		xyz_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+
+#-------------------------------------------------------------------------------
+
+def write_to_restart_file(restart_filename, index, j, box, xyz_filename):
+
+	with open(restart_filename, 'wb', buffering = 0) as restart_file:
+		pickle.dump(index, restart_file)
+		pickle.dump(j, restart_file)
+		pickle.dump(box, restart_file)
+		with open(xyz_filename, "r") as copied_file:
+			pickle.dump(copied_file.read(), restart_file)
+	shutil.copy(restart_filename, restart_filename+"2")
 
 #-------------------------------------------------------------------------------
 
