@@ -51,16 +51,18 @@ def main(input_filename):
 
 	if "measure_flux" in i.input_data.keys():
 		flux = True
-		n_flux = i.input_data["flux_freq"]
-		flux_filename = i.input_data[""]
+		n_flux = i.input_data["measure_flux"]["flux_freq"]
+		flux_filename = i.input_data["measure_flux"]["output_flux_filename"]
 
 	str_filename = i.input_data["input_str_filename"]
 	xyz_filename = i.input_data["output_xyz_filename"]
 
 	if "filename_range" in i.input_data.keys():
+		if flux: flux_filenames = [ flux_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 		str_filenames = [ str_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 		xyz_filenames = [ xyz_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 	else:
+		if flux: flux_filenames = [ flux_filename ]
 		str_filenames = [ str_filename ]
 		xyz_filenames = [ xyz_filename ]
 
@@ -84,6 +86,11 @@ def main(input_filename):
 
 	for index in range(len(str_filenames)):
 
+		extra_output_filenames = []
+
+		if flux:
+			flux_filename = flux_filenames[index]
+			extra_output_filenames.append(flux_filename)
 		str_filename = str_filenames[index]
 		xyz_filename = xyz_filenames[index]
 
@@ -98,22 +105,33 @@ def main(input_filename):
 
 		with ExitStack() as stack:
 
+			if flux: flux_file = stack.enter_context(open(flux_filename, "w", buffering = 1))
 			xyz_file = stack.enter_context(open(xyz_filename, "w", buffering = 1))
 
 			for j in tqdm( range(n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
 
+				if flux: 
+					if j != 0 and j % n_flux == 0:
+						write_to_flux_file(flux_file, j, dt, box.net_flux)
+
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
 				if restart:
 					if j != 0 and j % n_restart == 0:
-						write_to_restart_file(rst_filename, index, j, box, xyz_filename)
+						write_to_restart_file(rst_filename, index, j, box, xyz_filename, extra_output_filenames)
 
 	
 		end = time.time()
 	
 		print('{} seconds elapsed'.format(end-start))
+
+#-------------------------------------------------------------------------------
+
+def write_to_flux_file(flux_file, j, dt, net_flux):
+
+	flux_file.write('{} {}\n'.format(j*dt, net_flux))
 
 #-------------------------------------------------------------------------------
 
@@ -126,7 +144,7 @@ def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads):
 
 #-------------------------------------------------------------------------------
 
-def write_to_restart_file(restart_filename, index, j, box, xyz_filename):
+def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_output_filenames = []):
 
 	with open(restart_filename, 'wb', buffering = 0) as restart_file:
 		pickle.dump(index, restart_file)
@@ -134,6 +152,10 @@ def write_to_restart_file(restart_filename, index, j, box, xyz_filename):
 		pickle.dump(box, restart_file)
 		with open(xyz_filename, "r") as copied_file:
 			pickle.dump(copied_file.read(), restart_file)
+		for extra_output_filename in extra_output_filenames:
+			with open(extra_output_filename, "r") as copied_file:
+				pickle.dump(copied_file.read(), restart_file)
+
 	shutil.copy(restart_filename, restart_filename+"2")
 
 #-------------------------------------------------------------------------------

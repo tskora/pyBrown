@@ -22,7 +22,7 @@ import time
 from contextlib import ExitStack
 from tqdm import tqdm
 
-from BD import write_to_xyz_file, write_to_restart_file
+from BD import write_to_xyz_file, write_to_restart_file, write_to_flux_file
 
 from pyBD.box import Box
 from pyBD.input import read_str_file
@@ -40,6 +40,7 @@ def main(restart_filename):
 		j_rst = pickle.load(restart_file)
 		box_rst = pickle.load(restart_file)
 		xyz_file_rst = pickle.load(restart_file)
+		if box_rst.is_flux: pickle.load(restart_file)
 
 	input_data = box_rst.inp
 
@@ -47,15 +48,22 @@ def main(restart_filename):
 
 	disable_progress_bar = not input_data["progress_bar"]
 
+	if box_rst.is_flux:
+		flux = True
+		n_flux = input_data["measure_flux"]["flux_freq"]
+
+	if flux: flux_filename = input_data["measure_flux"]["output_flux_filename"]
 	str_filename = input_data["input_str_filename"]
 	xyz_filename = input_data["output_xyz_filename"]
 	rst_filename = input_data["output_rst_filename"]
 
 	if "filename_range" in input_data.keys():
+		if flux: flux_filenames = [ flux_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		str_filenames = [ str_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		xyz_filenames = [ xyz_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		rst_filenames = [ rst_filename.format(j) for j in range(*input_data["filename_range"]) ]
 	else:
+		if flux: flux_filenames = [ flux_filename ]
 		str_filenames = [ str_filename ]
 		xyz_filenames = [ xyz_filename ]
 		rst_filenames = [ rst_filename ]
@@ -73,6 +81,11 @@ def main(restart_filename):
 
 	for index in range(index_rst, len(str_filenames)):
 
+		extra_output_filenames = []
+
+		if flux:
+			flux_filename = flux_filenames[index]
+			extra_output_filenames.append(flux_filename)
 		str_filename = str_filenames[index]
 		xyz_filename = xyz_filenames[index]
 		rst_filename = rst_filenames[index]
@@ -93,17 +106,21 @@ def main(restart_filename):
 
 		with ExitStack() as stack:
 
+			if flux: flux_file = stack.enter_context(open(flux_filename, filemode, buffering = 1))
 			xyz_file = stack.enter_context(open(xyz_filename, filemode, buffering = 1))
 
 			for j in tqdm( range(j0, n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
 
+				if flux: 
+					if j != 0 and j % n_flux == 0:
+						write_to_flux_file(flux_file, j, dt, box.net_flux)
+
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
-				if restart:
-					if j != 0 and j % n_restart == 0:
-						write_to_restart_file(rst_filename, index, j, box, xyz_filename)
+				if j != 0 and j % n_restart == 0:
+					write_to_restart_file(rst_filename, index, j, box, xyz_filename, flux, flux_filename, extra_output_filenames)
 	
 		end = time.time()
 	

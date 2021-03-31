@@ -68,6 +68,8 @@ class Box():
 			self.is_flux = True
 			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
 			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
+			self.flux = np.zeros( len(self.mobile_beads), int )
+			self.net_flux = 0
 
 		if self.hydrodynamics == "nohi":
 			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
@@ -115,9 +117,7 @@ class Box():
 
 		self.keep_beads_in_box()
 
-		if self.is_flux:
-			print(self.flux)
-			print(np.sum(self.flux))
+		if self.is_flux: self.net_flux = np.sum(self.flux)
 
 	#-------------------------------------------------------------------------------
 
