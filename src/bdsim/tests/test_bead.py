@@ -21,7 +21,7 @@ import sys
 sys.path.insert(0, '.')
 import unittest
 
-from pyBD.bead import Bead, overlap_pbc, distance_pbc
+from pyBrown.bead import Bead, overlap_pbc, distance_pbc
 
 #-------------------------------------------------------------------------------
 

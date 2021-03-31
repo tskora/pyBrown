@@ -17,7 +17,7 @@
 import math
 import numpy as np
 
-from pyBD.output import timing
+from pyBrown.output import timing
 
 #-------------------------------------------------------------------------------
 

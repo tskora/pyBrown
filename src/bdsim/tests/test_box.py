@@ -25,8 +25,8 @@ import sys
 sys.path.insert(0, '.')
 import unittest
 
-from pyBD.box import Box
-from pyBD.bead import Bead
+from pyBrown.box import Box
+from pyBrown.bead import Bead
 
 #-------------------------------------------------------------------------------
 

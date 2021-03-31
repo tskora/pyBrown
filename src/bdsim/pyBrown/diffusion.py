@@ -21,9 +21,9 @@ import numpy as np
 from array import array
 from scipy.special import erfc
 
-from pyBD.output import timing
+from pyBrown.output import timing
 
-lib = ctypes.cdll.LoadLibrary('./Ccode/diff_tensor.so')
+lib = ctypes.cdll.LoadLibrary('./clib/diff_tensor.so')
 
 #-------------------------------------------------------------------------------
 

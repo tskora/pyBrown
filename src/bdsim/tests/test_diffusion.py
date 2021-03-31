@@ -20,17 +20,17 @@ import sys
 sys.path.insert(0, '.')
 import unittest
 
-from pyBD.bead import Bead, pointer_pbc
-from pyBD.diffusion import O, O_python, Oii_pbc_smith, Oii_pbc_smith_python, Oij_pbc_smith, Oij_pbc_smith_python
-from pyBD.diffusion import Q, Q_python, Qii_pbc_smith, Qii_pbc_smith_python, Qij_pbc_smith, Qij_pbc_smith_python
-from pyBD.diffusion import Mij_rpy, Mij_rpy_python
-from pyBD.diffusion import Mii_rpy_smith, Mii_rpy_smith_python
-from pyBD.diffusion import Mij_rpy_smith, Mij_rpy_smith_python
-from pyBD.diffusion import X_f_poly, X_f_poly_python, Y_f_poly, Y_f_poly_python
-from pyBD.diffusion import X_g_poly, X_g_poly_python, Y_g_poly, Y_g_poly_python
-from pyBD.diffusion import XA11, XA11_python, YA11, YA11_python, XA12, XA12_python, YA12, YA12_python
-from pyBD.diffusion import R_jeffrey, R_jeffrey_python
-from pyBD.diffusion import M_rpy_smith, M_rpy_smith_python
+from pyBrown.bead import Bead, pointer_pbc
+from pyBrown.diffusion import O, O_python, Oii_pbc_smith, Oii_pbc_smith_python, Oij_pbc_smith, Oij_pbc_smith_python
+from pyBrown.diffusion import Q, Q_python, Qii_pbc_smith, Qii_pbc_smith_python, Qij_pbc_smith, Qij_pbc_smith_python
+from pyBrown.diffusion import Mij_rpy, Mij_rpy_python
+from pyBrown.diffusion import Mii_rpy_smith, Mii_rpy_smith_python
+from pyBrown.diffusion import Mij_rpy_smith, Mij_rpy_smith_python
+from pyBrown.diffusion import X_f_poly, X_f_poly_python, Y_f_poly, Y_f_poly_python
+from pyBrown.diffusion import X_g_poly, X_g_poly_python, Y_g_poly, Y_g_poly_python
+from pyBrown.diffusion import XA11, XA11_python, YA11, YA11_python, XA12, XA12_python, YA12, YA12_python
+from pyBrown.diffusion import R_jeffrey, R_jeffrey_python
+from pyBrown.diffusion import M_rpy_smith, M_rpy_smith_python
 
 #-------------------------------------------------------------------------------
 
