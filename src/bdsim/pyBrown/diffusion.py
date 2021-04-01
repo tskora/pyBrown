@@ -24,8 +24,9 @@ from scipy.special import erfc
 
 from pyBrown.output import timing
 
-lib_name = 'clib/diff_tensor.so'
-lib_path = os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ) + os.path.sep + lib_name
+# lib_name = 'clib/diff_tensor.so'
+# lib_path = os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ) + os.path.sep + lib_name
+lib_path = "libpyBrown.dylib"
 lib = ctypes.cdll.LoadLibrary(lib_path)
 
 #-------------------------------------------------------------------------------
