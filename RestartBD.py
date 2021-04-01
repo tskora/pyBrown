@@ -118,7 +118,7 @@ def main(restart_filename):
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
 
 				if flux: 
-					if j != 0 and j % n_flux == 0:
+					if j % n_flux == 0:
 						write_to_flux_file(flux_file, j, dt, box.net_flux)
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)

@@ -113,7 +113,7 @@ def main(input_filename):
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
 
 				if flux: 
-					if j != 0 and j % n_flux == 0:
+					if j % n_flux == 0:
 						write_to_flux_file(flux_file, j, dt, box.net_flux)
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
@@ -131,7 +131,21 @@ def main(input_filename):
 
 def write_to_flux_file(flux_file, j, dt, net_flux):
 
-	flux_file.write('{} {}\n'.format(j*dt, net_flux))
+	net_flux_labels = list(net_flux.keys())
+
+	if j == 0:
+
+		first_line_string = 'time/ps' + ' {}' * len(net_flux_labels) + '\n'
+
+		flux_file.write(first_line_string.format(*net_flux_labels))
+
+	else:
+
+		line_string = '{}' + ' {}'*len(net_flux) + '\n'
+
+		net_flux_for_given_label = [ net_flux[key] for key in net_flux_labels ]
+
+		flux_file.write(line_string.format(j*dt, *net_flux_for_given_label))
 
 #-------------------------------------------------------------------------------
 
