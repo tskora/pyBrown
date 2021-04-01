@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # pyBrown is a Brownian and Stokesian dynamics simulation tool
 # Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 #
