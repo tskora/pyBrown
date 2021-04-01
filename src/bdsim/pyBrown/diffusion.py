@@ -17,13 +17,16 @@
 import ctypes
 import math
 import numpy as np
+import os.path	
 
 from array import array
 from scipy.special import erfc
 
 from pyBrown.output import timing
 
-lib = ctypes.cdll.LoadLibrary('./clib/diff_tensor.so')
+lib_name = 'clib/diff_tensor.so'
+lib_path = os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ) + os.path.sep + lib_name
+lib = ctypes.cdll.LoadLibrary(lib_path)
 
 #-------------------------------------------------------------------------------
 

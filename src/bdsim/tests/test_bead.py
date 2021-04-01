@@ -17,8 +17,9 @@
 import numpy as np
 import copy as cp
 import numpy as np
+import os.path
 import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
 from pyBrown.bead import Bead, overlap_pbc, distance_pbc
