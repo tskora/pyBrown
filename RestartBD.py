@@ -40,7 +40,7 @@ def main(restart_filename):
 		j_rst = pickle.load(restart_file)
 		box_rst = pickle.load(restart_file)
 		xyz_file_rst = pickle.load(restart_file)
-		if box_rst.is_flux: pickle.load(restart_file)
+		if box_rst.is_flux: flux_file_rst = pickle.load(restart_file)
 
 	input_data = box_rst.inp
 
@@ -68,8 +68,12 @@ def main(restart_filename):
 		xyz_filenames = [ xyz_filename ]
 		rst_filenames = [ rst_filename ]
 
-	with open(xyz_filenames[index_rst], 'w') as new_output_file:
-		new_output_file.write(xyz_file_rst)
+	with ExitStack() as stack:
+		if flux:
+			new_flux_file = stack.enter_context(open(flux_filenames[index_rst], 'w'))
+			new_flux_file.write(flux_file_rst)
+		new_xyz_file = stack.enter_context(open(xyz_filenames[index_rst], 'w'))
+		new_xyz_file.write(xyz_file_rst)
 
 	dt = input_data["dt"]
 	n_steps = input_data["number_of_steps"]
@@ -120,7 +124,7 @@ def main(restart_filename):
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
 				if j != 0 and j % n_restart == 0:
-					write_to_restart_file(rst_filename, index, j, box, xyz_filename, flux, flux_filename, extra_output_filenames)
+					write_to_restart_file(rst_filename, index, j, box, xyz_filename, extra_output_filenames)
 	
 		end = time.time()
 	
