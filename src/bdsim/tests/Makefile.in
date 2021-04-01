@@ -445,9 +445,9 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 test:
-	python3 tests/test_bead.py
-	python3 tests/test_box.py
-	python3 tests/test_diffusion.py
+	python3 test_bead.py
+	python3 test_box.py
+	python3 test_diffusion.py
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

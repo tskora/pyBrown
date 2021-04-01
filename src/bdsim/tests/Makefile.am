@@ -1,4 +1,4 @@
 test:
-	python3 tests/test_bead.py
-	python3 tests/test_box.py
-	python3 tests/test_diffusion.py
+	python3 test_bead.py
+	python3 test_box.py
+	python3 test_diffusion.py
