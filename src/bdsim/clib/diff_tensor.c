@@ -1,4 +1,4 @@
-// pyBD is a Brownian and Stokesian dynamics simulation tool
+// pyBrown is a Brownian and Stokesian dynamics simulation tool
 // Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+// LU decomoposition of a general matrix
+void dgetrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO);
+
+// generate inverse of a matrix given its LU decomposition
+void dgetri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO);
+
+// -------------------------------------------------------------------------------
+
+void inverse(double* A, int N)
+{
+    int *IPIV = calloc(N, sizeof(int));
+    int LWORK = N*N;
+    double *WORK = calloc(LWORK, sizeof(double));
+    int INFO;
+
+    dgetrf_(&N,&N,A,&N,IPIV,&INFO);
+    dgetri_(&N,A,&N,IPIV,WORK,&LWORK,&INFO);
+
+    free(IPIV);
+    free(WORK);
+}
 
 // -------------------------------------------------------------------------------
 
@@ -471,6 +493,13 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 // -------------------------------------------------------------------------------
 
+double Mii_rpy(double a)
+{
+	return 1.0 / ( 6 * M_PI * a );
+}
+
+// -------------------------------------------------------------------------------
+
 void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answer)
 {
 	double al, as;
@@ -638,6 +667,101 @@ int results_position(int i, int j, int N)
 
 // -------------------------------------------------------------------------------
 
+void M_rpy(double* as, double* pointers, int N, double* results2)
+{
+	register int i = 0;
+
+	register int j = 0;
+
+	double* vector;
+
+	double* shifted_results;
+
+	double* shifted_pointers;
+
+	double rx, ry, rz, diag;
+
+	double* results = calloc(3*(N*N+N), sizeof(double));
+
+	int r, I, I1, I2, J, J1, J2;
+
+	int N3 = 3*N;
+
+	for (j = 0; j < N; j++)
+	{
+		diag = Mii_rpy(*(as+j));
+
+		shifted_results = results + 6*results_position(j,j,N);
+
+		*(shifted_results) = diag;
+		*(shifted_results + 1) = diag;
+		*(shifted_results + 2) = diag;
+
+		for (i = j + 1; i < N; i++)
+		{
+			vector = calloc(6, sizeof(double));
+
+			shifted_results = results + 6*results_position(i,j,N);
+			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+
+			rx = *(shifted_pointers);
+			ry = *(shifted_pointers + 1);
+			rz = *(shifted_pointers + 2);
+
+			Mij_rpy(*(as+i), *(as+j), rx, ry, rz, vector);
+
+			*(shifted_results) = *(vector);
+			*(shifted_results + 1) = *(vector + 1);
+			*(shifted_results + 2) = *(vector + 2);
+			*(shifted_results + 3) = *(vector + 3);
+			*(shifted_results + 4) = *(vector + 4);
+			*(shifted_results + 5) = *(vector + 5);
+
+		}
+	}
+
+	for (j = 0; j < N; j++)
+	{
+		r = 6*results_position(j, j, N);
+		J = 3*j;
+		J1 = J + 1;
+		J2 = J + 2;
+
+		results2[J + J*N3] = results[r];
+		results2[J1 + J1*N3] = results[r + 1];
+		results2[J2 + J2*N3] = results[r + 2];
+
+		for (i = j+1; i < N; i++)
+		{
+			r = 6*results_position(i, j, N);
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
+
+			results2[I + J*N3] = results[r];
+			results2[J + I*N3] = results[r];
+			results2[I1 + J1*N3] = results[r + 1];
+			results2[J1 + I1*N3] = results[r + 1];
+			results2[I2 + J2*N3] = results[r + 2];
+			results2[J2 + I2*N3] = results[r + 2];
+			results2[I1 + J*N3] = results[r + 3];
+			results2[I + J1*N3] = results[r + 3];
+			results2[J + I1*N3] = results[r + 3];
+			results2[J1 + I*N3] = results[r + 3];
+			results2[I2 + J*N3] = results[r + 4];
+			results2[I + J2*N3] = results[r + 4];
+			results2[J + I2*N3] = results[r + 4];
+			results2[J2 + I*N3] = results[r + 4];
+			results2[I2 + J1*N3] = results[r + 5];
+			results2[I1 + J2*N3] = results[r + 5];
+			results2[J1 + I2*N3] = results[r + 5];
+			results2[J2 + I1*N3] = results[r + 5];
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------
+
 void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, int m, int n, int N, double* results2)
 {
 	register int i = 0;
@@ -647,6 +771,8 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 	int I, J, J1, J2, I1, I2;
 
 	int r;
+
+	int N3 = 3*N;
 
 	double* vector;
 
@@ -692,8 +818,6 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 		}
 	}
-
-	int N3 = 3*N;
 
 	for (j = 0; j < N; j++)
 	{
@@ -1186,6 +1310,77 @@ double YA12(double s, double l)
 
 // -------------------------------------------------------------------------------
 
+void R_rpy(double ai, double aj, double rx, double ry, double rz, double* answer)
+{
+	double Mi = Mii_rpy(ai);
+
+	double Mj = Mii_rpy(aj);
+
+	double* Mij = calloc(6, sizeof(double));
+
+	Mij_rpy(ai, aj, rx, ry, rz, Mij);
+
+	double* matrix = calloc(6*6, sizeof(double));
+
+	*matrix = Mi;
+	*(matrix+7) = Mi;
+	*(matrix+14) = Mi;
+	*(matrix+21) = Mj;
+	*(matrix+28) = Mj;
+	*(matrix+35) = Mj;
+
+	*(matrix+3) = *(Mij);
+	*(matrix+4) = *(Mij+3);
+	*(matrix+5) = *(Mij+4);
+	*(matrix+9) = *(Mij+3);
+	*(matrix+10) = *(Mij+1);
+	*(matrix+11) = *(Mij+5);
+	*(matrix+15) = *(Mij+4);
+	*(matrix+16) = *(Mij+5);
+	*(matrix+17) = *(Mij+2);
+
+	*(matrix+18) = *(Mij);
+	*(matrix+19) = *(Mij+3);
+	*(matrix+20) = *(Mij+4);
+	*(matrix+24) = *(Mij+3);
+	*(matrix+25) = *(Mij+1);
+	*(matrix+26) = *(Mij+5);
+	*(matrix+30) = *(Mij+4);
+	*(matrix+31) = *(Mij+5);
+	*(matrix+32) = *(Mij+2);
+
+	inverse(matrix,6);
+
+	// block 00
+
+	*(answer) = *matrix;
+	*(answer+1) = *(matrix+7);
+	*(answer+2) = *(matrix+14);
+	*(answer+3) = *(matrix+6);
+	*(answer+4) = *(matrix+12);
+	*(answer+5) = *(matrix+13);
+
+	// block 11
+
+	*(answer+6) = *(matrix+21);
+	*(answer+7) = *(matrix+28);
+	*(answer+8) = *(matrix+35);
+	*(answer+9) = *(matrix+27);
+	*(answer+10) = *(matrix+33);
+	*(answer+11) = *(matrix+34);
+
+	// block 10
+
+	*(answer+12) = *(matrix+3);
+	*(answer+13) = *(matrix+10);
+	*(answer+14) = *(matrix+17);
+	*(answer+15) = *(matrix+9);
+	*(answer+16) = *(matrix+15);
+	*(answer+17) = *(matrix+16);
+}
+
+// -------------------------------------------------------------------------------
+
 void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* answer)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
@@ -1261,3 +1456,104 @@ void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* an
 }
 
 // -------------------------------------------------------------------------------
+
+void R_lub_corr(double* as, double* pointers, int N, double* results2)
+{
+	register int i = 0;
+
+	register int j = 0;
+
+	register int k = 0;
+
+	double* nf2b;
+
+	double* ff2b;
+
+	double diagi, diagj;
+
+	double rx, ry, rz;
+
+	int I, I1, I2, J, J1, J2, r;
+
+	int N3 = 3*N;
+
+	double* shifted_pointers;
+
+	double* results = calloc(3*(N*N+N), sizeof(double));
+
+	for (j = 0; j < N; j++)
+	{
+
+		for (i = j + 1; i < N; i++)
+		{
+			nf2b = calloc(18, sizeof(double));
+
+			ff2b = calloc(18, sizeof(double));
+
+			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+
+			rx = *(shifted_pointers);
+			ry = *(shifted_pointers+1);
+			rz = *(shifted_pointers+2);
+
+			R_jeffrey(*(as+j), *(as+i), rx, ry, rz, nf2b);
+
+			R_rpy(*(as+j), *(as+i), rx, ry, rz, ff2b);
+
+			for (k = 0; k < 18; k++)
+			{
+				*(results+k) = *(nf2b+k) - *(ff2b+k);
+			}
+
+			J = 3*j;
+			J1 = J + 1;
+			J2 = J + 2;
+
+			results2[J + J*N3] += results[0];
+			results2[J1 + J1*N3] += results[1];
+			results2[J2 + J2*N3] += results[2];
+			results2[J1 + J*N3] += results[3];
+			results2[J + J1*N3] += results[3];
+			results2[J2 + J*N3] += results[4];
+			results2[J + J2*N3] += results[4];
+			results2[J2 + J1*N3] += results[5];
+			results2[J1 + J2*N3] += results[5];
+
+			r = 6;
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
+
+			results2[I + I*N3] += results[r];
+			results2[I1 + I1*N3] += results[r + 1];
+			results2[I2 + I2*N3] += results[r + 2];
+			results2[I1 + I*N3] += results[r + 3];
+			results2[I + I1*N3] += results[r + 3];
+			results2[I2 + I*N3] += results[r + 4];
+			results2[I + I2*N3] += results[r + 4];
+			results2[I2 + I1*N3] += results[r + 5];
+			results2[I1 + I2*N3] += results[r + 5];
+
+			r = 12;
+
+			results2[I + J*N3] += results[r];
+			results2[J + I*N3] += results[r];
+			results2[I1 + J1*N3] += results[r + 1];
+			results2[J1 + I1*N3] += results[r + 1];
+			results2[I2 + J2*N3] += results[r + 2];
+			results2[J2 + I2*N3] += results[r + 2];
+			results2[I1 + J*N3] += results[r + 3];
+			results2[I + J1*N3] += results[r + 3];
+			results2[J + I1*N3] += results[r + 3];
+			results2[J1 + I*N3] += results[r + 3];
+			results2[I2 + J*N3] += results[r + 4];
+			results2[I + J2*N3] += results[r + 4];
+			results2[J + I2*N3] += results[r + 4];
+			results2[J2 + I*N3] += results[r + 4];
+			results2[I2 + J1*N3] += results[r + 5];
+			results2[I1 + J2*N3] += results[r + 5];
+			results2[J1 + I2*N3] += results[r + 5];
+			results2[J2 + I1*N3] += results[r + 5];
+		}
+	}
+}

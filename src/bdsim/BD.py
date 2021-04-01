@@ -1,4 +1,4 @@
-# pyBrownis a Brownian and Stokesian dynamics simulation tool
+# pyBD is a Brownian and Stokesian dynamics simulation tool
 # Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,11 +20,12 @@ import pickle
 import shutil
 import time
 
+from contextlib import ExitStack
 from tqdm import tqdm
 
-from pyBrown.box import Box
-from pyBrown.input import read_str_file, InputData
-from pyBrown.output import timestamp
+from pyBD.box import Box
+from pyBD.input import read_str_file, InputData
+from pyBD.output import timestamp
 
 @click.command()
 @click.argument('input_filename',
@@ -48,13 +49,30 @@ def main(input_filename):
 
 	disable_progress_bar = not i.input_data["progress_bar"]
 
+	if "measure_concentration" in i.input_data.keys():
+		concentration = True
+		con_filename = i.input_data["measure_concentration"]["output_concentration_filename"]
+	else:
+		concentration = False
+
+	if "measure_flux" in i.input_data.keys():
+		flux = True
+		n_flux = i.input_data["measure_flux"]["flux_freq"] # is it needed? it does not work yet anyways
+		flux_filename = i.input_data["measure_flux"]["output_flux_filename"]
+	else:
+		flux = False
+
 	str_filename = i.input_data["input_str_filename"]
 	xyz_filename = i.input_data["output_xyz_filename"]
 
 	if "filename_range" in i.input_data.keys():
+		if concentration: con_filenames = [ con_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
+		if flux: flux_filenames = [ flux_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 		str_filenames = [ str_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 		xyz_filenames = [ xyz_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 	else:
+		if concentration: con_filenames = [ con_filename ]
+		if flux: flux_filenames = [ flux_filename ]
 		str_filenames = [ str_filename ]
 		xyz_filenames = [ xyz_filename ]
 
@@ -78,6 +96,14 @@ def main(input_filename):
 
 	for index in range(len(str_filenames)):
 
+		extra_output_filenames = []
+
+		if concentration:
+			con_filename = con_filenames[index]
+			extra_output_filenames.append(con_filename)
+		if flux:
+			flux_filename = flux_filenames[index]
+			extra_output_filenames.append(flux_filename)
 		str_filename = str_filenames[index]
 		xyz_filename = xyz_filenames[index]
 
@@ -89,30 +115,99 @@ def main(input_filename):
 		bs = read_str_file(str_filename)
 
 		box = Box(bs, i.input_data)
-	
-		with open(xyz_filename, 'w', buffering = 1) as output_file:
+
+		with ExitStack() as stack:
+
+			if concentration: con_file = stack.enter_context(open(con_filename, "w", buffering = 1))
+			if flux: flux_file = stack.enter_context(open(flux_filename, "w", buffering = 1))
+			xyz_file = stack.enter_context(open(xyz_filename, "w", buffering = 1))
+
 			for j in tqdm( range(n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
-					output_file.write('{}\n'.format(len(box.beads)))
-					output_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
-					for bead in box.beads:
-						output_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
+
+				if concentration:
+					write_to_con_file(con_file, j, dt, box.concentration)
+
+				if flux: 
+					if j % n_flux == 0:
+						write_to_flux_file(flux_file, j, dt, box.net_flux)
+
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
 				if restart:
 					if j != 0 and j % n_restart == 0:
-						with open(rst_filename, 'wb', buffering = 0) as restart_file:
-							pickle.dump(index, restart_file)
-							pickle.dump(j, restart_file)
-							pickle.dump(box, restart_file)
-							with open(xyz_filename, "r") as copied_file:
-								pickle.dump(copied_file.read(), restart_file)
-						shutil.copy(rst_filename, rst_filename+"2")
+						write_to_restart_file(rst_filename, index, j, box, xyz_filename, extra_output_filenames)
 
 	
 		end = time.time()
 	
 		print('{} seconds elapsed'.format(end-start))
+
+#-------------------------------------------------------------------------------
+
+def write_to_con_file(con_file, j, dt, concentration):
+
+	concentration_labels = list(concentration.keys())
+
+	if j == 0:
+
+		first_line_string = 'time/ps' + ' {}' * len(concentration_labels) + '\n'
+
+		con_file.write(first_line_string.format(*concentration_labels))
+
+	else:
+
+		line_string = '{}' + ' {}' * len(concentration) + '\n'
+
+		concentration_for_given_label = [ concentration[key] for key in concentration_labels ]
+
+		con_file.write(line_string.format(j*dt, *concentration_for_given_label))
+
+#-------------------------------------------------------------------------------
+
+def write_to_flux_file(flux_file, j, dt, net_flux):
+
+	net_flux_labels = list(net_flux.keys())
+
+	if j == 0:
+
+		first_line_string = 'time/ps' + ' {}' * len(net_flux_labels) + '\n'
+
+		flux_file.write(first_line_string.format(*net_flux_labels))
+
+	else:
+
+		line_string = '{}' + ' {}'*len(net_flux) + '\n'
+
+		net_flux_for_given_label = [ net_flux[key] for key in net_flux_labels ]
+
+		flux_file.write(line_string.format(j*dt, *net_flux_for_given_label))
+
+#-------------------------------------------------------------------------------
+
+def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads):
+
+	xyz_file.write('{}\n'.format(len(beads)))
+	xyz_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
+	for bead in beads:
+		xyz_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+
+#-------------------------------------------------------------------------------
+
+def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_output_filenames = []):
+
+	with open(restart_filename, 'wb', buffering = 0) as restart_file:
+		pickle.dump(index, restart_file)
+		pickle.dump(j, restart_file)
+		pickle.dump(box, restart_file)
+		with open(xyz_filename, "r") as copied_file:
+			pickle.dump(copied_file.read(), restart_file)
+		for extra_output_filename in extra_output_filenames:
+			with open(extra_output_filename, "r") as copied_file:
+				pickle.dump(copied_file.read(), restart_file)
+
+	shutil.copy(restart_filename, restart_filename+"2")
 
 #-------------------------------------------------------------------------------
 

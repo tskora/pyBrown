@@ -1,5 +1,5 @@
-Ccode/diff_tensor.so: Ccode/diff_tensor.c
-	gcc -o Ccode/diff_tensor.so -shared -fPIC Ccode/diff_tensor.c
+clib/diff_tensor.so: clib/diff_tensor.c
+	gcc -llapack -o clib/diff_tensor.so -shared -fPIC clib/diff_tensor.c
 
 test:
 	python3 tests/test_bead.py

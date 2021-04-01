@@ -1,4 +1,4 @@
-# pyBD is a Brownian and Stokesian dynamics simulation tool
+# pyBrown is a Brownian and Stokesian dynamics simulation tool
 # Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,8 @@ class TestBox(unittest.TestCase):
 	def setUp(self):
 
 		self.mock_input = {"hydrodynamics": "nohi", "box_length": 35.0, "T": 298.0,
-					  	   "viscosity": 0.01, "external_force": [0, 0, 0]}
+					  	   "viscosity": 0.01, "external_force": [0, 0, 0],
+					  	   "immobile_labels": []}
 
 		self.test_filename = 'test_box.txt'
 

@@ -1,4 +1,4 @@
-# pyBD is a Brownian and Stokesian dynamics simulation tool
+# pyBrown is a Brownian and Stokesian dynamics simulation tool
 # Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -108,6 +108,37 @@ def Mij_rpy_python(ai, aj, pointer):
 
 # @timing
 def M_rpy(beads, pointers):
+
+	c_double = ctypes.c_double
+
+	N = len(beads);
+
+	a_list = [b.a for b in beads]
+	v0 = array('d', a_list)
+	a = (c_double * len(v0)).from_buffer(v0)
+
+	p_list = [pointers[i][j][k] for j in range(N) for i in range(j+1, N) for k in range(3)]
+	v1 = array('d', p_list)
+	p = (c_double * len(v1)).from_buffer(v1)
+
+	N_c = ctypes.c_int(N)
+
+	len_my_list = 9*N*N
+
+	my_list = [0 for i in range(len_my_list)]
+	v2 = array('d', my_list)
+	my_arr = (c_double * len(v2)).from_buffer(v2)
+
+	lib.M_rpy(a, p, N_c, my_arr)
+
+	M = np.reshape(my_arr, (3*N, 3*N))
+
+	return M
+
+#-------------------------------------------------------------------------------
+
+# @timing
+def M_rpy_python(beads, pointers):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
 
@@ -889,6 +920,36 @@ def R_jeffrey_python(ai, aj, pointer):
 #-------------------------------------------------------------------------------
 
 def R_lub_corr(beads, pointers):
+
+	c_double = ctypes.c_double
+
+	N = len(beads);
+
+	a_list = [b.a for b in beads]
+	v0 = array('d', a_list)
+	a = (c_double * len(v0)).from_buffer(v0)
+
+	p_list = [pointers[i][j][k] for j in range(N) for i in range(j+1, N) for k in range(3)]
+	v1 = array('d', p_list)
+	p = (c_double * len(v1)).from_buffer(v1)
+
+	N_c = ctypes.c_int(N)
+
+	len_my_list = 9*N*N
+
+	my_list = [0 for i in range(len_my_list)]
+	v2 = array('d', my_list)
+	my_arr = (c_double * len(v2)).from_buffer(v2)
+
+	lib.R_lub_corr(a, p, N_c, my_arr)
+
+	M = np.reshape(my_arr, (3*N, 3*N))
+
+	return M
+
+#-------------------------------------------------------------------------------
+
+def R_lub_corr_python(beads, pointers):
 
 	corr = [ [ np.zeros((3,3)) for j in range( len(beads) ) ] for i in range( len(beads) ) ]
 

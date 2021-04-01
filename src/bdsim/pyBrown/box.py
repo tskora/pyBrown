@@ -1,4 +1,4 @@
-# pyBD is a Brownian and Stokesian dynamics simulation tool
+# pyBrown is a Brownian and Stokesian dynamics simulation tool
 # Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -39,6 +39,7 @@ class Box():
 
 		self.immobile_labels = self.inp["immobile_labels"]
 		self.handle_bead_mobility()
+		self.labels = self.handle_bead_labels()
 
 		self.box_length = self.inp["box_length"]
 		self.T = self.inp["T"]
@@ -56,18 +57,45 @@ class Box():
 			if "x" in self.inp["external_force_region"].keys():
 				self.is_external_force_region_x = True
 				self.Fex_region_x = self.inp["external_force_region"]["x"]
+			else:
+				self.is_external_force_region_x = False
 			if "y" in self.inp["external_force_region"].keys():
 				self.is_external_force_region_y = True
 				self.Fex_region_y = self.inp["external_force_region"]["y"]
+			else:
+				self.is_external_force_region_y = False
 			if "z" in self.inp["external_force_region"].keys():
 				self.is_external_force_region_z = True
 				self.Fex_region_z = self.inp["external_force_region"]["z"]
+			else:
+				self.is_external_force_region_z = False
 
 		self.is_flux = False
 		if "measure_flux" in self.inp.keys():
 			self.is_flux = True
 			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
 			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
+			self.net_flux = {label: 0 for label in self.mobile_labels}
+
+		self.is_concentration = False
+		if "measure_concentration" in self.inp.keys():
+			self.is_concentration = True
+			if "x" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_x = True
+				self.concentration_region_x = self.inp["measure_concentration"]["x"]
+			else:
+				self.is_concentration_region_x = False
+			if "y" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_y = True
+				self.concentration_region_y = self.inp["measure_concentration"]["y"]
+			else:
+				self.is_concentration_region_y = False
+			if "z" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_z = True
+				self.concentration_region_z = self.inp["measure_concentration"]["z"]
+			else:
+				self.is_concentration_region_z = False
+			self.concentration = {label: 0 for label in self.mobile_labels}
 
 		if self.hydrodynamics == "nohi":
 			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
@@ -89,7 +117,10 @@ class Box():
 	# @timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True, overlaps = True):
 
-		if self.is_flux: self.flux = np.zeros( len(self.mobile_beads), int )
+		if self.is_flux:
+			self.net_flux = {label: 0 for label in self.mobile_labels}
+		if self.is_concentration:
+			self.concentration = {label: 0 for label in self.mobile_labels}
 
 		# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
 		if self.hydrodynamics != "nohi":
@@ -115,9 +146,7 @@ class Box():
 
 		self.keep_beads_in_box()
 
-		if self.is_flux:
-			print(self.flux)
-			print(np.sum(self.flux))
+		if self.is_concentration: self.compute_concentration_in_region()
 
 	#-------------------------------------------------------------------------------
 
@@ -147,6 +176,19 @@ class Box():
 			else:
 				self.mobile_beads.append(bead)
 				self.mobile_bead_indices.append(i)
+
+	#-------------------------------------------------------------------------------
+
+	def handle_bead_labels(self):
+
+		self.labels = []
+		self.mobile_labels = []
+
+		for bead in self.beads:
+			if bead.label not in self.labels:
+				self.labels.append(bead.label)
+				if bead.mobile == True:
+					self.mobile_labels.append(bead.label)
 
 	#-------------------------------------------------------------------------------
 
@@ -184,7 +226,7 @@ class Box():
 
 			# deterministic step
 			for i, bead in enumerate( self.mobile_beads ):
-				if self.is_flux: self.flux[i] += bead.translate_and_return_flux( FX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+				if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( FX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
 				else: bead.translate( FX[3 * i: 3 * (i + 1)] )
 
 	#-------------------------------------------------------------------------------
@@ -204,7 +246,7 @@ class Box():
 
 			for i, bead in enumerate( self.mobile_beads ):
 				# stochastic step
-				if self.is_flux: self.flux[i] += bead.translate_and_return_flux( BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+				if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
 				else: bead.translate( BX[3 * i: 3 * (i + 1)] )
 
 			if overlaps:
@@ -212,7 +254,7 @@ class Box():
 				if self.check_overlaps():
 					for i, bead in enumerate( self.mobile_beads ):
 						# undo stochastic step
-						if self.is_flux: self.flux[i] += bead.translate_and_return_flux( -BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+						if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( -BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
 						else: bead.translate( -BX[3 * i: 3 * (i + 1)] )
 				else:
 					break
@@ -227,6 +269,23 @@ class Box():
 
 		for i, bead in enumerate( self.mobile_beads ):
 			bead.keep_in_box(self.box_length)
+
+	#-------------------------------------------------------------------------------
+
+	def compute_concentration_in_region(self):
+
+		for bead in self.mobile_beads:
+			if self.is_concentration_region_x:
+				if bead.r[0] < self.concentration_region_x[0] or bead.r[0] > self.concentration_region_x[1]:
+					continue
+			if self.is_concentration_region_y:
+				if bead.r[1] < self.concentration_region_y[0] or bead.r[1] > self.concentration_region_y[1]:
+					continue
+			if self.is_concentration_region_z:
+				if bead.r[2] < self.concentration_region_z[0] or bead.r[2] > self.concentration_region_z[1]:
+					continue
+
+			self.concentration[bead.label] += 1
 
 	#-------------------------------------------------------------------------------
 
