@@ -1,4 +1,4 @@
-// pyBD is a Brownian and Stokesian dynamics simulation tool
+// pyBrown is a Brownian and Stokesian dynamics simulation tool
 // Copyright (C) 2021  Tomasz Skora (tskora@ichf.edu.pl)
 //
 // This program is free software: you can redistribute it and/or modify
