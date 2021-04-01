@@ -92,7 +92,7 @@ void Q(double rx, double ry, double rz, double* answer)
 
 void Oii(double a, double box_length, double alpha, int m, int n, double* answer)
 {
-	double mlen, mlen2, nlen, nlen2, mult, temp;
+	double mlen, mlen2, nlen2, mult, temp;
 
 	int mbis, mtris, nbis, ntris;
 
@@ -191,7 +191,7 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 
 void Qii(double a, double box_length, double alpha, int m, int n, double* answer)
 {
-	double amlen, amlen2, expamlen2, mlen2, nlen, nlen2, mult;
+	double amlen, amlen2, expamlen2, mlen2, nlen2, mult;
 
 	int mbis, mtris, nbis, ntris;
 
@@ -299,7 +299,7 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n, double* answer)
 {
-	double mslen, mslen2, nlen, nlen2, msx, msy, msz, nsdot, mult, mult2, exp_const;
+	double mslen, mslen2, nlen2, msx, msy, msz, nsdot, mult, mult2, exp_const;
 
 	int mbis, mtris, nbis, ntris;
 
@@ -395,7 +395,7 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n, double* answer)
 {
-	double amslen, amslen2, mslen2, expamslen2, nlen, nlen2, msx, msy, msz, nsdot, mult;
+	double amslen, amslen2, mslen2, expamslen2, nlen2, msx, msy, msz, nsdot, mult;
 
 	int mbis, mtris, nbis, ntris;
 
@@ -565,8 +565,6 @@ void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answ
 
 void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, double* answer)
 {
-	int i;
-
 	double coef1 = 1.0 / ( 6 * M_PI * a );
 	double coef2 = 3 * a / ( 4 * box_length );
 	double coef3 = a * a * a / ( 2 * box_length * box_length * box_length );
@@ -590,7 +588,6 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 
 void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m, int n, double* answer)
 {
-	int i;
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
 	double sigmax = rx / box_length;
@@ -658,8 +655,6 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 
 int results_position(int i, int j, int N)
 {
-	int k;
-
 	int position = i + j*N;
 
 	return position - j*(j+1)/2;
@@ -1468,8 +1463,6 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 	double* nf2b;
 
 	double* ff2b;
-
-	double diagi, diagj;
 
 	double rx, ry, rz;
 
