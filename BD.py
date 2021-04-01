@@ -49,19 +49,29 @@ def main(input_filename):
 
 	disable_progress_bar = not i.input_data["progress_bar"]
 
+	if "measure_concentration" in i.input_data.keys():
+		concentration = True
+		con_filename = i.input_data["measure_concentration"]["output_concentration_filename"]
+	else:
+		concentration = False
+
 	if "measure_flux" in i.input_data.keys():
 		flux = True
-		n_flux = i.input_data["measure_flux"]["flux_freq"]
+		n_flux = i.input_data["measure_flux"]["flux_freq"] # is it needed? it does not work yet anyways
 		flux_filename = i.input_data["measure_flux"]["output_flux_filename"]
+	else:
+		flux = False
 
 	str_filename = i.input_data["input_str_filename"]
 	xyz_filename = i.input_data["output_xyz_filename"]
 
 	if "filename_range" in i.input_data.keys():
+		if concentration: con_filenames = [ con_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 		if flux: flux_filenames = [ flux_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 		str_filenames = [ str_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 		xyz_filenames = [ xyz_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
 	else:
+		if concentration: con_filenames = [ con_filename ]
 		if flux: flux_filenames = [ flux_filename ]
 		str_filenames = [ str_filename ]
 		xyz_filenames = [ xyz_filename ]
@@ -88,6 +98,9 @@ def main(input_filename):
 
 		extra_output_filenames = []
 
+		if concentration:
+			con_filename = con_filenames[index]
+			extra_output_filenames.append(con_filename)
 		if flux:
 			flux_filename = flux_filenames[index]
 			extra_output_filenames.append(flux_filename)
@@ -105,12 +118,16 @@ def main(input_filename):
 
 		with ExitStack() as stack:
 
+			if concentration: con_file = stack.enter_context(open(con_filename, "w", buffering = 1))
 			if flux: flux_file = stack.enter_context(open(flux_filename, "w", buffering = 1))
 			xyz_file = stack.enter_context(open(xyz_filename, "w", buffering = 1))
 
 			for j in tqdm( range(n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
+
+				if concentration:
+					write_to_con_file(con_file, j, dt, box.concentration)
 
 				if flux: 
 					if j % n_flux == 0:
@@ -126,6 +143,26 @@ def main(input_filename):
 		end = time.time()
 	
 		print('{} seconds elapsed'.format(end-start))
+
+#-------------------------------------------------------------------------------
+
+def write_to_con_file(con_file, j, dt, concentration):
+
+	concentration_labels = list(concentration.keys())
+
+	if j == 0:
+
+		first_line_string = 'time/ps' + ' {}' * len(concentration_labels) + '\n'
+
+		con_file.write(first_line_string.format(*concentration_labels))
+
+	else:
+
+		line_string = '{}' + ' {}' * len(concentration) + '\n'
+
+		concentration_for_given_label = [ concentration[key] for key in concentration_labels ]
+
+		con_file.write(line_string.format(j*dt, *concentration_for_given_label))
 
 #-------------------------------------------------------------------------------
 

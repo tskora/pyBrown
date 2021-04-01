@@ -57,12 +57,18 @@ class Box():
 			if "x" in self.inp["external_force_region"].keys():
 				self.is_external_force_region_x = True
 				self.Fex_region_x = self.inp["external_force_region"]["x"]
+			else:
+				self.is_external_force_region_x = False
 			if "y" in self.inp["external_force_region"].keys():
 				self.is_external_force_region_y = True
 				self.Fex_region_y = self.inp["external_force_region"]["y"]
+			else:
+				self.is_external_force_region_y = False
 			if "z" in self.inp["external_force_region"].keys():
 				self.is_external_force_region_z = True
 				self.Fex_region_z = self.inp["external_force_region"]["z"]
+			else:
+				self.is_external_force_region_z = False
 
 		self.is_flux = False
 		if "measure_flux" in self.inp.keys():
@@ -70,7 +76,26 @@ class Box():
 			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
 			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
 			self.net_flux = {label: 0 for label in self.mobile_labels}
-			assert list(self.net_flux.keys()) == self.mobile_labels, 'labels preserve the order from .str file'
+
+		self.is_concentration = False
+		if "measure_concentration" in self.inp.keys():
+			self.is_concentration = True
+			if "x" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_x = True
+				self.concentration_region_x = self.inp["measure_concentration"]["x"]
+			else:
+				self.is_concentration_region_x = False
+			if "y" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_y = True
+				self.concentration_region_y = self.inp["measure_concentration"]["y"]
+			else:
+				self.is_concentration_region_y = False
+			if "z" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_z = True
+				self.concentration_region_z = self.inp["measure_concentration"]["z"]
+			else:
+				self.is_concentration_region_z = False
+			self.concentration = {label: 0 for label in self.mobile_labels}
 
 		if self.hydrodynamics == "nohi":
 			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
@@ -94,6 +119,8 @@ class Box():
 
 		if self.is_flux:
 			self.net_flux = {label: 0 for label in self.mobile_labels}
+		if self.is_concentration:
+			self.concentration = {label: 0 for label in self.mobile_labels}
 
 		# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
 		if self.hydrodynamics != "nohi":
@@ -118,6 +145,8 @@ class Box():
 		self.stochastic_step(dt, overlaps)
 
 		self.keep_beads_in_box()
+
+		if self.is_concentration: self.compute_concentration_in_region()
 
 	#-------------------------------------------------------------------------------
 
@@ -240,6 +269,23 @@ class Box():
 
 		for i, bead in enumerate( self.mobile_beads ):
 			bead.keep_in_box(self.box_length)
+
+	#-------------------------------------------------------------------------------
+
+	def compute_concentration_in_region(self):
+
+		for bead in self.mobile_beads:
+			if self.is_concentration_region_x:
+				if bead.r[0] < self.concentration_region_x[0] or bead.r[0] > self.concentration_region_x[1]:
+					continue
+			if self.is_concentration_region_y:
+				if bead.r[1] < self.concentration_region_y[0] or bead.r[1] > self.concentration_region_y[1]:
+					continue
+			if self.is_concentration_region_z:
+				if bead.r[2] < self.concentration_region_z[0] or bead.r[2] > self.concentration_region_z[1]:
+					continue
+
+			self.concentration[bead.label] += 1
 
 	#-------------------------------------------------------------------------------
 

@@ -22,7 +22,7 @@ import time
 from contextlib import ExitStack
 from tqdm import tqdm
 
-from BD import write_to_xyz_file, write_to_restart_file, write_to_flux_file
+from BD import write_to_xyz_file, write_to_restart_file, write_to_con_file, write_to_flux_file
 
 from pyBD.box import Box
 from pyBD.input import read_str_file
@@ -40,6 +40,7 @@ def main(restart_filename):
 		j_rst = pickle.load(restart_file)
 		box_rst = pickle.load(restart_file)
 		xyz_file_rst = pickle.load(restart_file)
+		if box_rst.is_concentration: con_file_rst = pickle.load(restart_file)
 		if box_rst.is_flux: flux_file_rst = pickle.load(restart_file)
 
 	input_data = box_rst.inp
@@ -48,27 +49,40 @@ def main(restart_filename):
 
 	disable_progress_bar = not input_data["progress_bar"]
 
+	if box_rst.is_concentration:
+		concentration = True
+	else:
+		concentration = False
+
 	if box_rst.is_flux:
 		flux = True
-		n_flux = input_data["measure_flux"]["flux_freq"]
+		n_flux = input_data["measure_flux"]["flux_freq"] # is it needed? it does not work yet anyways
+	else:
+		flux = False
 
+	if concentration: con_filename = input_data["measure_concentration"]["output_concentration_filename"]
 	if flux: flux_filename = input_data["measure_flux"]["output_flux_filename"]
 	str_filename = input_data["input_str_filename"]
 	xyz_filename = input_data["output_xyz_filename"]
 	rst_filename = input_data["output_rst_filename"]
 
 	if "filename_range" in input_data.keys():
+		if concentration: con_filenames = [ con_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		if flux: flux_filenames = [ flux_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		str_filenames = [ str_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		xyz_filenames = [ xyz_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		rst_filenames = [ rst_filename.format(j) for j in range(*input_data["filename_range"]) ]
 	else:
+		if concentration: con_filenames = [ con_filename ]
 		if flux: flux_filenames = [ flux_filename ]
 		str_filenames = [ str_filename ]
 		xyz_filenames = [ xyz_filename ]
 		rst_filenames = [ rst_filename ]
 
 	with ExitStack() as stack:
+		if concentration:
+			new_con_file = stack.enter_context(open(con_filenames[index_rst], 'w'))
+			new_con_file.write(con_file_rst)
 		if flux:
 			new_flux_file = stack.enter_context(open(flux_filenames[index_rst], 'w'))
 			new_flux_file.write(flux_file_rst)
@@ -87,6 +101,9 @@ def main(restart_filename):
 
 		extra_output_filenames = []
 
+		if concentration:
+			con_filename = con_filenames[index]
+			extra_output_filenames.append(con_filename)
 		if flux:
 			flux_filename = flux_filenames[index]
 			extra_output_filenames.append(flux_filename)
@@ -110,12 +127,16 @@ def main(restart_filename):
 
 		with ExitStack() as stack:
 
+			if concentration: con_file = stack.enter_context(open(con_filename, filemode, buffering = 1))
 			if flux: flux_file = stack.enter_context(open(flux_filename, filemode, buffering = 1))
 			xyz_file = stack.enter_context(open(xyz_filename, filemode, buffering = 1))
 
 			for j in tqdm( range(j0, n_steps), disable = disable_progress_bar ):
 				if j % n_write == 0:
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
+
+				if concentration:
+					write_to_con_file(con_file, j, dt, box.concentration)
 
 				if flux: 
 					if j % n_flux == 0:
