@@ -49,7 +49,7 @@ class Box():
 		self.hydrodynamics = self.inp["hydrodynamics"]
 		
 		self.Fex = np.array( self.inp["external_force"] )
-		self.F0 = np.array( list(self.Fex)*len(self.mobile_beads) )
+		self.F = np.array( list(self.Fex)*len(self.mobile_beads) )
 
 		self.is_external_force_region = False
 		if "external_force_region" in self.inp.keys():
@@ -115,7 +115,66 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	# @timing
+	def propagate_midpoint(self, dt, build_Dff = True):
+
+		m = 100.0
+
+		self.compute_rij_matrix()
+
+		if build_Dff:
+
+			self.compute_Dff_matrix()
+
+		self.compute_Dtot_matrix()
+
+		self.decompose_D_matrix()
+
+		D0 = np.copy(self.D)
+
+		B0 = np.copy(self.B)
+
+		self.compute_forces()
+
+		self.deterministic_step(dt, mult = 1.0/m)
+
+		self.generate_random_vector()
+
+		self.stochastic_step(dt, mult = 1.0/m)
+
+		self.compute_rij_matrix()
+
+		if build_Dff:
+
+			self.compute_Dff_matrix()
+
+		self.compute_Dtot_matrix()
+
+		self.decompose_D_matrix()
+
+		deterministic_drift = m * dt / ( 2 * self.kBT ) * ( self.D - D0 ) @ self.F
+
+		stochastic_drift = m / 2 * math.sqrt(2 * dt) * ( self.B - B0 ) @ self.N
+
+		drift = stochastic_drift + deterministic_drift
+
+		self.D = D0
+
+		self.B = B0
+
+		self.deterministic_step(dt, mult = 1.0 - 1.0/m)
+
+		self.stochastic_step(dt, mult = 1.0 - 1.0/m)
+
+		self.translate_beads(drift)
+
+	#-------------------------------------------------------------------------------
+
+	# @timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True, overlaps = True):
+
+		# workaround for testing
+		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+			self.propagate_midpoint(dt)
 
 		if self.is_flux:
 			self.net_flux = {label: 0 for label in self.mobile_labels}
@@ -140,9 +199,26 @@ class Box():
 			if cholesky:
 				self.decompose_D_matrix()
 
+		self.compute_forces()
+
 		self.deterministic_step(dt)
 
-		self.stochastic_step(dt, overlaps)
+		while True:
+
+			self.generate_random_vector()
+
+			self.stochastic_step(dt)
+
+			if overlaps:
+
+				if self.check_overlaps():
+					self.stochastic_step(dt, mult = -1)
+				else:
+					break
+
+			else:
+
+				break
 
 		self.keep_beads_in_box()
 
@@ -198,70 +274,67 @@ class Box():
 			for i, bead in enumerate(self.mobile_beads):
 				if self.is_external_force_region_x:
 					if bead.r[0] < self.Fex_region_x[0] or bead.r[0] > self.Fex_region_x[1]:
-						self.F0[3*i:3*i+3] = np.zeros(3)
+						self.F[3*i:3*i+3] = np.zeros(3)
 						continue
 				if self.is_external_force_region_y:
 					if bead.r[1] < self.Fex_region_y[0] or bead.r[1] > self.Fex_region_y[1]:
-						self.F0[3*i:3*i+3] = np.zeros(3)
+						self.F[3*i:3*i+3] = np.zeros(3)
 						continue
 				if self.is_external_force_region_z:
 					if bead.r[2] < self.Fex_region_z[0] or bead.r[2] > self.Fex_region_z[1]:
-						self.F0[3*i:3*i+3] = np.zeros(3)
+						self.F[3*i:3*i+3] = np.zeros(3)
 						continue
-				self.F0[3*i:3*i+3] = self.Fex
+				self.F[3*i:3*i+3] = self.Fex
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def deterministic_step(self, dt):
+	def compute_forces(self):
 
 		self.prepare_region_dependent_external_force()
 
-		# computing displacement due to external force
-		if not np.all(self.Fex == 0.0):
-			if self.hydrodynamics != "nohi":
-				FX = dt / self.kBT * self.D @ self.F0
-			else:
-				FX = dt / self.kBT * self.D * self.F0
-
-			# deterministic step
-			for i, bead in enumerate( self.mobile_beads ):
-				if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( FX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
-				else: bead.translate( FX[3 * i: 3 * (i + 1)] )
+		# more to come -- interactions
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def stochastic_step(self, dt, overlaps):
+	def deterministic_step(self, dt, mult = 1.0):
 
-		while True:
+		# computing displacement due to external force
+		if self.hydrodynamics != "nohi":
+			FX = dt / self.kBT * self.D @ self.F * mult
+		else:
+			FX = dt / self.kBT * self.D * self.F * mult
 
-			# computing stochastic displacement
-			if self.hydrodynamics == "nohi":
-				BX = self.B * np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads)) * math.sqrt(2 * dt)
-			else:
-				BX = self.B @ np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads)) * math.sqrt(2 * dt)
-			
-			self.draw_count += 3 * len(self.mobile_beads)
+		self.translate_beads(FX)
 
-			for i, bead in enumerate( self.mobile_beads ):
-				# stochastic step
-				if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
-				else: bead.translate( BX[3 * i: 3 * (i + 1)] )
+	#-------------------------------------------------------------------------------
 
-			if overlaps:
+	def generate_random_vector(self):
 
-				if self.check_overlaps():
-					for i, bead in enumerate( self.mobile_beads ):
-						# undo stochastic step
-						if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( -BX[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
-						else: bead.translate( -BX[3 * i: 3 * (i + 1)] )
-				else:
-					break
+		self.N = np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads))
 
-			else:
+		self.draw_count += 3 * len(self.mobile_beads)
 
-				break
+	#-------------------------------------------------------------------------------
+
+	# @timing
+	def stochastic_step(self, dt, mult = 1.0):
+
+		if self.hydrodynamics == "nohi":
+			BX = self.B * self.N * math.sqrt(2 * dt) * mult
+		else:
+			BX = self.B @ self.N * math.sqrt(2 * dt) * mult
+
+		self.translate_beads(BX)
+
+	#-------------------------------------------------------------------------------
+
+	def translate_beads(self, vector):
+
+		for i, bead in enumerate( self.mobile_beads ):
+			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
 
 	#-------------------------------------------------------------------------------
 
@@ -342,24 +415,24 @@ class Box():
 
 		if self.hydrodynamics == "rpy_lub":
 
-			self.Dff = M_rpy(self.mobile_beads, self.rij)
+			self.Mff = M_rpy(self.mobile_beads, self.rij) * 10**19 / self.viscosity
 
-			self.Rff = np.linalg.inv( self.Dff )
+			self.Rff = np.linalg.inv( self.Mff )
 
 		if self.hydrodynamics == "rpy_smith_lub":
 
-			self.Dff = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max)
+			self.Mff = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max) * 10**19 / self.viscosity
 
-			self.Rff = np.linalg.inv( self.Dff )
+			self.Rff = np.linalg.inv( self.Mff )
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
 	def compute_Dtot_matrix(self):
 
-		self.R = R_lub_corr(self.mobile_beads, self.rij) + self.Rff
+		self.R = R_lub_corr(self.mobile_beads, self.rij) * self.viscosity / 10**19 + self.Rff
 
-		self.D = self.kBT * 10**19 * np.linalg.inv(self.R) / self.viscosity
+		self.D = self.kBT * np.linalg.inv(self.R)
 
 	#-------------------------------------------------------------------------------
 
