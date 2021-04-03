@@ -33,6 +33,7 @@ class Box():
 		self.beads = beads
 		self.inp = input_data
 
+		# handling pseudorandom number generation
 		self.seed = self.inp["seed"]
 		np.random.seed(self.seed)
 		self.draw_count = 0
@@ -41,35 +42,33 @@ class Box():
 		self.handle_bead_mobility()
 		self.labels = self.handle_bead_labels()
 
+		# handling basic physical parameters
 		self.box_length = self.inp["box_length"]
 		self.T = self.inp["T"]
 		self.kBT = Boltzmann*self.T
 		self.viscosity = self.inp["viscosity"]
 
 		self.hydrodynamics = self.inp["hydrodynamics"]
+		if self.hydrodynamics == "nohi":
+			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
+			self.B = np.sqrt( self.D )
+		if self.hydrodynamics == "rpy_smith" or self.hydrodynamics == "rpy_smith_lub":
+			self.alpha = self.inp["ewald_alpha"]
+			self.m_max = self.inp["ewald_real"]
+			self.n_max = self.inp["ewald_imag"]
+
+		self.propagation_scheme = self.inp["propagation_scheme"]
+		if self.propagation_scheme == "midpoint":
+			self.m_midpoint = self.inp["m_midpoint"]
+
+		self.overlaps = self.inp["check_overlaps"]
 		
+		# handling external forces
 		self.Fex = np.array( self.inp["external_force"] )
 		self.F = np.array( list(self.Fex)*len(self.mobile_beads) )
+		self.handle_external_force_restricted_to_region()
 
-		self.is_external_force_region = False
-		if "external_force_region" in self.inp.keys():
-			self.is_external_force_region = True
-			if "x" in self.inp["external_force_region"].keys():
-				self.is_external_force_region_x = True
-				self.Fex_region_x = self.inp["external_force_region"]["x"]
-			else:
-				self.is_external_force_region_x = False
-			if "y" in self.inp["external_force_region"].keys():
-				self.is_external_force_region_y = True
-				self.Fex_region_y = self.inp["external_force_region"]["y"]
-			else:
-				self.is_external_force_region_y = False
-			if "z" in self.inp["external_force_region"].keys():
-				self.is_external_force_region_z = True
-				self.Fex_region_z = self.inp["external_force_region"]["z"]
-			else:
-				self.is_external_force_region_z = False
-
+		# handling flow measurement
 		self.is_flux = False
 		if "measure_flux" in self.inp.keys():
 			self.is_flux = True
@@ -97,84 +96,16 @@ class Box():
 				self.is_concentration_region_z = False
 			self.concentration = {label: 0 for label in self.mobile_labels}
 
-		if self.hydrodynamics == "nohi":
-			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
-			self.B = np.sqrt( self.D )
-
-		if self.hydrodynamics == "rpy_smith" or self.hydrodynamics == "rpy_smith_lub":
-			self.alpha = self.inp["ewald_alpha"]
-			self.m_max = self.inp["ewald_real"]
-			self.n_max = self.inp["ewald_imag"]
-
 	#-------------------------------------------------------------------------------
 
 	def __str__(self):
 
-		return 'a'
+		return 'simulation box'
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def propagate_midpoint(self, dt, build_Dff = True):
-
-		m = 100.0
-
-		self.compute_rij_matrix()
-
-		if build_Dff:
-
-			self.compute_Dff_matrix()
-
-		self.compute_Dtot_matrix()
-
-		self.decompose_D_matrix()
-
-		D0 = np.copy(self.D)
-
-		B0 = np.copy(self.B)
-
-		self.compute_forces()
-
-		self.deterministic_step(dt, mult = 1.0/m)
-
-		self.generate_random_vector()
-
-		self.stochastic_step(dt, mult = 1.0/m)
-
-		self.compute_rij_matrix()
-
-		if build_Dff:
-
-			self.compute_Dff_matrix()
-
-		self.compute_Dtot_matrix()
-
-		self.decompose_D_matrix()
-
-		deterministic_drift = m * dt / ( 2 * self.kBT ) * ( self.D - D0 ) @ self.F
-
-		stochastic_drift = m / 2 * math.sqrt(2 * dt) * ( self.B - B0 ) @ self.N
-
-		drift = stochastic_drift + deterministic_drift
-
-		self.D = D0
-
-		self.B = B0
-
-		self.deterministic_step(dt, mult = 1.0 - 1.0/m)
-
-		self.stochastic_step(dt, mult = 1.0 - 1.0/m)
-
-		self.translate_beads(drift)
-
-	#-------------------------------------------------------------------------------
-
-	# @timing
-	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True, overlaps = True):
-
-		# workaround for testing
-		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-			self.propagate_midpoint(dt)
+	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True):
 
 		if self.is_flux:
 			self.net_flux = {label: 0 for label in self.mobile_labels}
@@ -201,6 +132,18 @@ class Box():
 
 		self.compute_forces()
 
+		if self.propagation_scheme == "ermak": self.ermak_step(dt)
+
+		if self.propagation_scheme == "midpoint": self.midpoint_step(dt, build_Dff, build_Dnf, cholesky)
+
+		self.keep_beads_in_box()
+
+		if self.is_concentration: self.compute_concentration_in_region()
+
+	#-------------------------------------------------------------------------------
+
+	def ermak_step(self, dt):
+
 		self.deterministic_step(dt)
 
 		while True:
@@ -209,7 +152,7 @@ class Box():
 
 			self.stochastic_step(dt)
 
-			if overlaps:
+			if self.overlaps:
 
 				if self.check_overlaps():
 					self.stochastic_step(dt, mult = -1)
@@ -220,9 +163,68 @@ class Box():
 
 				break
 
-		self.keep_beads_in_box()
+	#-------------------------------------------------------------------------------
 
-		if self.is_concentration: self.compute_concentration_in_region()
+	def midpoint_step(self, dt, build_Dff, build_Dnf, cholesky):
+
+		D0 = np.copy(self.D)
+
+		B0 = np.copy(self.B)
+
+		while True:
+
+			self.deterministic_step(dt, mult = 1.0 / self.m_midpoint)
+
+			self.generate_random_vector()
+
+			self.stochastic_step(dt, mult = 1.0 / self.m_midpoint)
+
+			# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
+			if self.hydrodynamics != "nohi":
+
+				self.compute_rij_matrix()
+
+			if self.hydrodynamics != "nohi":
+
+				if build_Dff:
+					self.compute_Dff_matrix()
+
+				if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+
+					if build_Dnf:
+						self.compute_Dtot_matrix()
+
+				if cholesky:
+					self.decompose_D_matrix()
+
+			deterministic_drift = self.m_midpoint * dt / ( 2 * self.kBT ) * ( self.D - D0 ) @ self.F
+
+			stochastic_drift = self.m_midpoint / 2 * math.sqrt(2 * dt) * ( self.B - B0 ) @ self.N
+
+			drift = stochastic_drift + deterministic_drift
+
+			self.D = D0
+
+			self.B = B0
+
+			self.deterministic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
+
+			self.stochastic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
+
+			self.translate_beads(drift)
+
+			if self.overlaps:
+
+				if self.check_overlaps():
+					self.deterministic_step(dt, mult = -1)
+					self.stochastic_step(dt, mult = -1)
+					self.translate_beads(-drift)
+				else:
+					break
+
+			else:
+
+				break
 
 	#-------------------------------------------------------------------------------
 
@@ -265,6 +267,29 @@ class Box():
 				self.labels.append(bead.label)
 				if bead.mobile == True:
 					self.mobile_labels.append(bead.label)
+
+	#-------------------------------------------------------------------------------
+
+	def handle_external_force_restricted_to_region(self):
+
+		self.is_external_force_region = False
+		if "external_force_region" in self.inp.keys():
+			self.is_external_force_region = True
+			if "x" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_x = True
+				self.Fex_region_x = self.inp["external_force_region"]["x"]
+			else:
+				self.is_external_force_region_x = False
+			if "y" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_y = True
+				self.Fex_region_y = self.inp["external_force_region"]["y"]
+			else:
+				self.is_external_force_region_y = False
+			if "z" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_z = True
+				self.Fex_region_z = self.inp["external_force_region"]["z"]
+			else:
+				self.is_external_force_region_z = False
 
 	#-------------------------------------------------------------------------------
 

@@ -43,7 +43,8 @@ def main(input_filename):
 	defaults = {"debug": False, "hydrodynamics": "nohi", "external_force": [0.0, 0.0, 0.0],
 				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0, "diff_freq": 1,
 				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1, "progress_bar": False,
-				"seed": np.random.randint(2**32 - 1), "immobile_labels": []}
+				"seed": np.random.randint(2**32 - 1), "immobile_labels": [],
+				"propagation_scheme": "ermak", "check_overlaps": True}
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults)

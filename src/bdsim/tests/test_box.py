@@ -36,7 +36,8 @@ class TestBox(unittest.TestCase):
 
 		self.mock_input = {"hydrodynamics": "nohi", "box_length": 35.0, "T": 298.0,
 					  	   "viscosity": 0.01, "external_force": [0, 0, 0],
-					  	   "immobile_labels": []}
+					  	   "immobile_labels": [], "propagation_scheme": "ermak",
+					  	   "check_overlaps": True}
 
 		self.test_filename = 'test_box.txt'
 
@@ -150,7 +151,7 @@ class TestBox(unittest.TestCase):
 
 		b.propagate(1e-20)
 
-		self.assertSequenceEqual(should_be, list( b.F0 ))
+		self.assertSequenceEqual(should_be, list( b.F ))
 
 	#---------------------------------------------------------------------------
 
