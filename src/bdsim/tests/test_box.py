@@ -25,8 +25,11 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
+from scipy.constants import Boltzmann
+
+from pyBrown.bead import Bead, pointer_pbc
 from pyBrown.box import Box
-from pyBrown.bead import Bead
+from pyBrown.diffusion import M_rpy_smith, M_rpy, R_lub_corr
 
 #-------------------------------------------------------------------------------
 
@@ -190,6 +193,296 @@ class TestBox(unittest.TestCase):
 		move_canceled = [*move_canceled_1, *move_canceled_2]
 
 		for i in range(6): self.assertAlmostEqual(initial[i],move_canceled[i], places=15)
+
+	#---------------------------------------------------------------------------
+
+	def test_random_numbers(self):
+
+		self.mock_input["seed"] = 0
+
+		N = 100
+
+		np.random.seed(0)
+
+		beads = [ Bead(np.array([0.0, 0.0, 0.0], float), 1.0),
+				  Bead(np.array([3.0, 0.0, 0.0], float), 1.0),
+				  Bead(np.array([0.0, 3.0, 0.0], float), 1.0) ]
+
+		ref = np.random.normal(0.0, 1.0, (N, 3*len(beads)))
+
+		b = Box(beads, self.mock_input)
+
+		for i in range(len(beads)):
+
+			b.generate_random_vector()
+
+			for j in range(3): self.assertEqual(b.N[j], ref[i][j])
+
+			self.assertEqual(b.draw_count, (i+1)*3*len(beads))
+
+	#---------------------------------------------------------------------------
+
+	def test_ermak_nohi(self):
+
+		self.mock_input["seed"] = 0
+
+		self.mock_input["propagation_scheme"] = "ermak"
+
+		self.mock_input["hydrodynamics"] = "nohi"
+
+		Nit = 100
+
+		coords = [-6.0, -3.0, 0.0, 3.0, 6.0]
+
+		dt = 1e-10
+
+		beads = [ Bead(np.array([x, y, z], float), 1.0) for x in coords for y in coords for z in coords ]
+
+		beads_copy = cp.deepcopy( beads )
+
+		np.random.seed( self.mock_input["seed"] )
+
+		N = np.random.normal(0.0, 1.0, Nit*3*len(beads))
+
+		b = Box(beads, self.mock_input)
+
+		for iteration in range(Nit):
+
+			pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+			b.propagate(dt)
+
+			D = Boltzmann * self.mock_input["T"] * 10**19 / ( 6.0 * np.pi * self.mock_input["viscosity"] ) * np.ones(3*len(beads))
+
+			B = np.sqrt(D)
+
+			Ni = N[3*iteration*len(beads):3*(iteration+1)*len(beads)]
+
+			BX = B * Ni * math.sqrt(2*dt)
+
+			for i in range(3*len(beads)): self.assertEqual(b.N[i], Ni[i])
+
+			for i, bead in enumerate(beads_copy):
+
+				bead.translate( BX[3*i:3*(i+1)] )
+
+			for i in range(len(beads)):
+
+				for j in range(3):
+
+					self.assertEqual( beads[i].r[j], beads_copy[i].r[j] )
+
+	#---------------------------------------------------------------------------
+
+	def test_ermak_rpy(self):
+
+		self.mock_input["seed"] = 0
+
+		self.mock_input["propagation_scheme"] = "ermak"
+
+		self.mock_input["hydrodynamics"] = "rpy"
+
+		Nit = 100
+
+		coords = [-3.0, 0.0, 3.0]
+
+		dt = 1e-10
+
+		beads = [ Bead(np.array([x, y, z], float), 1.0) for x in coords for y in coords for z in coords ]
+
+		beads_copy = cp.deepcopy( beads )
+
+		np.random.seed( self.mock_input["seed"] )
+
+		N = np.random.normal(0.0, 1.0, Nit*3*len(beads))
+
+		b = Box(beads, self.mock_input)
+
+		for iteration in range(Nit):
+
+			pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+			b.propagate(dt)
+
+			D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * M_rpy(beads_copy, pointers)
+
+			B = np.linalg.cholesky( D )
+
+			Ni = N[3*iteration*len(beads):3*(iteration+1)*len(beads)]
+
+			BX = B @ Ni * math.sqrt(2*dt)
+
+			for i in range(3*len(beads)): self.assertEqual(b.N[i], Ni[i])
+
+			for i, bead in enumerate(beads_copy):
+
+				bead.translate( BX[3*i:3*(i+1)] )
+
+			for i in range(len(beads)):
+
+				for j in range(3):
+
+					self.assertEqual( beads[i].r[j], beads_copy[i].r[j] )
+
+	#---------------------------------------------------------------------------
+
+	def test_ermak_rpy_smith(self):
+
+		self.mock_input["seed"] = 0
+
+		self.mock_input["propagation_scheme"] = "ermak"
+
+		self.mock_input["hydrodynamics"] = "rpy_smith"
+
+		self.mock_input["ewald_alpha"] = np.sqrt( np.pi )
+
+		Nit = 100
+
+		coords = [-3.0, 0.0, 3.0]
+
+		dt = 1e-10
+
+		for n in range(3):
+
+			self.mock_input["ewald_real"] = n
+
+			self.mock_input["ewald_imag"] = n
+
+			beads = [ Bead(np.array([x, y, z], float), 1.0) for x in coords for y in coords for z in coords ]
+
+			beads_copy = cp.deepcopy( beads )
+
+			np.random.seed( self.mock_input["seed"] )
+
+			N = np.random.normal(0.0, 1.0, Nit*3*len(beads))
+
+			b = Box(beads, self.mock_input)
+
+			for iteration in range(Nit):
+
+				pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+				b.propagate(dt)
+
+				D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * M_rpy_smith(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n)
+
+				B = np.linalg.cholesky( D )
+
+				Ni = N[3*iteration*len(beads):3*(iteration+1)*len(beads)]
+
+				BX = B @ Ni * math.sqrt(2*dt)
+
+				for i in range(3*len(beads)): self.assertEqual(b.N[i], Ni[i])
+
+				for i, bead in enumerate(beads_copy):
+
+					bead.translate( BX[3*i:3*(i+1)] )
+
+				for i in range(len(beads)):
+
+					for j in range(3):
+
+						self.assertAlmostEqual( beads[i].r[j], beads_copy[i].r[j] )
+
+	#---------------------------------------------------------------------------
+
+	def test_midpoint_rpy_smith_lub(self):
+
+		self.mock_input["seed"] = 0
+
+		self.mock_input["propagation_scheme"] = "midpoint"
+
+		self.mock_input["hydrodynamics"] = "rpy_smith_lub"
+
+		self.mock_input["ewald_alpha"] = np.sqrt( np.pi )
+
+		Nit = 100
+
+		coords = [-2.2, 0.0, 2.2]
+
+		ms = [ 2.0, 10.0, 100.0 ]
+
+		dt = 1e-10
+
+		for n in range(3):
+
+			for m in ms:
+
+				self.mock_input["ewald_real"] = n
+
+				self.mock_input["ewald_imag"] = n
+
+				self.mock_input["m_midpoint"] = m
+
+				beads = [ Bead(np.array([x, y, z], float), 1.0) for x in coords for y in coords for z in coords ]
+
+				beads_copy = cp.deepcopy( beads )
+
+				np.random.seed( self.mock_input["seed"] )
+
+				N = np.random.normal(0.0, 1.0, Nit*3*len(beads))
+
+				b = Box(beads, self.mock_input)
+
+				for iteration in range(Nit):
+
+					pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+					b.propagate(dt)
+
+					Mff = M_rpy_smith(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
+
+					Rff = np.linalg.inv(Mff)
+
+					Rlc = R_lub_corr(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
+
+					Rtot = Rlc + Rff
+
+					Dtot = Boltzmann * self.mock_input["T"] * np.linalg.inv(Rtot)
+
+					Btot = np.linalg.cholesky(Dtot)
+
+					Ni = N[3*iteration*len(beads):3*(iteration+1)*len(beads)]
+
+					BX = Btot @ Ni * math.sqrt(2*dt)
+
+					for i in range(3*len(beads)): self.assertEqual(b.N[i], Ni[i])
+
+					for i, bead in enumerate(beads_copy):
+
+						bead.translate( BX[3*i:3*(i+1)] / m )
+
+					pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+					Mff_mid = M_rpy_smith(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
+
+					Rff_mid = np.linalg.inv(Mff_mid)
+
+					Rlc_mid = R_lub_corr(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
+
+					Rtot_mid = Rlc_mid + Rff_mid
+
+					Dtot_mid = Boltzmann * self.mock_input["T"] * np.linalg.inv(Rtot_mid)
+
+					for i, bead in enumerate(beads_copy):
+
+						bead.translate( BX[3*i:3*(i+1)] * (1.0 - 1.0/m) )
+
+					Btot_mid = np.linalg.cholesky(Dtot_mid)
+
+					BX_mid = Btot_mid @ Ni * math.sqrt(2*dt)
+
+					BX_drift = ( BX_mid - BX ) * m / 2
+
+					for i, bead in enumerate(beads_copy):
+
+						bead.translate( BX_drift[3*i:3*(i+1)] )
+
+					for i in range(len(beads)):
+
+						for j in range(3):
+
+							self.assertAlmostEqual( beads[i].r[j], beads_copy[i].r[j], places = 9 )
 
 	#---------------------------------------------------------------------------
 
