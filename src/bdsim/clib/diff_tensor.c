@@ -753,6 +753,10 @@ void M_rpy(double* as, double* pointers, int N, double* results2)
 			results2[J2 + I1*N3] = results[r + 5];
 		}
 	}
+
+	free(results);
+
+	free(vector);
 }
 
 // -------------------------------------------------------------------------------
@@ -858,6 +862,10 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 			results2[J2 + I1*N3] = results[r + 5];
 		}
 	}
+
+	free(results);
+
+	free(vector);
 }
 
 // -------------------------------------------------------------------------------
@@ -1372,6 +1380,10 @@ void R_rpy(double ai, double aj, double rx, double ry, double rz, double* answer
 	*(answer+15) = *(matrix+9);
 	*(answer+16) = *(matrix+15);
 	*(answer+17) = *(matrix+16);
+
+	free(Mij);
+
+	free(matrix);
 }
 
 // -------------------------------------------------------------------------------
@@ -1549,4 +1561,10 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 			results2[J2 + I1*N3] += results[r + 5];
 		}
 	}
+
+	free(results);
+
+	free(nf2b);
+
+	free(ff2b);
 }
