@@ -25,7 +25,7 @@ from scipy.special import erfc
 
 from pyBrown.output import timing
 
-lib_name = "libpyBrown"
+lib_name = "pyBrown"
 lib_path = find_library(lib_name)
 lib = ctypes.cdll.LoadLibrary( lib_path )
 
