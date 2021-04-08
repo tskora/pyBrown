@@ -20,14 +20,14 @@ import numpy as np
 import os.path	
 
 from array import array
+from ctypes.util import find_library
 from scipy.special import erfc
 
 from pyBrown.output import timing
 
-# lib_name = 'clib/diff_tensor.so'
-# lib_path = os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ) + os.path.sep + lib_name
-lib_path = "libpyBrown.dylib"
-lib = ctypes.cdll.LoadLibrary(lib_path)
+lib_name = "libpyBrown"
+lib_path = find_library(lib_name)
+lib = ctypes.cdll.LoadLibrary( lib_path )
 
 #-------------------------------------------------------------------------------
 
