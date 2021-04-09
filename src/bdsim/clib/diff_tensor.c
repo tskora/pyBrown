@@ -185,6 +185,8 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 	*(answer) -= temp;
 	*(answer+1) -= temp;
 	*(answer+2) -= temp;
+
+	free(values);
 }
 
 // -------------------------------------------------------------------------------
@@ -292,7 +294,9 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	*(answer) -= temp1;
 	*(answer+1) -= temp1;
-	*(answer+2) -= temp1;	
+	*(answer+2) -= temp1;
+
+	free(values);
 }
 
 // -------------------------------------------------------------------------------
@@ -389,6 +393,8 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 			}
 		}
 	}
+
+	free(values);
 }
 
 // -------------------------------------------------------------------------------
@@ -489,6 +495,8 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 			}
 		}
 	}
+
+	free(values);
 }
 
 // -------------------------------------------------------------------------------
@@ -582,6 +590,9 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 	*(answer+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
 	*(answer+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
 	*(answer+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
+
+	free(comp1);
+	free(comp2);
 }
 
 // -------------------------------------------------------------------------------
@@ -648,7 +659,13 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 		*(answer+3) -= coef1 * coef3 * rx * ry;
 		*(answer+4) -= coef1 * coef3 * rx * rz;
 		*(answer+5) -= coef1 * coef3 * ry * rz;
+
+		free(Aij);
 	}
+
+	free(comp1);
+
+	free(comp2);
 }
 
 // -------------------------------------------------------------------------------
@@ -712,6 +729,7 @@ void M_rpy(double* as, double* pointers, int N, double* results2)
 			*(shifted_results + 4) = *(vector + 4);
 			*(shifted_results + 5) = *(vector + 5);
 
+			free(vector);
 		}
 	}
 
@@ -755,8 +773,6 @@ void M_rpy(double* as, double* pointers, int N, double* results2)
 	}
 
 	free(results);
-
-	free(vector);
 }
 
 // -------------------------------------------------------------------------------
@@ -795,6 +811,8 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 		*(shifted_results + 1) = *(vector + 1);
 		*(shifted_results + 2) = *(vector + 2);
 
+		free(vector);
+
 		for (i = j + 1; i < N; i++)
 		{
 			vector = calloc(6, sizeof(double));
@@ -815,6 +833,7 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 			*(shifted_results + 4) = *(vector + 4);
 			*(shifted_results + 5) = *(vector + 5);
 
+			free(vector);
 		}
 	}
 
@@ -864,8 +883,6 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 	}
 
 	free(results);
-
-	free(vector);
 }
 
 // -------------------------------------------------------------------------------
@@ -1559,12 +1576,13 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 			results2[I1 + J2*N3] += results[r + 5];
 			results2[J1 + I2*N3] += results[r + 5];
 			results2[J2 + I1*N3] += results[r + 5];
+
+
+			free(nf2b);
+
+			free(ff2b);
 		}
 	}
 
 	free(results);
-
-	free(nf2b);
-
-	free(ff2b);
 }
