@@ -204,13 +204,20 @@ def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_o
 		pickle.dump(index, restart_file)
 		pickle.dump(j, restart_file)
 		pickle.dump(box, restart_file)
-		with open(xyz_filename, "r") as copied_file:
-			pickle.dump(copied_file.read(), restart_file)
+		pickle.dump(file_length(xyz_filename), restart_file)
 		for extra_output_filename in extra_output_filenames:
-			with open(extra_output_filename, "r") as copied_file:
-				pickle.dump(copied_file.read(), restart_file)
+			pickle.dump(file_length(extra_output_filename), restart_file)
 
 	shutil.copy(restart_filename, restart_filename+"2")
+
+#-------------------------------------------------------------------------------
+
+def file_length(filename):
+	i = -1
+	with open(filename, "r") as file:
+		for i, l in enumerate(file):
+			pass
+	return i + 1
 
 #-------------------------------------------------------------------------------
 

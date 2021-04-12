@@ -18,6 +18,7 @@
 
 import click
 import pickle
+import os
 import shutil
 import time
 
@@ -41,9 +42,9 @@ def main(restart_filename):
 		index_rst = pickle.load(restart_file)
 		j_rst = pickle.load(restart_file)
 		box_rst = pickle.load(restart_file)
-		xyz_file_rst = pickle.load(restart_file)
-		if box_rst.is_concentration: con_file_rst = pickle.load(restart_file)
-		if box_rst.is_flux: flux_file_rst = pickle.load(restart_file)
+		xyz_file_length_rst = pickle.load(restart_file)
+		if box_rst.is_concentration: con_file_length_rst = pickle.load(restart_file)
+		if box_rst.is_flux: flux_file_length_rst = pickle.load(restart_file)
 
 	input_data = box_rst.inp
 
@@ -81,15 +82,10 @@ def main(restart_filename):
 		xyz_filenames = [ xyz_filename ]
 		rst_filenames = [ rst_filename ]
 
-	with ExitStack() as stack:
-		if concentration:
-			new_con_file = stack.enter_context(open(con_filenames[index_rst], 'w'))
-			new_con_file.write(con_file_rst)
-		if flux:
-			new_flux_file = stack.enter_context(open(flux_filenames[index_rst], 'w'))
-			new_flux_file.write(flux_file_rst)
-		new_xyz_file = stack.enter_context(open(xyz_filenames[index_rst], 'w'))
-		new_xyz_file.write(xyz_file_rst)
+
+	if concentration: truncate_file(con_filenames[index_rst], con_file_length_rst)
+	if flux: truncate_file(flux_filenames[index_rst], flux_file_length_rst)
+	truncate_file(xyz_filenames[index_rst], xyz_file_length_rst)
 
 	dt = input_data["dt"]
 	n_steps = input_data["number_of_steps"]
@@ -152,6 +148,25 @@ def main(restart_filename):
 		end = time.time()
 	
 		print('{} seconds elapsed'.format(end-start))
+
+#-------------------------------------------------------------------------------
+
+def truncate_file(filename, line):
+    
+    tmp_filename = filename+'.tmp'
+    
+    with open(filename, 'r') as source:
+        with open(tmp_filename, 'w') as destination:
+            for i in range(line):
+                destination.write( source.readline() )
+                
+    with open(filename, 'w') as destination:
+        with open(tmp_filename, 'r') as source:
+            for line in source:
+                destination.write(line)
+                
+    if os.path.exists(tmp_filename):
+        os.remove(tmp_filename)
 
 #-------------------------------------------------------------------------------
 
