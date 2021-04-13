@@ -26,15 +26,15 @@ void dgetri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, i
 
 // -------------------------------------------------------------------------------
 
-void inverse(double* A, int N)
+static void inverse(double* matrix, int matrix_dimension)
 {
-    int *IPIV = calloc(N, sizeof(int));
-    int LWORK = N*N;
+    int *IPIV = calloc(matrix_dimension, sizeof(int));
+    int LWORK = matrix_dimension * matrix_dimension;
     double *WORK = calloc(LWORK, sizeof(double));
     int INFO;
 
-    dgetrf_(&N,&N,A,&N,IPIV,&INFO);
-    dgetri_(&N,A,&N,IPIV,WORK,&LWORK,&INFO);
+    dgetrf_(&matrix_dimension, &matrix_dimension, matrix, &matrix_dimension, IPIV, &INFO);
+    dgetri_(&matrix_dimension, matrix, &matrix_dimension, IPIV, WORK, &LWORK, &INFO);
 
     free(IPIV);
     free(WORK);
@@ -42,7 +42,7 @@ void inverse(double* A, int N)
 
 // -------------------------------------------------------------------------------
 
-void O(double rx, double ry, double rz, double* answer)
+static void RPY_O_function(double rx, double ry, double rz, double* matrix)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
@@ -50,22 +50,22 @@ void O(double rx, double ry, double rz, double* answer)
 
 	double dist3 = dist2 * dist;
 
-	*answer = ( 1 + rx*rx / dist2 ) / dist;
+	*matrix = ( 1 + rx*rx / dist2 ) / dist;
 
-	*(answer+1) = ( 1 + ry*ry / dist2 ) / dist;
+	*(matrix+1) = ( 1 + ry*ry / dist2 ) / dist;
 
-	*(answer+2) = ( 1 + rz*rz / dist2 ) / dist;
+	*(matrix+2) = ( 1 + rz*rz / dist2 ) / dist;
 
-	*(answer+3) = rx*ry / dist3;
+	*(matrix+3) = rx*ry / dist3;
 
-	*(answer+4) = rx*rz / dist3;
+	*(matrix+4) = rx*rz / dist3;
 
-	*(answer+5) = ry*rz / dist3;
+	*(matrix+5) = ry*rz / dist3;
 }
 
 // -------------------------------------------------------------------------------
 
-void Q(double rx, double ry, double rz, double* answer)
+static void RPY_Q_function(double rx, double ry, double rz, double* matrix)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
@@ -75,40 +75,35 @@ void Q(double rx, double ry, double rz, double* answer)
 
 	double dist5 = dist3 * dist2;
 
-	*answer = ( 1 - 3 * rx*rx / dist2 ) / dist3;
+	*matrix = ( 1 - 3 * rx*rx / dist2 ) / dist3;
 
-	*(answer+1) = ( 1 - 3 * ry*ry / dist2 ) / dist3;
+	*(matrix+1) = ( 1 - 3 * ry*ry / dist2 ) / dist3;
 
-	*(answer+2) = ( 1 - 3 * rz*rz / dist2 ) / dist3;
+	*(matrix+2) = ( 1 - 3 * rz*rz / dist2 ) / dist3;
 
-	*(answer+3) = -3 * rx*ry / dist5;
+	*(matrix+3) = -3 * rx*ry / dist5;
 
-	*(answer+4) = -3 * rx*rz / dist5;
+	*(matrix+4) = -3 * rx*rz / dist5;
 
-	*(answer+5) = -3 * ry*rz / dist5;
+	*(matrix+5) = -3 * ry*rz / dist5;
 }
 
 // -------------------------------------------------------------------------------
 
-void Oii(double a, double box_length, double alpha, int m, int n, double* answer)
+static void RPY_Smith_Oii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix)
 {
+	register int mx;
+	register int my;
+	register int mz;
+	register int nx;
+	register int ny;
+	register int nz;
+
 	double mlen, mlen2, nlen2, mult, temp;
 
 	int mbis, mtris, nbis, ntris;
 
-	register int mx;
-
-	register int my;
-
-	register int mz;
-	
-	register int nx;
-	
-	register int ny;
-	
-	register int nz;
-
-	double* values = calloc(6, sizeof(double));
+	double* O_values = calloc(6, sizeof(double));
 
 	double sqrt_pi = sqrt(M_PI);
 
@@ -118,9 +113,9 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	double exp_const = -M_PI*M_PI/alpha2;
 
-	for (mx = -m; mx <= m; mx++)
+	for (mx = -m_max; mx <= m_max; mx++)
 	{
-		mbis = m - abs(mx);
+		mbis = m_max - abs(mx);
 		for (my = -mbis; my <= mbis; my++)
 		{
 			mtris = mbis - abs(my);
@@ -130,24 +125,24 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 				{
 					mlen2 = mx*mx + my*my + mz*mz;
 					mlen = sqrt(mlen2);
-					O(mx, my, mz, values);
+					RPY_O_function(mx, my, mz, O_values);
 					mult = erfc( alpha*mlen );
 
-					*(answer) += mult * *(values);
-					*(answer+1) += mult * *(values+1);
-					*(answer+2) += mult * *(values+2);
-					*(answer+3) += mult * *(values+3);
-					*(answer+4) += mult * *(values+4);
-					*(answer+5) += mult * *(values+5);
+					*matrix += mult * *O_values;
+					*(matrix+1) += mult * *(O_values+1);
+					*(matrix+2) += mult * *(O_values+2);
+					*(matrix+3) += mult * *(O_values+3);
+					*(matrix+4) += mult * *(O_values+4);
+					*(matrix+5) += mult * *(O_values+5);
 
 					mult = mult0 * exp( - alpha2 * mlen2 ) / mlen2;
 
-					*(answer) += mult * mx * mx;
-					*(answer+1) += mult * my * my;
-					*(answer+2) += mult * mz * mz;
-					*(answer+3) += mult * mx * my;
-					*(answer+4) += mult * mx * mz;
-					*(answer+5) += mult * my * mz;
+					*matrix += mult * mx * mx;
+					*(matrix+1) += mult * my * my;
+					*(matrix+2) += mult * mz * mz;
+					*(matrix+3) += mult * mx * my;
+					*(matrix+4) += mult * mx * mz;
+					*(matrix+5) += mult * my * mz;
 				}
 			}
 		}
@@ -155,9 +150,9 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	mult0 = 2.0 / M_PI;
 
-	for (nx = -n; nx <= n; nx++)
+	for (nx = -n_max; nx <= n_max; nx++)
 	{
-		nbis = n - abs(nx);
+		nbis = n_max - abs(nx);
 		for (ny = -nbis; ny <= nbis; ny++)
 		{
 			ntris = nbis - abs(ny);
@@ -169,12 +164,12 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 					mult = mult0 / nlen2 * exp(exp_const * nlen2);
 					temp = 1.0 / nlen2 - exp_const;
 
-					*(answer) += mult * ( 1.0 - temp * nx * nx );					
-					*(answer+1) += mult * ( 1.0 - temp * ny * ny );					
-					*(answer+2) += mult * ( 1.0 - temp * nz * nz );					
-					*(answer+3) += mult * ( - temp * nx * ny );				
-					*(answer+4) += mult * ( - temp * nx * nz );				
-					*(answer+5) += mult * ( - temp * ny * nz );				
+					*matrix += mult * ( 1.0 - temp * nx * nx );
+					*(matrix+1) += mult * ( 1.0 - temp * ny * ny );
+					*(matrix+2) += mult * ( 1.0 - temp * nz * nz );
+					*(matrix+3) += mult * ( - temp * nx * ny );
+					*(matrix+4) += mult * ( - temp * nx * nz );
+					*(matrix+5) += mult * ( - temp * ny * nz );
 				}
 			}
 		}
@@ -182,34 +177,29 @@ void Oii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	temp = 1.5 * alpha * a / ( sqrt_pi * box_length );
 
-	*(answer) -= temp;
-	*(answer+1) -= temp;
-	*(answer+2) -= temp;
+	*matrix -= temp;
+	*(matrix+1) -= temp;
+	*(matrix+2) -= temp;
 
-	free(values);
+	free(O_values);
 }
 
 // -------------------------------------------------------------------------------
 
-void Qii(double a, double box_length, double alpha, int m, int n, double* answer)
+static void RPY_Smith_Qii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix)
 {
+	register int mx;
+	register int my;
+	register int mz;
+	register int nx;
+	register int ny;
+	register int nz;
+
 	double amlen, amlen2, expamlen2, mlen2, nlen2, mult;
 
 	int mbis, mtris, nbis, ntris;
 
-	register int mx;
-
-	register int my;
-
-	register int mz;
-	
-	register int nx;
-	
-	register int ny;
-	
-	register int nz;
-
-	double* values = calloc(6, sizeof(double));
+	double* Q_values = calloc(6, sizeof(double));
 
 	double sqrt_pi = sqrt(M_PI);
 
@@ -225,9 +215,9 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	double temp2 = 2 * alpha3;
 
-	for (mx = -m; mx <= m; mx++)
+	for (mx = -m_max; mx <= m_max; mx++)
 	{
-		mbis = m -abs(mx);
+		mbis = m_max - abs(mx);
 		for (my = -mbis; my <= mbis; my++)
 		{
 			mtris = mbis - abs(my);
@@ -239,24 +229,24 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 					amlen = alpha * sqrt(mlen2);
 					amlen2 = amlen * amlen;
 					expamlen2 = exp( -amlen2 );
-					Q(mx, my, mz, values);
+					RPY_Q_function(mx, my, mz, Q_values);
 					mult = erfc( amlen ) + temp1 * amlen * expamlen2;
 
-					*(answer) += mult * *(values);
-					*(answer+1) += mult * *(values+1);
-					*(answer+2) += mult * *(values+2);
-					*(answer+3) += mult * *(values+3);
-					*(answer+4) += mult * *(values+4);
-					*(answer+5) += mult * *(values+5);
+					*matrix += mult * *Q_values;
+					*(matrix+1) += mult * *(Q_values+1);
+					*(matrix+2) += mult * *(Q_values+2);
+					*(matrix+3) += mult * *(Q_values+3);
+					*(matrix+4) += mult * *(Q_values+4);
+					*(matrix+5) += mult * *(Q_values+5);
 
 					mult = temp1 * temp2 * expamlen2 / mlen2;
 
-					*(answer) -= mult * mx * mx;
-					*(answer+1) -= mult * my * my;
-					*(answer+2) -= mult * mz * mz;
-					*(answer+3) -= mult * mx * my;
-					*(answer+4) -= mult * mx * mz;
-					*(answer+5) -= mult * my * mz;
+					*matrix -= mult * mx * mx;
+					*(matrix+1) -= mult * my * my;
+					*(matrix+2) -= mult * mz * mz;
+					*(matrix+3) -= mult * mx * my;
+					*(matrix+4) -= mult * mx * mz;
+					*(matrix+5) -= mult * my * mz;
 				}
 			}
 		}
@@ -266,9 +256,9 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	temp2 = 4 * M_PI;
 
-	for (nx = -n; nx <= n; nx++)
+	for (nx = -n_max; nx <= n_max; nx++)
 	{
-		nbis = n - abs(nx);
+		nbis = n_max - abs(nx);
 		for (ny = -nbis; ny <= nbis; ny++)
 		{
 			ntris = nbis - abs(ny);
@@ -279,12 +269,12 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 					nlen2 = nx*nx + ny*ny + nz*nz;
 					mult = temp2 * exp( temp1 * nlen2 ) / nlen2;
 
-					*(answer) += mult * nx * nx;
-					*(answer+1) += mult * ny * ny;
-					*(answer+2) += mult * nz * nz;
-					*(answer+3) += mult * nx * ny;
-					*(answer+4) += mult * nx * nz;
-					*(answer+5) += mult * ny * nz;
+					*matrix += mult * nx * nx;
+					*(matrix+1) += mult * ny * ny;
+					*(matrix+2) += mult * nz * nz;
+					*(matrix+3) += mult * nx * ny;
+					*(matrix+4) += mult * nx * nz;
+					*(matrix+5) += mult * ny * nz;
 				}
 			}
 		}
@@ -292,34 +282,29 @@ void Qii(double a, double box_length, double alpha, int m, int n, double* answer
 
 	temp1 = alpha3 * a3 / ( box_length3 * 3.0 * sqrt_pi );
 
-	*(answer) -= temp1;
-	*(answer+1) -= temp1;
-	*(answer+2) -= temp1;
+	*matrix -= temp1;
+	*(matrix+1) -= temp1;
+	*(matrix+2) -= temp1;
 
-	free(values);
+	free(Q_values);
 }
 
 // -------------------------------------------------------------------------------
 
-void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n, double* answer)
+static void RPY_Smith_Oij_block(double sigmax, double sigmay, double sigmaz, double alpha, int m_max, int n_max, double* matrix)
 {
+	register int mx;
+	register int my;
+	register int mz;
+	register int nx;
+	register int ny;
+	register int nz;
+
 	double mslen, mslen2, nlen2, msx, msy, msz, nsdot, mult, mult2, exp_const;
 
 	int mbis, mtris, nbis, ntris;
 
-	register int mx;
-
-	register int my;
-
-	register int mz;
-	
-	register int nx;
-	
-	register int ny;
-	
-	register int nz;
-
-	double* values = calloc(6, sizeof(double));
+	double* O_values = calloc(6, sizeof(double));
 
 	double alpha2 = alpha * alpha;
 
@@ -327,9 +312,9 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 	double temp = 2 * alpha / sqrt_pi;
 
-	for (mx = -m; mx <= m; mx++)
+	for (mx = -m_max; mx <= m_max; mx++)
 	{
-		mbis = m - abs(mx);
+		mbis = m_max - abs(mx);
 		for (my = -mbis; my <= mbis; my++)
 		{
 			mtris = mbis - abs(my);
@@ -342,23 +327,23 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 				mslen2 = msx*msx + msy*msy + msz*msz;
 				mslen = sqrt(mslen2);
 				mult = erfc( alpha * mslen );
-				O(msx, msy, msz, values);
+				RPY_O_function(msx, msy, msz, O_values);
 
-				*(answer) += mult * *(values);
-				*(answer+1) += mult * *(values+1);
-				*(answer+2) += mult * *(values+2);
-				*(answer+3) += mult * *(values+3);
-				*(answer+4) += mult * *(values+4);
-				*(answer+5) += mult * *(values+5);
+				*matrix += mult * *O_values;
+				*(matrix+1) += mult * *(O_values+1);
+				*(matrix+2) += mult * *(O_values+2);
+				*(matrix+3) += mult * *(O_values+3);
+				*(matrix+4) += mult * *(O_values+4);
+				*(matrix+5) += mult * *(O_values+5);
 
 				mult = temp * exp( -alpha2 * mslen2 ) / mslen2;
 
-				*(answer) += mult * msx * msx;
-				*(answer+1) += mult * msy * msy;
-				*(answer+2) += mult * msz * msz;
-				*(answer+3) += mult * msx * msy;
-				*(answer+4) += mult * msx * msz;
-				*(answer+5) += mult * msy * msz;
+				*matrix += mult * msx * msx;
+				*(matrix+1) += mult * msy * msy;
+				*(matrix+2) += mult * msz * msz;
+				*(matrix+3) += mult * msx * msy;
+				*(matrix+4) += mult * msx * msz;
+				*(matrix+5) += mult * msy * msz;
 			}
 		}
 	}
@@ -367,9 +352,9 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 	double temp2 = 2.0 / M_PI;
 
-	for (nx = -n; nx <= n; nx++)
+	for (nx = -n_max; nx <= n_max; nx++)
 	{
-		nbis = n - abs(nx);
+		nbis = n_max - abs(nx);
 		for (ny = -nbis; ny <= nbis; ny++)
 		{
 			ntris = nbis - abs(ny);
@@ -383,41 +368,36 @@ void Oij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 					mult = temp2 / nlen2 * exp( -exp_const ) * cos(2 * M_PI * nsdot );
 					mult2 = (1.0 + exp_const) / nlen2;
 
-					*(answer) += mult * ( 1.0 - mult2 * nx * nx );
-					*(answer+1) += mult * ( 1.0 - mult2 * ny * ny );
-					*(answer+2) += mult * ( 1.0 - mult2 * nz * nz );
-					*(answer+3) += mult * ( - mult2 * nx * ny );
-					*(answer+4) += mult * ( - mult2 * nx * nz );
-					*(answer+5) += mult * ( - mult2 * ny * nz );
+					*matrix += mult * ( 1.0 - mult2 * nx * nx );
+					*(matrix+1) += mult * ( 1.0 - mult2 * ny * ny );
+					*(matrix+2) += mult * ( 1.0 - mult2 * nz * nz );
+					*(matrix+3) += mult * ( - mult2 * nx * ny );
+					*(matrix+4) += mult * ( - mult2 * nx * nz );
+					*(matrix+5) += mult * ( - mult2 * ny * nz );
 				}
 			}
 		}
 	}
 
-	free(values);
+	free(O_values);
 }
 
 // -------------------------------------------------------------------------------
 
-void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n, double* answer)
+static void RPY_Smith_Qij_block(double sigmax, double sigmay, double sigmaz, double alpha, int m_max, int n_max, double* matrix)
 {
+	register int mx;
+	register int my;
+	register int mz;
+	register int nx;
+	register int ny;
+	register int nz;
+
 	double amslen, amslen2, mslen2, expamslen2, nlen2, msx, msy, msz, nsdot, mult;
 
 	int mbis, mtris, nbis, ntris;
 
-	register int mx;
-
-	register int my;
-
-	register int mz;
-	
-	register int nx;
-	
-	register int ny;
-	
-	register int nz;
-
-	double* values = calloc(6, sizeof(double));
+	double* Q_values = calloc(6, sizeof(double));
 
 	double alpha2 = alpha * alpha;
 
@@ -429,9 +409,9 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 	double temp2 = 4 * alpha3 / sqrt_pi;
 
-	for (mx = -m; mx <= m; mx++)
+	for (mx = -m_max; mx <= m_max; mx++)
 	{
-		mbis = m - abs(mx);
+		mbis = m_max - abs(mx);
 		for (my = -mbis; my <= mbis; my++)
 		{
 			mtris = mbis - abs(my);
@@ -446,23 +426,23 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 				amslen2 = amslen * amslen;
 				expamslen2 = exp( -amslen2 );
 				mult = erfc( amslen ) + temp1 * amslen * expamslen2;
-				Q(msx, msy, msz, values);
+				RPY_Q_function(msx, msy, msz, Q_values);
 
-				*(answer) += mult * *(values);
-				*(answer+1) += mult * *(values+1);
-				*(answer+2) += mult * *(values+2);
-				*(answer+3) += mult * *(values+3);
-				*(answer+4) += mult * *(values+4);
-				*(answer+5) += mult * *(values+5);
+				*matrix += mult * *Q_values;
+				*(matrix+1) += mult * *(Q_values+1);
+				*(matrix+2) += mult * *(Q_values+2);
+				*(matrix+3) += mult * *(Q_values+3);
+				*(matrix+4) += mult * *(Q_values+4);
+				*(matrix+5) += mult * *(Q_values+5);
 
 				mult = temp2 * expamslen2 / mslen2;
 
-				*(answer) -= mult * msx * msx;
-				*(answer+1) -= mult * msy * msy;
-				*(answer+2) -= mult * msz * msz;
-				*(answer+3) -= mult * msx * msy;
-				*(answer+4) -= mult * msx * msz;
-				*(answer+5) -= mult * msy * msz;
+				*matrix -= mult * msx * msx;
+				*(matrix+1) -= mult * msy * msy;
+				*(matrix+2) -= mult * msz * msz;
+				*(matrix+3) -= mult * msx * msy;
+				*(matrix+4) -= mult * msx * msz;
+				*(matrix+5) -= mult * msy * msz;
 			}
 		}
 	}
@@ -471,9 +451,9 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 
 	temp2 = 4 * M_PI;
 
-	for (nx = -n; nx <= n; nx++)
+	for (nx = -n_max; nx <= n_max; nx++)
 	{
-		nbis = n - abs(nx);
+		nbis = n_max - abs(nx);
 		for (ny = -nbis; ny <= nbis; ny++)
 		{
 			ntris = nbis - abs(ny);
@@ -485,30 +465,30 @@ void Qij(double sigmax, double sigmay, double sigmaz, double alpha, int m, int n
 					nsdot = nx*sigmax + ny*sigmay + nz*sigmaz;
 					mult = temp2 * exp(temp1 * nlen2) * cos(2*M_PI*nsdot) / nlen2;
 
-					*(answer) += mult * nx * nx;
-					*(answer+1) += mult * ny * ny;
-					*(answer+2) += mult * nz * nz;
-					*(answer+3) += mult * nx * ny;
-					*(answer+4) += mult * nx * nz;
-					*(answer+5) += mult * ny * nz;
+					*matrix += mult * nx * nx;
+					*(matrix+1) += mult * ny * ny;
+					*(matrix+2) += mult * nz * nz;
+					*(matrix+3) += mult * nx * ny;
+					*(matrix+4) += mult * nx * nz;
+					*(matrix+5) += mult * ny * nz;
 				}
 			}
 		}
 	}
 
-	free(values);
+	free(Q_values);
 }
 
 // -------------------------------------------------------------------------------
 
-double Mii_rpy(double a)
+static inline double RPY_Mii_block(double a)
 {
 	return 1.0 / ( 6 * M_PI * a );
 }
 
 // -------------------------------------------------------------------------------
 
-void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answer)
+static void RPY_Mij_block(double ai, double aj, double rx, double ry, double rz, double* matrix)
 {
 	double al, as;
 
@@ -532,20 +512,20 @@ void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answ
 		double coef2 = 1.0 + aij2 / ( 3 * dist2 );
 		double coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
 
-		*(answer) = coef1 * ( coef2 + coef3 * rx * rx );
-		*(answer+1) = coef1 * ( coef2 + coef3 * ry * ry );
-		*(answer+2) = coef1 * ( coef2 + coef3 * rz * rz );
-		*(answer+3) = coef1 * coef3 * rx * ry;
-		*(answer+4) = coef1 * coef3 * rx * rz;
-		*(answer+5) = coef1 * coef3 * ry * rz;
+		*matrix = coef1 * ( coef2 + coef3 * rx * rx );
+		*(matrix+1) = coef1 * ( coef2 + coef3 * ry * ry );
+		*(matrix+2) = coef1 * ( coef2 + coef3 * rz * rz );
+		*(matrix+3) = coef1 * coef3 * rx * ry;
+		*(matrix+4) = coef1 * coef3 * rx * rz;
+		*(matrix+5) = coef1 * coef3 * ry * rz;
 	}
 	else if (dist <= (al - as))
 	{
 		double temp = 1.0 / ( 6 * M_PI * al );
 
-		*(answer) = temp;
-		*(answer+1) = temp;
-		*(answer+2) = temp;
+		*matrix = temp;
+		*(matrix+1) = temp;
+		*(matrix+2) = temp;
 	}
 	else
 	{
@@ -560,18 +540,18 @@ void Mij_rpy(double ai, double aj, double rx, double ry, double rz, double* answ
 		coef5 *= 3 * coef5;
 		double coef6 = coef5 / ( 32 * dist3 ) / dist2;
 
-		*(answer) = coef1 * ( coef4 + coef6 * rx * rx );
-		*(answer+1) = coef1 * ( coef4 + coef6 * ry * ry );
-		*(answer+2) = coef1 * ( coef4 + coef6 * rz * rz );
-		*(answer+3) = coef1 * coef6 * rx * ry;
-		*(answer+4) = coef1 * coef6 * rx * rz;
-		*(answer+5) = coef1 * coef6 * ry * rz;
+		*matrix = coef1 * ( coef4 + coef6 * rx * rx );
+		*(matrix+1) = coef1 * ( coef4 + coef6 * ry * ry );
+		*(matrix+2) = coef1 * ( coef4 + coef6 * rz * rz );
+		*(matrix+3) = coef1 * coef6 * rx * ry;
+		*(matrix+4) = coef1 * coef6 * rx * rz;
+		*(matrix+5) = coef1 * coef6 * ry * rz;
 	}
 }
 
 // -------------------------------------------------------------------------------
 
-void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, double* answer)
+static void RPY_Smith_Mii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix)
 {
 	double coef1 = 1.0 / ( 6 * M_PI * a );
 	double coef2 = 3 * a / ( 4 * box_length );
@@ -580,16 +560,16 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 	double* comp1 = calloc(6, sizeof(double));
 	double* comp2 = calloc(6, sizeof(double));
 
-	Oii(a, box_length, alpha, m, n, comp1);
-	Qii(a, box_length, alpha, m, n, comp2);
+	RPY_Smith_Oii_block(a, box_length, alpha, m_max, n_max, comp1);
+	RPY_Smith_Qii_block(a, box_length, alpha, m_max, n_max, comp2);
 
-	*(answer) = coef1 * ( 1.0 + coef2 * *(comp1) + coef3 * *(comp2) );
-	*(answer+1) = coef1 * ( 1.0 + coef2 * *(comp1+1) + coef3 * *(comp2+1) );
-	*(answer+2) = coef1 * ( 1.0 + coef2 * *(comp1+2) + coef3 * *(comp2+2) );
+	*matrix = coef1 * ( 1.0 + coef2 * *comp1 + coef3 * *comp2 );
+	*(matrix+1) = coef1 * ( 1.0 + coef2 * *(comp1+1) + coef3 * *(comp2+1) );
+	*(matrix+2) = coef1 * ( 1.0 + coef2 * *(comp1+2) + coef3 * *(comp2+2) );
 
-	*(answer+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
-	*(answer+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
-	*(answer+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
+	*(matrix+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
+	*(matrix+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
+	*(matrix+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
 
 	free(comp1);
 	free(comp2);
@@ -597,7 +577,7 @@ void Mii_rpy_smith(double a, double box_length, double alpha, int m, int n, doub
 
 // -------------------------------------------------------------------------------
 
-void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m, int n, double* answer)
+static void RPY_Smith_Mij_block(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m_max, int n_max, double* matrix)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
@@ -621,15 +601,15 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 	double* comp1 = calloc(6, sizeof(double));
 	double* comp2 = calloc(6, sizeof(double));
 
-	Oij(sigmax, sigmay, sigmaz, alpha, m, n, comp1);
-	Qij(sigmax, sigmay, sigmaz, alpha, m, n, comp2);
+	RPY_Smith_Oij_block(sigmax, sigmay, sigmaz, alpha, m_max, n_max, comp1);
+	RPY_Smith_Qij_block(sigmax, sigmay, sigmaz, alpha, m_max, n_max, comp2);
 
-	*(answer) = coef1 * ( coef2 * *(comp1) + coef3 * *(comp2) );
-	*(answer+1) = coef1 * ( coef2 * *(comp1+1) + coef3 * *(comp2+1) );
-	*(answer+2) = coef1 * ( coef2 * *(comp1+2) + coef3 * *(comp2+2) );
-	*(answer+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
-	*(answer+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
-	*(answer+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
+	*matrix = coef1 * ( coef2 * *comp1 + coef3 * *comp2 );
+	*(matrix+1) = coef1 * ( coef2 * *(comp1+1) + coef3 * *(comp2+1) );
+	*(matrix+2) = coef1 * ( coef2 * *(comp1+2) + coef3 * *(comp2+2) );
+	*(matrix+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
+	*(matrix+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
+	*(matrix+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
 
 
 	if (dist2 < (ai + aj)*(ai + aj))
@@ -640,25 +620,25 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 
 		double* Aij = calloc(6, sizeof(double));
 
-		Mij_rpy(ai, aj, rx, ry, rz, Aij);
+		RPY_Mij_block(ai, aj, rx, ry, rz, Aij);
 
-		*(answer) += *(Aij);
-		*(answer+1) += *(Aij+1);
-		*(answer+2) += *(Aij+2);
-		*(answer+3) += *(Aij+3);
-		*(answer+4) += *(Aij+4);
-		*(answer+5) += *(Aij+5);
+		*matrix += *(Aij);
+		*(matrix+1) += *(Aij+1);
+		*(matrix+2) += *(Aij+2);
+		*(matrix+3) += *(Aij+3);
+		*(matrix+4) += *(Aij+4);
+		*(matrix+5) += *(Aij+5);
 
 		coef1 = 1.0 / ( 8 * M_PI * dist );
 		coef2 = 1.0 + aij2 / ( 3 * dist2 );
 		coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
 
-		*(answer) -= coef1 * ( coef2 + coef3 * rx * rx);
-		*(answer+1) -= coef1 * ( coef2 + coef3 * ry * ry );
-		*(answer+2) -= coef1 * ( coef2 + coef3 * rz * rz );
-		*(answer+3) -= coef1 * coef3 * rx * ry;
-		*(answer+4) -= coef1 * coef3 * rx * rz;
-		*(answer+5) -= coef1 * coef3 * ry * rz;
+		*matrix -= coef1 * ( coef2 + coef3 * rx * rx);
+		*(matrix+1) -= coef1 * ( coef2 + coef3 * ry * ry );
+		*(matrix+2) -= coef1 * ( coef2 + coef3 * rz * rz );
+		*(matrix+3) -= coef1 * coef3 * rx * ry;
+		*(matrix+4) -= coef1 * coef3 * rx * rz;
+		*(matrix+5) -= coef1 * coef3 * ry * rz;
 
 		free(Aij);
 	}
@@ -670,7 +650,7 @@ void Mij_rpy_smith(double ai, double aj, double rx, double ry, double rz, double
 
 // -------------------------------------------------------------------------------
 
-int results_position(int i, int j, int N)
+static inline int results_position(int i, int j, int N)
 {
 	int position = i + j*N;
 
@@ -679,13 +659,14 @@ int results_position(int i, int j, int N)
 
 // -------------------------------------------------------------------------------
 
-void M_rpy(double* as, double* pointers, int N, double* results2)
+void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_matrix)
 {
 	register int i = 0;
-
 	register int j = 0;
 
-	double* vector;
+	double* Mij_values;
+
+	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
 
 	double* shifted_results;
 
@@ -693,82 +674,80 @@ void M_rpy(double* as, double* pointers, int N, double* results2)
 
 	double rx, ry, rz, diag;
 
-	double* results = calloc(3*(N*N+N), sizeof(double));
-
 	int r, I, I1, I2, J, J1, J2;
 
-	int N3 = 3*N;
+	int N = 3*number_of_beads;
 
-	for (j = 0; j < N; j++)
+	for (j = 0; j < number_of_beads; j++)
 	{
-		diag = Mii_rpy(*(as+j));
+		diag = RPY_Mii_block(*(as+j));
 
-		shifted_results = results + 6*results_position(j,j,N);
+		shifted_results = results + 6*results_position(j,j,number_of_beads);
 
-		*(shifted_results) = diag;
+		*shifted_results = diag;
 		*(shifted_results + 1) = diag;
 		*(shifted_results + 2) = diag;
 
-		for (i = j + 1; i < N; i++)
+		for (i = j + 1; i < number_of_beads; i++)
 		{
-			vector = calloc(6, sizeof(double));
+			Mij_values = calloc(6, sizeof(double));
 
-			shifted_results = results + 6*results_position(i,j,N);
-			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+			shifted_results = results + 6*results_position(i,j,number_of_beads);
+			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
 
-			rx = *(shifted_pointers);
+			rx = *shifted_pointers;
 			ry = *(shifted_pointers + 1);
 			rz = *(shifted_pointers + 2);
 
-			Mij_rpy(*(as+i), *(as+j), rx, ry, rz, vector);
+			RPY_Mij_block(*(as+i), *(as+j), rx, ry, rz, Mij_values);
 
-			*(shifted_results) = *(vector);
-			*(shifted_results + 1) = *(vector + 1);
-			*(shifted_results + 2) = *(vector + 2);
-			*(shifted_results + 3) = *(vector + 3);
-			*(shifted_results + 4) = *(vector + 4);
-			*(shifted_results + 5) = *(vector + 5);
+			*shifted_results = *Mij_values;
+			*(shifted_results + 1) = *(Mij_values + 1);
+			*(shifted_results + 2) = *(Mij_values + 2);
+			*(shifted_results + 3) = *(Mij_values + 3);
+			*(shifted_results + 4) = *(Mij_values + 4);
+			*(shifted_results + 5) = *(Mij_values + 5);
 
-			free(vector);
+			free(Mij_values);
 		}
 	}
 
-	for (j = 0; j < N; j++)
+	for (j = 0; j < number_of_beads; j++)
 	{
-		r = 6*results_position(j, j, N);
+		r = 6*results_position(j, j, number_of_beads);
 		J = 3*j;
 		J1 = J + 1;
 		J2 = J + 2;
 
-		results2[J + J*N3] = results[r];
-		results2[J1 + J1*N3] = results[r + 1];
-		results2[J2 + J2*N3] = results[r + 2];
+		M_matrix[J + J*N] = results[r];
+		M_matrix[J1 + J1*N] = results[r + 1];
+		M_matrix[J2 + J2*N] = results[r + 2];
 
-		for (i = j+1; i < N; i++)
+		for (i = j+1; i < number_of_beads; i++)
 		{
-			r = 6*results_position(i, j, N);
+			r = 6*results_position(i, j, number_of_beads);
 			I = 3*i;
 			I1 = I + 1;
 			I2 = I + 2;
 
-			results2[I + J*N3] = results[r];
-			results2[J + I*N3] = results[r];
-			results2[I1 + J1*N3] = results[r + 1];
-			results2[J1 + I1*N3] = results[r + 1];
-			results2[I2 + J2*N3] = results[r + 2];
-			results2[J2 + I2*N3] = results[r + 2];
-			results2[I1 + J*N3] = results[r + 3];
-			results2[I + J1*N3] = results[r + 3];
-			results2[J + I1*N3] = results[r + 3];
-			results2[J1 + I*N3] = results[r + 3];
-			results2[I2 + J*N3] = results[r + 4];
-			results2[I + J2*N3] = results[r + 4];
-			results2[J + I2*N3] = results[r + 4];
-			results2[J2 + I*N3] = results[r + 4];
-			results2[I2 + J1*N3] = results[r + 5];
-			results2[I1 + J2*N3] = results[r + 5];
-			results2[J1 + I2*N3] = results[r + 5];
-			results2[J2 + I1*N3] = results[r + 5];
+			M_matrix[I + J*N] = results[r];
+			M_matrix[J + I*N] = results[r];
+			M_matrix[I1 + J1*N] = results[r + 1];
+			M_matrix[J1 + I1*N] = results[r + 1];
+			M_matrix[I2 + J2*N] = results[r + 2];
+			M_matrix[J2 + I2*N] = results[r + 2];
+			M_matrix[I1 + J*N] = results[r + 3];
+			M_matrix[I + J1*N] = results[r + 3];
+			M_matrix[J + I1*N] = results[r + 3];
+			M_matrix[J1 + I*N] = results[r + 3];
+			M_matrix[I2 + J*N] = results[r + 4];
+			M_matrix[I + J2*N] = results[r + 4];
+			M_matrix[J + I2*N] = results[r + 4];
+			M_matrix[J2 + I*N] = results[r + 4];
+			M_matrix[I2 + J1*N] = results[r + 5];
+			M_matrix[I1 + J2*N] = results[r + 5];
+			M_matrix[J1 + I2*N] = results[r + 5];
+			M_matrix[J2 + I1*N] = results[r + 5];
 		}
 	}
 
@@ -777,17 +756,16 @@ void M_rpy(double* as, double* pointers, int N, double* results2)
 
 // -------------------------------------------------------------------------------
 
-void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, int m, int n, int N, double* results2)
+void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double alpha, int m_max, int n_max, int number_of_beads, double* M_matrix)
 {
 	register int i = 0;
-
 	register int j = 0;
 
 	int I, J, J1, J2, I1, I2;
 
 	int r;
 
-	int N3 = 3*N;
+	int N = 3*number_of_beads;
 
 	double* vector;
 
@@ -797,15 +775,15 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 	double rx, ry, rz;
 
-	double* results = calloc(3*(N*N+N), sizeof(double));
+	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
 
-	for (j = 0; j < N; j++)
+	for (j = 0; j < number_of_beads; j++)
 	{
 		vector = calloc(6, sizeof(double));
 
-		Mii_rpy_smith(*(as+j), box_length, alpha, m, n, vector);
+		RPY_Smith_Mii_block(*(as+j), box_length, alpha, m_max, n_max, vector);
 
-		shifted_results = results + 6*results_position(j,j,N);
+		shifted_results = results + 6*results_position(j,j,number_of_beads);
 
 		*(shifted_results) = *(vector);
 		*(shifted_results + 1) = *(vector + 1);
@@ -813,20 +791,20 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 		free(vector);
 
-		for (i = j + 1; i < N; i++)
+		for (i = j + 1; i < number_of_beads; i++)
 		{
 			vector = calloc(6, sizeof(double));
 
-			shifted_results = results + 6*results_position(i,j,N);
-			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+			shifted_results = results + 6*results_position(i,j,number_of_beads);
+			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
 
-			rx = *(shifted_pointers);
+			rx = *shifted_pointers;
 			ry = *(shifted_pointers + 1);
 			rz = *(shifted_pointers + 2);
 
-			Mij_rpy_smith(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m, n, vector);
+			RPY_Smith_Mij_block(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m_max, n_max, vector);
 
-			*(shifted_results) = *(vector);
+			*shifted_results = *vector;
 			*(shifted_results + 1) = *(vector + 1);
 			*(shifted_results + 2) = *(vector + 2);
 			*(shifted_results + 3) = *(vector + 3);
@@ -837,48 +815,48 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 		}
 	}
 
-	for (j = 0; j < N; j++)
+	for (j = 0; j < number_of_beads; j++)
 	{
-		r = 6*results_position(j, j, N);
+		r = 6*results_position(j, j, number_of_beads);
 		J = 3*j;
 		J1 = J + 1;
 		J2 = J + 2;
 
-		results2[J + J*N3] = results[r];
-		results2[J1 + J1*N3] = results[r + 1];
-		results2[J2 + J2*N3] = results[r + 2];
-		results2[J1 + J*N3] = results[r + 3];
-		results2[J + J1*N3] = results[r + 3];
-		results2[J2 + J*N3] = results[r + 4];
-		results2[J + J2*N3] = results[r + 4];
-		results2[J2 + J1*N3] = results[r + 5];
-		results2[J1 + J2*N3] = results[r + 5];
+		M_matrix[J + J*N] = results[r];
+		M_matrix[J1 + J1*N] = results[r + 1];
+		M_matrix[J2 + J2*N] = results[r + 2];
+		M_matrix[J1 + J*N] = results[r + 3];
+		M_matrix[J + J1*N] = results[r + 3];
+		M_matrix[J2 + J*N] = results[r + 4];
+		M_matrix[J + J2*N] = results[r + 4];
+		M_matrix[J2 + J1*N] = results[r + 5];
+		M_matrix[J1 + J2*N] = results[r + 5];
 
-		for (i = j+1; i < N; i++)
+		for (i = j+1; i < number_of_beads; i++)
 		{
-			r = 6*results_position(i, j, N);
+			r = 6*results_position(i, j, number_of_beads);
 			I = 3*i;
 			I1 = I + 1;
 			I2 = I + 2;
 
-			results2[I + J*N3] = results[r];
-			results2[J + I*N3] = results[r];
-			results2[I1 + J1*N3] = results[r + 1];
-			results2[J1 + I1*N3] = results[r + 1];
-			results2[I2 + J2*N3] = results[r + 2];
-			results2[J2 + I2*N3] = results[r + 2];
-			results2[I1 + J*N3] = results[r + 3];
-			results2[I + J1*N3] = results[r + 3];
-			results2[J + I1*N3] = results[r + 3];
-			results2[J1 + I*N3] = results[r + 3];
-			results2[I2 + J*N3] = results[r + 4];
-			results2[I + J2*N3] = results[r + 4];
-			results2[J + I2*N3] = results[r + 4];
-			results2[J2 + I*N3] = results[r + 4];
-			results2[I2 + J1*N3] = results[r + 5];
-			results2[I1 + J2*N3] = results[r + 5];
-			results2[J1 + I2*N3] = results[r + 5];
-			results2[J2 + I1*N3] = results[r + 5];
+			M_matrix[I + J*N] = results[r];
+			M_matrix[J + I*N] = results[r];
+			M_matrix[I1 + J1*N] = results[r + 1];
+			M_matrix[J1 + I1*N] = results[r + 1];
+			M_matrix[I2 + J2*N] = results[r + 2];
+			M_matrix[J2 + I2*N] = results[r + 2];
+			M_matrix[I1 + J*N] = results[r + 3];
+			M_matrix[I + J1*N] = results[r + 3];
+			M_matrix[J + I1*N] = results[r + 3];
+			M_matrix[J1 + I*N] = results[r + 3];
+			M_matrix[I2 + J*N] = results[r + 4];
+			M_matrix[I + J2*N] = results[r + 4];
+			M_matrix[J + I2*N] = results[r + 4];
+			M_matrix[J2 + I*N] = results[r + 4];
+			M_matrix[I2 + J1*N] = results[r + 5];
+			M_matrix[I1 + J2*N] = results[r + 5];
+			M_matrix[J1 + I2*N] = results[r + 5];
+			M_matrix[J2 + I1*N] = results[r + 5];
 		}
 	}
 
@@ -887,44 +865,44 @@ void M_rpy_smith(double* as, double* pointers, double box_length, double alpha, 
 
 // -------------------------------------------------------------------------------
 
-double X_f_poly(double l, int rank)
+static double JO_Xf_polynomial(double l, int degree)
 {
-	double answer;
+	double Xf_value;
 	double l2, l3, l4, l5, l6, l7, l8, l9, l10;
 
-	switch(rank)
+	switch(degree)
 	{
 		case 0:
-			answer = 1;
+			Xf_value = 1;
 			break;
 		case 1:
-			answer = 3*l;
+			Xf_value = 3*l;
 			break;
 		case 2:
-			answer = 9*l;
+			Xf_value = 9*l;
 			break;
 		case 3:
 			l2 = l*l;
 			l3 = l2*l; 
-			answer = -4*l + 27*l2 - 4*l3;
+			Xf_value = -4*l + 27*l2 - 4*l3;
 			break;
 		case 4:
 			l2 = l*l;
 			l3 = l2*l;
-			answer = -24*l + 81*l2 + 36*l3;
+			Xf_value = -24*l + 81*l2 + 36*l3;
 			break;
 		case 5:
 			l2 = l*l;
 			l3 = l2*l;
 			l4 = l2*l2;
-			answer = 72*l2 + 243*l3 + 72*l4;
+			Xf_value = 72*l2 + 243*l3 + 72*l4;
 			break;
 		case 6:
 			l2 = l*l;
 			l3 = l2*l;
 			l4 = l2*l2;
 			l5 = l3*l2;
-			answer = 16*l + 108*l2 + 281*l3 + 648*l4 + 144*l5;
+			Xf_value = 16*l + 108*l2 + 281*l3 + 648*l4 + 144*l5;
 			break;
 		case 7:
 			l2 = l*l;
@@ -932,7 +910,7 @@ double X_f_poly(double l, int rank)
 			l4 = l2*l2;
 			l5 = l3*l2;
 			l6 = l3*l3;
-			answer = 288*l2 + 1620*l3 + 1515*l4 + 1620*l5 + 288*l6;
+			Xf_value = 288*l2 + 1620*l3 + 1515*l4 + 1620*l5 + 288*l6;
 			break;
 		case 8:
 			l2 = l*l;
@@ -941,7 +919,7 @@ double X_f_poly(double l, int rank)
 			l5 = l3*l2;
 			l6 = l3*l3;
 			l7 = l4*l3;
-			answer = 576*l2 + 4848*l3 + 5409*l4 + 4524*l5 + 3888*l6 + 576*l7;
+			Xf_value = 576*l2 + 4848*l3 + 5409*l4 + 4524*l5 + 3888*l6 + 576*l7;
 			break;
 		case 9:
 			l2 = l*l;
@@ -951,7 +929,7 @@ double X_f_poly(double l, int rank)
 			l6 = l3*l3;
 			l7 = l4*l3;
 			l8 = l4*l4;
-			answer = 1152*l2 + 9072*l3 + 14752*l4 + 26163*l5 + 14752*l6 + 9072*l7 + 1152*l8;
+			Xf_value = 1152*l2 + 9072*l3 + 14752*l4 + 26163*l5 + 14752*l6 + 9072*l7 + 1152*l8;
 			break;
 		case 10:
 			l2 = l*l;
@@ -962,7 +940,7 @@ double X_f_poly(double l, int rank)
 			l7 = l4*l3;
 			l8 = l4*l4;
 			l9 = l5*l4;
-			answer = 2304*l2 + 20736*l3 + 42804*l4 + 115849*l5 + 76176*l6 + 39264*l7 + 20736*l8 + 2304*l9;
+			Xf_value = 2304*l2 + 20736*l3 + 42804*l4 + 115849*l5 + 76176*l6 + 39264*l7 + 20736*l8 + 2304*l9;
 			break;
 		case 11:
 			l2 = l*l;
@@ -974,53 +952,53 @@ double X_f_poly(double l, int rank)
 			l8 = l4*l4;
 			l9 = l5*l4;
 			l10 = l5*l5;
-			answer = 4608*l2 + 46656*l3 + 108912*l4 + 269100*l5 + 319899*l6 + 269100*l7 + 108912*l8 + 46656*l9 + 4608*l10;
+			Xf_value = 4608*l2 + 46656*l3 + 108912*l4 + 269100*l5 + 319899*l6 + 269100*l7 + 108912*l8 + 46656*l9 + 4608*l10;
 			break;
 	}
 
-	return answer;
+	return Xf_value;
 }
 
 // -------------------------------------------------------------------------------
 
-double Y_f_poly(double l, int rank)
+static double JO_Yf_polynomial(double l, int degree)
 {
-	double answer;
+	double Yf_value;
 	double l2, l3, l4, l5, l6, l7, l8, l9, l10;
 
-	switch(rank)
+	switch(degree)
 	{
 		case 0:
-			answer = 1;
+			Yf_value = 1;
 			break;
 		case 1:
-			answer = 3.0/2*l;
+			Yf_value = 3.0/2*l;
 			break;
 		case 2:
-			answer = 9.0/4*l;
+			Yf_value = 9.0/4*l;
 			break;
 		case 3:
 			l2 = l*l;
 			l3 = l2*l;
-			answer = 2*l + 3.375*l2 + 2*l3;
+			Yf_value = 2*l + 3.375*l2 + 2*l3;
 			break;
 		case 4:
 			l2 = l*l;
 			l3 = l2*l;
-			answer = 6*l + 5.0625*l2 + 18*l3;
+			Yf_value = 6*l + 5.0625*l2 + 18*l3;
 			break;
 		case 5:
 			l2 = l*l;
 			l3 = l2*l;
 			l4 = l2*l2;
-			answer = 31.5*l2 + 7.59375*l3 + 31.5*l4;
+			Yf_value = 31.5*l2 + 7.59375*l3 + 31.5*l4;
 			break;
 		case 6:
 			l2 = l*l;
 			l3 = l2*l;
 			l4 = l2*l2;
 			l5 = l3*l2;
-			answer = 4*l + 54*l2 + 19.390625*l3 + 81*l4 + 72*l5;
+			Yf_value = 4*l + 54*l2 + 19.390625*l3 + 81*l4 + 72*l5;
 			break;
 		case 7:
 			l2 = l*l;
@@ -1028,7 +1006,7 @@ double Y_f_poly(double l, int rank)
 			l4 = l2*l2;
 			l5 = l3*l2;
 			l6 = l3*l3;
-			answer = 144*l2 + 131.625*l3 + 149.0859375*l4 + 131.625*l5 + 144*l6;
+			Yf_value = 144*l2 + 131.625*l3 + 149.0859375*l4 + 131.625*l5 + 144*l6;
 			break;
 		case 8:
 			l2 = l*l;
@@ -1037,7 +1015,7 @@ double Y_f_poly(double l, int rank)
 			l5 = l3*l2;
 			l6 = l3*l3;
 			l7 = l4*l3;
-			answer = 279*l2 + 532.625*l3 + 493.62890625*l4 - 14.625*l5 + 648*l6 + 288*l7;
+			Yf_value = 279*l2 + 532.625*l3 + 493.62890625*l4 - 14.625*l5 + 648*l6 + 288*l7;
 			break;
 		case 9:
 			l2 = l*l;
@@ -1047,7 +1025,7 @@ double Y_f_poly(double l, int rank)
 			l6 = l3*l3;
 			l7 = l4*l3;
 			l8 = l4*l4;
-			answer = 576*l2 + 1134*l3 + 1888.84375*l4 + 1496.443359375*l5 + 1888.84375*l6 + 1134*l7 + 576*l8;
+			Yf_value = 576*l2 + 1134*l3 + 1888.84375*l4 + 1496.443359375*l5 + 1888.84375*l6 + 1134*l7 + 576*l8;
 			break;
 		case 10:
 			l2 = l*l;
@@ -1058,7 +1036,7 @@ double Y_f_poly(double l, int rank)
 			l7 = l4*l3;
 			l8 = l4*l4;
 			l9 = l5*l4;
-			answer = 1152*l2 + 1964.25*l3 + 6155.4375*l4 + 10301.1650390625*l5 + 8452.125*l6 - 175.5*l7 + 3888*l8 + 1152*l9;
+			Yf_value = 1152*l2 + 1964.25*l3 + 6155.4375*l4 + 10301.1650390625*l5 + 8452.125*l6 - 175.5*l7 + 3888*l8 + 1152*l9;
 			break;
 		case 11:
 			l2 = l*l;
@@ -1070,70 +1048,70 @@ double Y_f_poly(double l, int rank)
 			l8 = l4*l4;
 			l9 = l5*l4;
 			l10 = l5*l5;
-			answer = 2304*l2 + 7128*l3 + 11035.5*l4 + 21441.4453125*l5 + 46486.24755859375*l6 + 21441.4453125*l7 + 11035.5*l8 + 7128*l9 + 2304*l10;
+			Yf_value = 2304*l2 + 7128*l3 + 11035.5*l4 + 21441.4453125*l5 + 46486.24755859375*l6 + 21441.4453125*l7 + 11035.5*l8 + 7128*l9 + 2304*l10;
 			break;
 	}
 
-	return answer;
+	return Yf_value;
 }
 
 // -------------------------------------------------------------------------------
 
-double X_g_poly(double l, int rank)
+static double JO_Xg_polynomial(double l, int degree)
 {
-	double answer;
+	double Xg_value;
 	double l2 = l*l;
 	double plus = 1+l;
 	double plus3 = plus * plus * plus;
 	double l3, l4;
 
-	switch(rank)
+	switch(degree)
 	{
 		case 1:
-			answer = 2*l2/plus3;
+			Xg_value = 2*l2/plus3;
 			break;
 		case 2:
-			answer = 0.2*l*(1 + 7*l + l2)/plus3;
+			Xg_value = 0.2*l*(1 + 7*l + l2)/plus3;
 			break;
 		case 3:
 			l3 = l2*l;
 			l4 = l2*l2;
-			answer = 1.0/42*(1 + 18*l - 29*l2 + 18*l3 + l4)/plus3;
+			Xg_value = 1.0/42*(1 + 18*l - 29*l2 + 18*l3 + l4)/plus3;
 			break;
 	}
 
-	return answer;
+	return Xg_value;
 }
 
 // -------------------------------------------------------------------------------
 
-double Y_g_poly(double l, int rank)
+static double JO_Yg_polynomial(double l, int degree)
 {
-	double answer;
+	double Yg_value;
 	double l2 = l*l;
 	double plus = 1+l;
 	double plus3 = plus * plus * plus;
 	double l3, l4;
 
-	switch(rank)
+	switch(degree)
 	{
 		case 2:
-			answer = 4.0/15*l*(2 + l + 2*l2)/plus3;
+			Yg_value = 4.0/15*l*(2 + l + 2*l2)/plus3;
 			break;
 		case 3:
 			l3 = l2*l;
 			l4 = l2*l2;
-			answer = 2.0/375*(16 - 45*l + 58*l2 - 45*l3 + 16*l4)/plus3;
+			Yg_value = 2.0/375*(16 - 45*l + 58*l2 - 45*l3 + 16*l4)/plus3;
 	}
 
-	return answer;
+	return Yg_value;
 }
 
 // -------------------------------------------------------------------------------
 
-double XA11(double s, double l)
+static double JO_XA11_term(double s, double l)
 {
-	double answer = 0.0;
+	double XA11_value = 0.0;
 
 	double s2 = 1.0 - 4.0 / ( s * s );
 
@@ -1143,13 +1121,13 @@ double XA11(double s, double l)
 
 	double mult;
 
-	answer += X_g_poly(l, 1)/s2;
+	XA11_value += JO_Xg_polynomial(l, 1)/s2;
 
-	answer -= X_g_poly(l, 2)*logs2;
+	XA11_value -= JO_Xg_polynomial(l, 2)*logs2;
 
-	answer -= X_g_poly(l, 3)*s2*logs2;
+	XA11_value -= JO_Xg_polynomial(l, 3)*s2*logs2;
 
-	answer += X_f_poly(l, 0) - X_g_poly(l, 1);
+	XA11_value += JO_Xf_polynomial(l, 0) - JO_Xg_polynomial(l, 1);
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1170,20 +1148,20 @@ double XA11(double s, double l)
 			
 			mult = pow(2/s, m);
 
-			answer += mult * ( pow(2, -m) * pow(1+l, -m) * X_f_poly(l, m) - X_g_poly(l, 1) );
+			XA11_value += mult * ( pow(2, -m) * pow(1+l, -m) * JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
 
-			answer += mult * ( 4.0 / ( m * m1 ) * X_g_poly(l, 3) - 2.0 / m * X_g_poly(l, 2) );
+			XA11_value += mult * ( 4.0 / ( m * m1 ) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
 		}
 	}
 
-	return answer;
+	return XA11_value;
 }
 
 // -------------------------------------------------------------------------------
 
-double YA11(double s, double l)
+static double JO_YA11_term(double s, double l)
 {
-	double answer = 0.0;
+	double YA11_value = 0.0;
 
 	double s2 = 1.0 - 4.0 / ( s * s );
 
@@ -1193,11 +1171,11 @@ double YA11(double s, double l)
 
 	double mult;
 
-	answer -= Y_g_poly(l, 2)*logs2;
+	YA11_value -= JO_Yg_polynomial(l, 2)*logs2;
 
-	answer -= Y_g_poly(l, 3)*s2*logs2;
+	YA11_value -= JO_Yg_polynomial(l, 3)*s2*logs2;
 
-	answer += Y_f_poly(l, 0);
+	YA11_value += JO_Yf_polynomial(l, 0);
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1218,20 +1196,20 @@ double YA11(double s, double l)
 
 			mult = pow(2/s, m);
 
-			answer += mult * ( pow(2, -m)*pow(1+l, -m)*Y_f_poly(l, m) - 2.0/m*Y_g_poly(l, 2) );
+			YA11_value += mult * ( pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2) );
 
-			answer += mult*4.0/(m*m1)*Y_g_poly(l, 3);
+			YA11_value += mult*4.0/(m*m1)*JO_Yg_polynomial(l, 3);
 		}
 	}
 
-	return answer;
+	return YA11_value;
 }
 
 // -------------------------------------------------------------------------------
 
-double XA12(double s, double l)
+static double JO_XA12_term(double s, double l)
 {
-	double answer = 0.0;
+	double XA12_value = 0.0;
 
 	double s2 = 1.0 - 4.0 / ( s * s );
 
@@ -1241,11 +1219,11 @@ double XA12(double s, double l)
 
 	double mult, divisor;
 
-	answer += 2.0/s*X_g_poly(l, 1)/s2;
+	XA12_value += 2.0/s*JO_Xg_polynomial(l, 1)/s2;
 
-	answer += X_g_poly(l, 2)*logs;
+	XA12_value += JO_Xg_polynomial(l, 2)*logs;
 
-	answer += X_g_poly(l, 3)*s2*logs + 4*X_g_poly(l, 3)/s;
+	XA12_value += JO_Xg_polynomial(l, 3)*s2*logs + 4*JO_Xg_polynomial(l, 3)/s;
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1266,23 +1244,23 @@ double XA12(double s, double l)
 
 			mult = pow(2/s, m);
 
-			answer += mult * ( pow(2, -m)*pow(1 + l, -m)*X_f_poly(l, m) - X_g_poly(l, 1) );
+			XA12_value += mult * ( pow(2, -m)*pow(1 + l, -m)*JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
 
-			answer += mult * ( 4.0/(m*m1) * X_g_poly(l, 3) - 2.0 / m * X_g_poly(l, 2) );
+			XA12_value += mult * ( 4.0/(m*m1) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
 		}
 
 	}
 
 	divisor = -(1.0 + l)/2;
 
-	return answer / divisor;
+	return XA12_value / divisor;
 }
 
 // -------------------------------------------------------------------------------
 
-double YA12(double s, double l)
+static double JO_YA12_term(double s, double l)
 {
-	double answer = 0.0;
+	double YA12_value = 0.0;
 
 	double s2 = 1.0 - 4.0 / ( s * s );
 
@@ -1292,11 +1270,11 @@ double YA12(double s, double l)
 
 	double mult, divisor;
 
-	answer += Y_g_poly(l, 2)*logs;
+	YA12_value += JO_Yg_polynomial(l, 2)*logs;
 
-	answer += Y_g_poly(l, 3)*s2*logs;
+	YA12_value += JO_Yg_polynomial(l, 3)*s2*logs;
 
-	answer += 4*Y_g_poly(l, 3)/s;
+	YA12_value += 4*JO_Yg_polynomial(l, 3)/s;
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1317,28 +1295,28 @@ double YA12(double s, double l)
 
 			mult = pow(2/s, m);
 
-			answer += mult*(pow(2, -m)*pow(1+l, -m)*Y_f_poly(l, m) - 2.0/m*Y_g_poly(l, 2));
+			YA12_value += mult*(pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2));
 
-			answer += mult*(4.0/(m*m1)*Y_g_poly(l, 3));
+			YA12_value += mult*(4.0/(m*m1)*JO_Yg_polynomial(l, 3));
 		}
 	}
 
 	divisor = -(1.0 + l)/2;
 
-	return answer / divisor;
+	return YA12_value / divisor;
 }
 
 // -------------------------------------------------------------------------------
 
-void R_rpy(double ai, double aj, double rx, double ry, double rz, double* answer)
+static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
 {
-	double Mi = Mii_rpy(ai);
+	double Mi = RPY_Mii_block(ai);
 
-	double Mj = Mii_rpy(aj);
+	double Mj = RPY_Mii_block(aj);
 
 	double* Mij = calloc(6, sizeof(double));
 
-	Mij_rpy(ai, aj, rx, ry, rz, Mij);
+	RPY_Mij_block(ai, aj, rx, ry, rz, Mij);
 
 	double* matrix = calloc(6*6, sizeof(double));
 
@@ -1373,30 +1351,30 @@ void R_rpy(double ai, double aj, double rx, double ry, double rz, double* answer
 
 	// block 00
 
-	*(answer) = *matrix;
-	*(answer+1) = *(matrix+7);
-	*(answer+2) = *(matrix+14);
-	*(answer+3) = *(matrix+6);
-	*(answer+4) = *(matrix+12);
-	*(answer+5) = *(matrix+13);
+	*R_matrix = *matrix;
+	*(R_matrix+1) = *(matrix+7);
+	*(R_matrix+2) = *(matrix+14);
+	*(R_matrix+3) = *(matrix+6);
+	*(R_matrix+4) = *(matrix+12);
+	*(R_matrix+5) = *(matrix+13);
 
 	// block 11
 
-	*(answer+6) = *(matrix+21);
-	*(answer+7) = *(matrix+28);
-	*(answer+8) = *(matrix+35);
-	*(answer+9) = *(matrix+27);
-	*(answer+10) = *(matrix+33);
-	*(answer+11) = *(matrix+34);
+	*(R_matrix+6) = *(matrix+21);
+	*(R_matrix+7) = *(matrix+28);
+	*(R_matrix+8) = *(matrix+35);
+	*(R_matrix+9) = *(matrix+27);
+	*(R_matrix+10) = *(matrix+33);
+	*(R_matrix+11) = *(matrix+34);
 
 	// block 10
 
-	*(answer+12) = *(matrix+3);
-	*(answer+13) = *(matrix+10);
-	*(answer+14) = *(matrix+17);
-	*(answer+15) = *(matrix+9);
-	*(answer+16) = *(matrix+15);
-	*(answer+17) = *(matrix+16);
+	*(R_matrix+12) = *(matrix+3);
+	*(R_matrix+13) = *(matrix+10);
+	*(R_matrix+14) = *(matrix+17);
+	*(R_matrix+15) = *(matrix+9);
+	*(R_matrix+16) = *(matrix+15);
+	*(R_matrix+17) = *(matrix+16);
 
 	free(Mij);
 
@@ -1405,7 +1383,7 @@ void R_rpy(double ai, double aj, double rx, double ry, double rz, double* answer
 
 // -------------------------------------------------------------------------------
 
-void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* answer)
+static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
@@ -1415,17 +1393,17 @@ void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* an
 
 	double l = aj/ai;
 
-	double xa11l = XA11(s, l);
+	double xa11l = JO_XA11_term(s, l);
 
-	double ya11l = YA11(s, l);
+	double ya11l = JO_YA11_term(s, l);
 
-	double xa11linv = XA11(s, 1/l);
+	double xa11linv = JO_XA11_term(s, 1/l);
 
-	double ya11linv = YA11(s, 1/l);
+	double ya11linv = JO_YA11_term(s, 1/l);
 
-	double xa12linv = XA12(s, 1/l);
+	double xa12linv = JO_XA12_term(s, 1/l);
 
-	double ya12linv = YA12(s, 1/l);
+	double ya12linv = JO_YA12_term(s, 1/l);
 
 	double mult = 3 * M_PI * ( ai + aj );
 
@@ -1433,55 +1411,55 @@ void R_jeffrey(double ai, double aj, double rx, double ry, double rz, double* an
 
 	// block 00
 
-	*answer = xa11l*rx*rx/dist2 + ya11l*(1 - rx*rx/dist2); // 00
+	*R_matrix = xa11l*rx*rx/dist2 + ya11l*(1 - rx*rx/dist2); // 00
 
-	*(answer+1) = xa11l*ry*ry/dist2 + ya11l*(1 - ry*ry/dist2); // 11
+	*(R_matrix+1) = xa11l*ry*ry/dist2 + ya11l*(1 - ry*ry/dist2); // 11
 
-	*(answer+2) = xa11l*rz*rz/dist2 + ya11l*(1 - rz*rz/dist2); // 22
+	*(R_matrix+2) = xa11l*rz*rz/dist2 + ya11l*(1 - rz*rz/dist2); // 22
 
-	*(answer+3) = (xa11l - ya11l)*rx*ry/dist2; // 10
+	*(R_matrix+3) = (xa11l - ya11l)*rx*ry/dist2; // 10
 
-	*(answer+4) = (xa11l - ya11l)*rx*rz/dist2; // 20
+	*(R_matrix+4) = (xa11l - ya11l)*rx*rz/dist2; // 20
 
-	*(answer+5) = (xa11l - ya11l)*ry*rz/dist2; // 21
+	*(R_matrix+5) = (xa11l - ya11l)*ry*rz/dist2; // 21
 
 	// block 11
 
-	*(answer+6) = xa11linv*rx*rx/dist2 + ya11linv*(1 - rx*rx/dist2); // 33
+	*(R_matrix+6) = xa11linv*rx*rx/dist2 + ya11linv*(1 - rx*rx/dist2); // 33
 
-	*(answer+7) = xa11linv*ry*ry/dist2 + ya11linv*(1 - ry*ry/dist2); // 44
+	*(R_matrix+7) = xa11linv*ry*ry/dist2 + ya11linv*(1 - ry*ry/dist2); // 44
 
-	*(answer+8) = xa11linv*rz*rz/dist2 + ya11linv*(1 - rz*rz/dist2); // 55
+	*(R_matrix+8) = xa11linv*rz*rz/dist2 + ya11linv*(1 - rz*rz/dist2); // 55
 
-	*(answer+9) = (xa11linv - ya11linv)*rx*ry/dist2; // 43
+	*(R_matrix+9) = (xa11linv - ya11linv)*rx*ry/dist2; // 43
 
-	*(answer+10) = (xa11linv - ya11linv)*rx*rz/dist2; // 53
+	*(R_matrix+10) = (xa11linv - ya11linv)*rx*rz/dist2; // 53
 
-	*(answer+11) = (xa11linv - ya11linv)*ry*rz/dist2; // 54
+	*(R_matrix+11) = (xa11linv - ya11linv)*ry*rz/dist2; // 54
 
 	// block 10
 
-	*(answer+12) = xa12linv*rx*rx/dist2 + ya12linv*(1 - rx*rx/dist2); // 30
+	*(R_matrix+12) = xa12linv*rx*rx/dist2 + ya12linv*(1 - rx*rx/dist2); // 30
 
-	*(answer+13) = xa12linv*ry*ry/dist2 + ya12linv*(1 - ry*ry/dist2); // 41
+	*(R_matrix+13) = xa12linv*ry*ry/dist2 + ya12linv*(1 - ry*ry/dist2); // 41
 
-	*(answer+14) = xa12linv*rz*rz/dist2 + ya12linv*(1 - rz*rz/dist2); // 52
+	*(R_matrix+14) = xa12linv*rz*rz/dist2 + ya12linv*(1 - rz*rz/dist2); // 52
 
-	*(answer+15) = (xa12linv - ya12linv)*rx*ry/dist2; // 40
+	*(R_matrix+15) = (xa12linv - ya12linv)*rx*ry/dist2; // 40
 
-	*(answer+16) = (xa12linv - ya12linv)*rx*rz/dist2; // 50
+	*(R_matrix+16) = (xa12linv - ya12linv)*rx*rz/dist2; // 50
 
-	*(answer+17) = (xa12linv - ya12linv)*ry*rz/dist2; // 51
+	*(R_matrix+17) = (xa12linv - ya12linv)*ry*rz/dist2; // 51
 
 	for (i = 0; i < 18; i++)
 	{
-		*(answer+i) *= mult;
+		*(R_matrix+i) *= mult;
 	}
 }
 
 // -------------------------------------------------------------------------------
 
-void R_lub_corr(double* as, double* pointers, int N, double* results2)
+void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double* correction_matrix)
 {
 	register int i = 0;
 
@@ -1497,30 +1475,30 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 
 	int I, I1, I2, J, J1, J2, r;
 
-	int N3 = 3*N;
+	int N = 3*number_of_beads;
 
 	double* shifted_pointers;
 
-	double* results = calloc(3*(N*N+N), sizeof(double));
+	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
 
-	for (j = 0; j < N; j++)
+	for (j = 0; j < number_of_beads; j++)
 	{
 
-		for (i = j + 1; i < N; i++)
+		for (i = j + 1; i < number_of_beads; i++)
 		{
 			nf2b = calloc(18, sizeof(double));
 
 			ff2b = calloc(18, sizeof(double));
 
-			shifted_pointers = pointers + 3*results_position(i-1,j,N-1);
+			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
 
 			rx = *(shifted_pointers);
 			ry = *(shifted_pointers+1);
 			rz = *(shifted_pointers+2);
 
-			R_jeffrey(*(as+j), *(as+i), rx, ry, rz, nf2b);
+			JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, nf2b);
 
-			R_rpy(*(as+j), *(as+i), rx, ry, rz, ff2b);
+			RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, ff2b);
 
 			for (k = 0; k < 18; k++)
 			{
@@ -1531,51 +1509,51 @@ void R_lub_corr(double* as, double* pointers, int N, double* results2)
 			J1 = J + 1;
 			J2 = J + 2;
 
-			results2[J + J*N3] += results[0];
-			results2[J1 + J1*N3] += results[1];
-			results2[J2 + J2*N3] += results[2];
-			results2[J1 + J*N3] += results[3];
-			results2[J + J1*N3] += results[3];
-			results2[J2 + J*N3] += results[4];
-			results2[J + J2*N3] += results[4];
-			results2[J2 + J1*N3] += results[5];
-			results2[J1 + J2*N3] += results[5];
+			correction_matrix[J + J*N] += results[0];
+			correction_matrix[J1 + J1*N] += results[1];
+			correction_matrix[J2 + J2*N] += results[2];
+			correction_matrix[J1 + J*N] += results[3];
+			correction_matrix[J + J1*N] += results[3];
+			correction_matrix[J2 + J*N] += results[4];
+			correction_matrix[J + J2*N] += results[4];
+			correction_matrix[J2 + J1*N] += results[5];
+			correction_matrix[J1 + J2*N] += results[5];
 
 			r = 6;
 			I = 3*i;
 			I1 = I + 1;
 			I2 = I + 2;
 
-			results2[I + I*N3] += results[r];
-			results2[I1 + I1*N3] += results[r + 1];
-			results2[I2 + I2*N3] += results[r + 2];
-			results2[I1 + I*N3] += results[r + 3];
-			results2[I + I1*N3] += results[r + 3];
-			results2[I2 + I*N3] += results[r + 4];
-			results2[I + I2*N3] += results[r + 4];
-			results2[I2 + I1*N3] += results[r + 5];
-			results2[I1 + I2*N3] += results[r + 5];
+			correction_matrix[I + I*N] += results[r];
+			correction_matrix[I1 + I1*N] += results[r + 1];
+			correction_matrix[I2 + I2*N] += results[r + 2];
+			correction_matrix[I1 + I*N] += results[r + 3];
+			correction_matrix[I + I1*N] += results[r + 3];
+			correction_matrix[I2 + I*N] += results[r + 4];
+			correction_matrix[I + I2*N] += results[r + 4];
+			correction_matrix[I2 + I1*N] += results[r + 5];
+			correction_matrix[I1 + I2*N] += results[r + 5];
 
 			r = 12;
 
-			results2[I + J*N3] += results[r];
-			results2[J + I*N3] += results[r];
-			results2[I1 + J1*N3] += results[r + 1];
-			results2[J1 + I1*N3] += results[r + 1];
-			results2[I2 + J2*N3] += results[r + 2];
-			results2[J2 + I2*N3] += results[r + 2];
-			results2[I1 + J*N3] += results[r + 3];
-			results2[I + J1*N3] += results[r + 3];
-			results2[J + I1*N3] += results[r + 3];
-			results2[J1 + I*N3] += results[r + 3];
-			results2[I2 + J*N3] += results[r + 4];
-			results2[I + J2*N3] += results[r + 4];
-			results2[J + I2*N3] += results[r + 4];
-			results2[J2 + I*N3] += results[r + 4];
-			results2[I2 + J1*N3] += results[r + 5];
-			results2[I1 + J2*N3] += results[r + 5];
-			results2[J1 + I2*N3] += results[r + 5];
-			results2[J2 + I1*N3] += results[r + 5];
+			correction_matrix[I + J*N] += results[r];
+			correction_matrix[J + I*N] += results[r];
+			correction_matrix[I1 + J1*N] += results[r + 1];
+			correction_matrix[J1 + I1*N] += results[r + 1];
+			correction_matrix[I2 + J2*N] += results[r + 2];
+			correction_matrix[J2 + I2*N] += results[r + 2];
+			correction_matrix[I1 + J*N] += results[r + 3];
+			correction_matrix[I + J1*N] += results[r + 3];
+			correction_matrix[J + I1*N] += results[r + 3];
+			correction_matrix[J1 + I*N] += results[r + 3];
+			correction_matrix[I2 + J*N] += results[r + 4];
+			correction_matrix[I + J2*N] += results[r + 4];
+			correction_matrix[J + I2*N] += results[r + 4];
+			correction_matrix[J2 + I*N] += results[r + 4];
+			correction_matrix[I2 + J1*N] += results[r + 5];
+			correction_matrix[I1 + J2*N] += results[r + 5];
+			correction_matrix[J1 + I2*N] += results[r + 5];
+			correction_matrix[J2 + I1*N] += results[r + 5];
 
 
 			free(nf2b);

@@ -32,7 +32,7 @@ lib = ctypes.cdll.LoadLibrary( lib_path )
 #-------------------------------------------------------------------------------
 
 # @timing
-def Mii_rpy(a):
+def Mii_rpy_python(a):
 
 	return np.identity(3) / ( 6 * np.pi * a )
 
@@ -133,7 +133,7 @@ def M_rpy(beads, pointers):
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
-	lib.M_rpy(a, p, N_c, my_arr)
+	lib.RPY_M_matrix(a, p, N_c, my_arr)
 
 	M = np.reshape(my_arr, (3*N, 3*N))
 
@@ -148,13 +148,13 @@ def M_rpy_python(beads, pointers):
 
 	for i, bi in enumerate(beads):
 
-		M[i][i] = Mii_rpy(bi.a)
+		M[i][i] = Mii_rpy_python(bi.a)
 
 		for j in range(i):
 
 			bj = beads[j]
 
-			M[i][j] = Mij_rpy(bi.a, bj.a, pointers[i][j])
+			M[i][j] = Mij_rpy_python(bi.a, bj.a, pointers[i][j])
 			M[j][i] = np.transpose( M[i][j] )
 
 	return np.block(M)
@@ -181,7 +181,7 @@ def O(r):
 
 	rz = ctypes.c_double(r[2])
 
-	lib.O(rx, ry, rz, arr)
+	lib.RPY_O_function(rx, ry, rz, arr)
 
 	my_list = np.array(arr)
 
@@ -209,7 +209,7 @@ def Q(r):
 
 	rz = ctypes.c_double(r[2])
 
-	lib.Q(rx, ry, rz, arr)
+	lib.RPY_Q_function(rx, ry, rz, arr)
 
 	my_list = np.array(arr)
 
@@ -234,7 +234,7 @@ def Oii_pbc_smith(a, box_length, alpha, m, n):
 
 	n_c = ctypes.c_int(n)
 
-	lib.Oii(a_c, box_length_c, alpha_c, m_c, n_c, arr)
+	lib.RPY_Smith_Oii_block(a_c, box_length_c, alpha_c, m_c, n_c, arr)
 
 	my_list = np.array(arr)
 
@@ -255,7 +255,7 @@ def Oii_pbc_smith_python(a, box_length, alpha, m, n ):
 
 		mlength = math.sqrt( mvec[0]**2 + mvec[1]**2 + mvec[2]**2 )
 
-		answer += erfc( alpha * mlength ) * O(mvec)
+		answer += erfc( alpha * mlength ) * O_python(mvec)
 
 		answer += 2.0 * alpha / math.sqrt(np.pi) * math.exp( - alpha**2 * mlength**2 ) * np.outer(mvec/mlength, mvec/mlength)
 
@@ -288,7 +288,7 @@ def Qii_pbc_smith(a, box_length, alpha, m, n):
 
 	n_c = ctypes.c_int(n)
 
-	lib.Qii(a_c, box_length_c, alpha_c, m_c, n_c, arr)
+	lib.RPY_Smith_Qii_block(a_c, box_length_c, alpha_c, m_c, n_c, arr)
 
 	my_list = np.array(arr)
 
@@ -311,7 +311,7 @@ def Qii_pbc_smith_python(a, box_length, alpha, m, n):
 
 		mult = erfc( alpha * mlength ) + 2.0 * alpha / math.sqrt(np.pi) * mlength * math.exp( -alpha**2 * mlength**2 )
 
-		answer += mult * Q(mvec)
+		answer += mult * Q_python(mvec)
 
 		answer -= 4.0 * alpha**3 / math.sqrt(np.pi) * math.exp(-alpha**2 * mlength**2) * np.outer(mvec/mlength, mvec/mlength)
 
@@ -342,7 +342,7 @@ def Mii_rpy_smith(a, box_length, alpha, m, n):
 
 	n_c = ctypes.c_int(n)
 
-	lib.Mii_rpy_smith(a_c, box_length_c, alpha_c, m_c, n_c, arr)
+	lib.RPY_Smith_Mii_block(a_c, box_length_c, alpha_c, m_c, n_c, arr)
 
 	my_list = np.array(arr)
 
@@ -361,9 +361,9 @@ def Mii_rpy_smith_python(a, box_length, alpha, m, n):
 
 	comp1 = np.identity(3)
 
-	comp2 = Oii_pbc_smith( a, box_length, alpha, m, n )
+	comp2 = Oii_pbc_smith_python( a, box_length, alpha, m, n )
 
-	comp3 = Qii_pbc_smith( a, box_length, alpha, m, n )
+	comp3 = Qii_pbc_smith_python( a, box_length, alpha, m, n )
 
 	return coef1 * ( comp1 + coef2 * comp2 + coef3 * comp3 )
 
@@ -386,7 +386,7 @@ def Oij_pbc_smith(sigma, alpha, m, n):
 
 	n_c = ctypes.c_int(n)
 
-	lib.Oij(sigmax_c, sigmay_c, sigmaz_c, alpha_c, m_c, n_c, arr)
+	lib.RPY_Smith_Oij_block(sigmax_c, sigmay_c, sigmaz_c, alpha_c, m_c, n_c, arr)
 
 	my_list = np.array(arr)
 
@@ -409,7 +409,7 @@ def Oij_pbc_smith_python(sigma, alpha, m, n):
 
 		mslength = math.sqrt( msvec[0]**2 + msvec[1]**2 + msvec[2]**2 )
 
-		answer += erfc( alpha * mslength ) * O( mvec + sigma )
+		answer += erfc( alpha * mslength ) * O_python( mvec + sigma )
 
 		answer += 2.0 * alpha / math.sqrt(np.pi) * math.exp( - alpha**2 * mslength**2 ) * np.outer(mvec+sigma, mvec+sigma)/mslength**2
 
@@ -444,7 +444,7 @@ def Qij_pbc_smith( sigma, alpha, m, n ):
 
 	n_c = ctypes.c_int(n)
 
-	lib.Qij(sigmax_c, sigmay_c, sigmaz_c, alpha_c, m_c, n_c, arr)
+	lib.RPY_Smith_Qij_block(sigmax_c, sigmay_c, sigmaz_c, alpha_c, m_c, n_c, arr)
 
 	my_list = np.array(arr)
 
@@ -469,7 +469,7 @@ def Qij_pbc_smith_python( sigma, alpha, m, n ):
 
 		mult = erfc( alpha * mslength ) + 2.0 * alpha / np.sqrt( np.pi ) * mslength * math.exp(- alpha**2 * mslength**2)
 
-		answer += mult * Q(mvec + sigma)
+		answer += mult * Q_python(mvec + sigma)
 
 		answer -= 4.0 * alpha**3 / np.sqrt(np.pi) * math.exp( -alpha**2 * mslength**2 ) * np.outer(mvec+sigma,mvec+sigma)/mslength**2
 
@@ -509,7 +509,7 @@ def Mij_rpy_smith(ai, aj, pointer, box_length, alpha, m, n):
 
 	n_c = ctypes.c_int(n)
 
-	lib.Mij_rpy_smith(ai_c, aj_c, rx, ry, rz, box_length_c, alpha_c, m_c, n_c, arr)
+	lib.RPY_Smith_Mij_block(ai_c, aj_c, rx, ry, rz, box_length_c, alpha_c, m_c, n_c, arr)
 
 	my_list = np.array(arr)
 
@@ -530,9 +530,9 @@ def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 
 	else: coef3 = ai * ( ai**2 + aj**2 ) / box_length**3 / 4
 
-	comp1 = Oij_pbc_smith( sigma, alpha, m, n )
+	comp1 = Oij_pbc_smith_python( sigma, alpha, m, n )
 
-	comp2 = Qij_pbc_smith( sigma, alpha, m, n )
+	comp2 = Qij_pbc_smith_python( sigma, alpha, m, n )
 
 	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
 
@@ -550,7 +550,7 @@ def Mij_rpy_smith_python(ai, aj, pointer, box_length, alpha, m, n):
 		coef_2 = 1.0 + aij2 / ( 3 * dist2 )
 		coef_3 = 1.0 - aij2 / dist2
 
-		result += Mij_rpy(ai, aj, pointer) - coef_1 * (coef_2 * np.identity(3) + coef_3 * outer) ###here i am
+		result += Mij_rpy_python(ai, aj, pointer) - coef_1 * (coef_2 * np.identity(3) + coef_3 * outer)
 
 	return result
 
@@ -593,7 +593,7 @@ def M_rpy_smith(beads, pointers, box_length, alpha, m, n):
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
-	lib.M_rpy_smith(a, p, box_length_c, alpha_c, m_c, n_c, N_c, my_arr)
+	lib.RPY_Smith_M_matrix(a, p, box_length_c, alpha_c, m_c, n_c, N_c, my_arr)
 
 	M = np.reshape(my_arr, (3*N, 3*N))
 
@@ -608,13 +608,13 @@ def M_rpy_smith_python(beads, pointers, box_length, alpha, m, n):
 
 	for i, bi in enumerate(beads):
 
-		M[i][i] = Mii_rpy_smith(bi.a, box_length, alpha, m, n)
+		M[i][i] = Mii_rpy_smith_python(bi.a, box_length, alpha, m, n)
 
 		for j in range(i):
 
 			bj = beads[j]
 
-			M[i][j] = Mij_rpy_smith(bi.a, bj.a, pointers[i][j], box_length, alpha, m, n)
+			M[i][j] = Mij_rpy_smith_python(bi.a, bj.a, pointers[i][j], box_length, alpha, m, n)
 			M[j][i] = np.transpose( M[i][j] )
 
 	return np.block(M)
@@ -627,9 +627,9 @@ def X_f_poly(l, rank):
 
 	rank_c = ctypes.c_int(rank)
 
-	lib.X_f_poly.restype = ctypes.c_double
+	lib.JO_Xf_polynomial.restype = ctypes.c_double
 
-	return lib.X_f_poly(l_c, rank_c)
+	return lib.JO_Xf_polynomial(l_c, rank_c)
 
 #-------------------------------------------------------------------------------
 
@@ -657,9 +657,9 @@ def Y_f_poly(l, rank):
 
 	rank_c = ctypes.c_int(rank)
 
-	lib.Y_f_poly.restype = ctypes.c_double
+	lib.JO_Yf_polynomial.restype = ctypes.c_double
 
-	return lib.Y_f_poly(l_c, rank_c)
+	return lib.JO_Yf_polynomial(l_c, rank_c)
 
 #-------------------------------------------------------------------------------
 
@@ -687,9 +687,9 @@ def X_g_poly(l, rank):
 
 	rank_c = ctypes.c_int(rank)
 
-	lib.X_g_poly.restype = ctypes.c_double
+	lib.JO_Xg_polynomial.restype = ctypes.c_double
 
-	return lib.X_g_poly(l_c, rank_c)
+	return lib.JO_Xg_polynomial(l_c, rank_c)
 
 #-------------------------------------------------------------------------------
 
@@ -708,9 +708,9 @@ def Y_g_poly(l, rank):
 
 	rank_c = ctypes.c_int(rank)
 
-	lib.Y_g_poly.restype = ctypes.c_double
+	lib.JO_Yg_polynomial.restype = ctypes.c_double
 
-	return lib.Y_g_poly(l_c, rank_c)
+	return lib.JO_Yg_polynomial(l_c, rank_c)
 
 #-------------------------------------------------------------------------------
 
@@ -727,9 +727,9 @@ def XA11(s, l):
 	s_c = ctypes.c_double(s)
 	l_c = ctypes.c_double(l)
 
-	lib.XA11.restype = ctypes.c_double
+	lib.JO_XA11_term.restype = ctypes.c_double
 
-	return lib.XA11(s_c, l_c)
+	return lib.JO_XA11_term(s_c, l_c)
 
 #-------------------------------------------------------------------------------
 
@@ -737,13 +737,13 @@ def XA11_python(s, l):
 
 	answer = 0.0
 
-	answer += X_g_poly(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
+	answer += X_g_poly_python(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
 
-	answer -= X_g_poly(l, 2) * np.log( 1 - 4 * s**(-2) )
+	answer -= X_g_poly_python(l, 2) * np.log( 1 - 4 * s**(-2) )
 
-	answer -= X_g_poly(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
+	answer -= X_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
 
-	answer += X_f_poly(l, 0) - X_g_poly(l, 1)
+	answer += X_f_poly_python(l, 0) - X_g_poly_python(l, 1)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 0 ) ]:
 
@@ -752,9 +752,9 @@ def XA11_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * X_f_poly(l, m) - X_g_poly(l, 1) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * X_f_poly_python(l, m) - X_g_poly_python(l, 1) )
 
-		answer += mult * ( 4 * m**(-1) * m1**(-1) * X_g_poly(l, 3) - 2 * m**(-1) * X_g_poly(l, 2) )
+		answer += mult * ( 4 * m**(-1) * m1**(-1) * X_g_poly_python(l, 3) - 2 * m**(-1) * X_g_poly_python(l, 2) )
 
 	return answer
 
@@ -765,9 +765,9 @@ def YA11(s, l):
 	s_c = ctypes.c_double(s)
 	l_c = ctypes.c_double(l)
 
-	lib.YA11.restype = ctypes.c_double
+	lib.JO_YA11_term.restype = ctypes.c_double
 
-	return lib.YA11(s_c, l_c)
+	return lib.JO_YA11_term(s_c, l_c)
 
 #-------------------------------------------------------------------------------
 
@@ -775,11 +775,11 @@ def YA11_python(s, l):
 
 	answer = 0.0
 
-	answer -= Y_g_poly(l, 2) * np.log( 1 - 4 * s**(-2) )
+	answer -= Y_g_poly_python(l, 2) * np.log( 1 - 4 * s**(-2) )
 
-	answer -= Y_g_poly(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
+	answer -= Y_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
 
-	answer += Y_f_poly(l, 0)
+	answer += Y_f_poly_python(l, 0)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 0 ) ]:
 
@@ -788,9 +788,9 @@ def YA11_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * Y_f_poly(l, m) - 2 * m**(-1) * Y_g_poly(l, 2) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * Y_f_poly_python(l, m) - 2 * m**(-1) * Y_g_poly_python(l, 2) )
 
-		answer += mult * 4 * m**(-1) * m1**(-1) * Y_g_poly(l, 3)
+		answer += mult * 4 * m**(-1) * m1**(-1) * Y_g_poly_python(l, 3)
 
 	return answer
 
@@ -801,9 +801,9 @@ def XA12(s, l):
 	s_c = ctypes.c_double(s)
 	l_c = ctypes.c_double(l)
 
-	lib.XA12.restype = ctypes.c_double
+	lib.JO_XA12_term.restype = ctypes.c_double
 
-	return lib.XA12(s_c, l_c)
+	return lib.JO_XA12_term(s_c, l_c)
 
 #-------------------------------------------------------------------------------
 
@@ -811,11 +811,11 @@ def XA12_python(s, l):
 
 	answer = 0.0
 
-	answer += 2 * s**(-1) * X_g_poly(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
+	answer += 2 * s**(-1) * X_g_poly_python(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
 
-	answer += X_g_poly(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
+	answer += X_g_poly_python(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
 
-	answer += X_g_poly(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) ) + 4 * X_g_poly(l, 3) * s**(-1)
+	answer += X_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) ) + 4 * X_g_poly_python(l, 3) * s**(-1)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 1 ) ]:
 
@@ -824,9 +824,9 @@ def XA12_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * X_f_poly(l, m) - X_g_poly(l, 1) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * X_f_poly_python(l, m) - X_g_poly_python(l, 1) )
 
-		answer += mult * ( 4 * m**(-1) * m1**(-1) * X_g_poly(l, 3) - 2 * m**(-1) * X_g_poly(l, 2) )
+		answer += mult * ( 4 * m**(-1) * m1**(-1) * X_g_poly_python(l, 3) - 2 * m**(-1) * X_g_poly_python(l, 2) )
 
 	divisor = -1 / 2 * ( 1 + l )
 
@@ -839,9 +839,9 @@ def YA12(s, l):
 	s_c = ctypes.c_double(s)
 	l_c = ctypes.c_double(l)
 
-	lib.YA12.restype = ctypes.c_double
+	lib.JO_YA12_term.restype = ctypes.c_double
 
-	return lib.YA12(s_c, l_c)
+	return lib.JO_YA12_term(s_c, l_c)
 
 #-------------------------------------------------------------------------------
 
@@ -849,11 +849,11 @@ def YA12_python(s, l):
 
 	answer = 0.0
 
-	answer += Y_g_poly(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
+	answer += Y_g_poly_python(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
 
-	answer += Y_g_poly(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) )
+	answer += Y_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) )
 
-	answer += 4 * Y_g_poly(l, 3) * s**(-1)
+	answer += 4 * Y_g_poly_python(l, 3) * s**(-1)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 1 ) ]:
 
@@ -862,9 +862,9 @@ def YA12_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * Y_f_poly(l, m) - 2 * m**(-1) * Y_g_poly(l, 2) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * Y_f_poly_python(l, m) - 2 * m**(-1) * Y_g_poly_python(l, 2) )
 
-		answer += mult * ( 4 * m**(-1) * m1**(-1) * Y_g_poly(l, 3) )
+		answer += mult * ( 4 * m**(-1) * m1**(-1) * Y_g_poly_python(l, 3) )
 
 	divisor = -1 / 2 * ( 1 + l )
 
@@ -886,7 +886,7 @@ def R_jeffrey(ai, aj, pointer):
 	ry = ctypes.c_double(pointer[1])
 	rz = ctypes.c_double(pointer[2])
 
-	lib.R_jeffrey(ai_c, aj_c, rx, ry, rz, arr)
+	lib.JO_2B_R_matrix(ai_c, aj_c, rx, ry, rz, arr)
 
 	my_list = np.array(arr)
 
@@ -911,13 +911,13 @@ def R_jeffrey_python(ai, aj, pointer):
 
 	R = [ [ None , None ], [ None, None ] ]
 
-	R[0][0] = XA11(s, l) * np.outer(pointer/dist, pointer/dist) + YA11(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+	R[0][0] = XA11_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA11_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
 
-	R[1][1] = XA11(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA11(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+	R[1][1] = XA11_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA11_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
 
-	R[0][1] = XA12(s, l) * np.outer(pointer/dist, pointer/dist) + YA12(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+	R[0][1] = XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
 
-	R[1][0] = XA12(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+	R[1][0] = XA12_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
 
 	return 3 * np.pi * ( ai + aj ) * np.block(R)
 
@@ -945,7 +945,7 @@ def R_lub_corr(beads, pointers):
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
-	lib.R_lub_corr(a, p, N_c, my_arr)
+	lib.JO_R_lubrication_correction_matrix(a, p, N_c, my_arr)
 
 	M = np.reshape(my_arr, (3*N, 3*N))
 
@@ -963,9 +963,9 @@ def R_lub_corr_python(beads, pointers):
 
 			bj = beads[j]
 
-			nf2b = R_jeffrey( bi.a, bj.a, pointers[i][j] )
+			nf2b = R_jeffrey_python( bi.a, bj.a, pointers[i][j] )
 
-			ff2b = np.linalg.inv( M_rpy( [bi, bj], np.array([[pointers[i][i], pointers[i][j]], [pointers[j][i], pointers[j][j]]]) ) )
+			ff2b = np.linalg.inv( M_rpy_python( [bi, bj], np.array([[pointers[i][i], pointers[i][j]], [pointers[j][i], pointers[j][j]]]) ) )
 
 			lub_corr = nf2b - ff2b
 
