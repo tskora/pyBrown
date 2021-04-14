@@ -1,9 +1,13 @@
-# pyBD
+######
+pyBD
+######
 
 Brownian and Stokesian dynamics simulation software.
 Copyright &copy;2021- Tomasz Skóra [tskora@ichf.edu.pl](mailto:tskora@ichf.edu.pl)
 
-## Features
+**********
+Features
+**********
 
 - [x] Brownian dynamics w/o hydrodynamic interactions
 - [x] Brownian dynamics w hydrodynamic interactions
@@ -13,7 +17,9 @@ Copyright &copy;2021- Tomasz Skóra [tskora@ichf.edu.pl](mailto:tskora@ichf.edu.
 - [ ] bead-bead interactions (inter- and intramolecular)
 - [ ] various propagation schemes (EM, IGT, ...)
 
-## Quick start
+*************
+Quick start
+*************
 
 To compile, type following commands in a terminal:
 
@@ -31,9 +37,11 @@ If you want tests, go to directory src/bdsims/tests and type
 
 make test
 
-## Example input
+***************
+Example input
+***************
 
-```json
+``json
 {
 	"input_str_filename": "test_{}.str",
 	"output_xyz_filename": "test_{}.xyz",
@@ -54,9 +62,11 @@ make test
 		"plane_point": [0.0, 0.0, 0.0]
 	}
 }
-```
+``
 
-## Units
+*******
+Units
+*******
 
 | Physical property | Units |
 |---|---|
