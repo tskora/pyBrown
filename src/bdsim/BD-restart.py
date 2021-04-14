@@ -28,13 +28,16 @@ from tqdm import tqdm
 from BD import write_to_xyz_file, write_to_restart_file, write_to_con_file, write_to_flux_file
 
 from pyBrown.box import Box
-from pyBrown.input import read_str_file
+from pyBrown.input import read_str_file, InputData
 from pyBrown.output import timestamp
 
 @click.command()
 @click.argument('restart_filename',
 				type = click.Path( exists = True ))
-def main(restart_filename):
+@click.option('-j', '--json-filename',
+			  required = False,
+			  type = click.Path( exists = True ))
+def main(restart_filename, json_filename):
 
 	timestamp( 'Reading restart from {} file', restart_filename )
 
@@ -48,7 +51,19 @@ def main(restart_filename):
 
 	input_data = box_rst.inp
 
-	timestamp( 'Input data:\n{}', input_data )
+	timestamp( 'Input data loaded from the restart file:\n{}', input_data )
+
+	if json_filename != None:
+		timestamp( 'Reading input patch from {} file', json_filename )
+		input_patch = InputData(json_filename).input_data
+		for key in input_patch.keys():
+			if key in input_data.keys():
+				timestamp('Keyword {} updated: from {} to {}', key, input_data[key], input_patch[key])
+			else:
+				timestamp('Keyword {} introduced: {}', key, input_patch[key])
+			input_data[key] = input_patch[key]
+
+	timestamp( 'Input data patched with the json file:\n{}', input_data )
 
 	disable_progress_bar = not input_data["progress_bar"]
 
