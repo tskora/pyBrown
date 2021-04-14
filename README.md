@@ -17,7 +17,7 @@ Copyright &copy;2021- Tomasz Skóra [tskora@ichf.edu.pl](mailto:tskora@ichf.edu.
 
 To compile, type following commands in a terminal:
 
-```console
+```sh
 ./configure --prefix=DIR --with-lapack=LAPACK_LIBS
 ```
 where DIR is the installation directory (/usr/local by default) 
@@ -25,13 +25,13 @@ and LAPACK_LIBS is lapack libraries to use (e.g. --with-lapack="-l lapack"
 
 then proceed with 
 
-```console
+```bash
 make
 make install
 ```
 
 If you want tests, go to directory src/bdsims/tests and type 
-```console
+```shell-session
 make test
 ```
 
