@@ -21,7 +21,7 @@ import sys
 from scipy.constants import Boltzmann
 
 from pyBrown.bead import overlap_pbc, distance_pbc, pointer_pbc
-from pyBrown.diffusion import M_rpy, M_rpy_smith, R_lub_corr
+from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.output import timestamp, timing
 
 #-------------------------------------------------------------------------------
@@ -428,25 +428,25 @@ class Box():
 
 		if self.hydrodynamics == "rpy":
 
-			self.D = M_rpy(self.mobile_beads, self.rij)
+			self.D = RPY_M_matrix(self.mobile_beads, self.rij)
 
 			self.D *= self.kBT * 10**19 / self.viscosity
 
 		if self.hydrodynamics == "rpy_smith":
 
-			self.D = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max)
+			self.D = RPY_Smith_M_matrix(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max)
 
 			self.D *= self.kBT * 10**19 / self.viscosity
 
 		if self.hydrodynamics == "rpy_lub":
 
-			self.Mff = M_rpy(self.mobile_beads, self.rij) * 10**19 / self.viscosity
+			self.Mff = RPY_M_matrix(self.mobile_beads, self.rij) * 10**19 / self.viscosity
 
 			self.Rff = np.linalg.inv( self.Mff )
 
 		if self.hydrodynamics == "rpy_smith_lub":
 
-			self.Mff = M_rpy_smith(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max) * 10**19 / self.viscosity
+			self.Mff = RPY_Smith_M_matrix(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max) * 10**19 / self.viscosity
 
 			self.Rff = np.linalg.inv( self.Mff )
 
@@ -455,7 +455,7 @@ class Box():
 	# @timing
 	def compute_Dtot_matrix(self):
 
-		self.R = R_lub_corr(self.mobile_beads, self.rij) * self.viscosity / 10**19 + self.Rff
+		self.R = JO_R_lubrication_correction_matrix(self.mobile_beads, self.rij) * self.viscosity / 10**19 + self.Rff
 
 		self.D = self.kBT * np.linalg.inv(self.R)
 

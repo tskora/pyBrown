@@ -29,7 +29,7 @@ from scipy.constants import Boltzmann
 
 from pyBrown.bead import Bead, pointer_pbc
 from pyBrown.box import Box
-from pyBrown.diffusion import M_rpy_smith, M_rpy, R_lub_corr
+from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -304,7 +304,7 @@ class TestBox(unittest.TestCase):
 
 			b.propagate(dt)
 
-			D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * M_rpy(beads_copy, pointers)
+			D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * RPY_M_matrix(beads_copy, pointers)
 
 			B = np.linalg.cholesky( D )
 
@@ -364,7 +364,7 @@ class TestBox(unittest.TestCase):
 
 				b.propagate(dt)
 
-				D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * M_rpy_smith(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n)
+				D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * RPY_Smith_M_matrix(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n)
 
 				B = np.linalg.cholesky( D )
 
@@ -430,11 +430,11 @@ class TestBox(unittest.TestCase):
 
 					b.propagate(dt)
 
-					Mff = M_rpy_smith(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
+					Mff = RPY_Smith_M_matrix(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
 
 					Rff = np.linalg.inv(Mff)
 
-					Rlc = R_lub_corr(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc = JO_R_lubrication_correction_matrix(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot = Rlc + Rff
 
@@ -454,11 +454,11 @@ class TestBox(unittest.TestCase):
 
 					pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
 
-					Mff_mid = M_rpy_smith(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
+					Mff_mid = RPY_Smith_M_matrix(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
 
 					Rff_mid = np.linalg.inv(Mff_mid)
 
-					Rlc_mid = R_lub_corr(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc_mid = JO_R_lubrication_correction_matrix(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot_mid = Rlc_mid + Rff_mid
 

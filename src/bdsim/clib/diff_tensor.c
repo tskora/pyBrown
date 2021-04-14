@@ -24,68 +24,531 @@ void dgetrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO);
 // generate inverse of a matrix given its LU decomposition
 void dgetri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO);
 
+static inline double RPY_Mii_block(double a);
+
+static void RPY_Mij_block(double ai, double aj, double rx, double ry, double rz, double* matrix);
+
+static void RPY_Smith_Mii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix);
+
+static void RPY_Smith_Mij_block(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m_max, int n_max, double* matrix);
+
+static void RPY_Smith_Oii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix);
+
+static void RPY_Smith_Qii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix);
+
+static void RPY_Smith_Oij_block(double sigmax, double sigmay, double sigmaz, double alpha, int m_max, int n_max, double* matrix);
+
+static void RPY_Smith_Qij_block(double sigmax, double sigmay, double sigmaz, double alpha, int m_max, int n_max, double* matrix);
+
+static void RPY_O_function(double rx, double ry, double rz, double* matrix);
+
+static void RPY_Q_function(double rx, double ry, double rz, double* matrix);
+
+static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix);
+
+static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix);
+
+static double JO_XA11_term(double s, double l);
+
+static double JO_YA11_term(double s, double l);
+
+static double JO_XA12_term(double s, double l);
+
+static double JO_YA12_term(double s, double l);
+
+static double JO_Xf_polynomial(double l, int degree);
+
+static double JO_Yf_polynomial(double l, int degree);
+
+static double JO_Xg_polynomial(double l, int degree);
+
+static double JO_Yg_polynomial(double l, int degree);
+
+static void inverse(double* matrix, int matrix_dimension);
+
+static inline int results_position(int i, int j, int N);
+
 // -------------------------------------------------------------------------------
 
-static void inverse(double* matrix, int matrix_dimension)
+void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_matrix)
 {
-    int *IPIV = calloc(matrix_dimension, sizeof(int));
-    int LWORK = matrix_dimension * matrix_dimension;
-    double *WORK = calloc(LWORK, sizeof(double));
-    int INFO;
+	register int i = 0;
+	register int j = 0;
 
-    dgetrf_(&matrix_dimension, &matrix_dimension, matrix, &matrix_dimension, IPIV, &INFO);
-    dgetri_(&matrix_dimension, matrix, &matrix_dimension, IPIV, WORK, &LWORK, &INFO);
+	double* Mij_values;
 
-    free(IPIV);
-    free(WORK);
+	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
+
+	double* shifted_results;
+
+	double* shifted_pointers;
+
+	double rx, ry, rz, diag;
+
+	int r, I, I1, I2, J, J1, J2;
+
+	int N = 3*number_of_beads;
+
+	for (j = 0; j < number_of_beads; j++)
+	{
+		diag = RPY_Mii_block(*(as+j));
+
+		shifted_results = results + 6*results_position(j,j,number_of_beads);
+
+		*shifted_results = diag;
+		*(shifted_results + 1) = diag;
+		*(shifted_results + 2) = diag;
+
+		for (i = j + 1; i < number_of_beads; i++)
+		{
+			Mij_values = calloc(6, sizeof(double));
+
+			shifted_results = results + 6*results_position(i,j,number_of_beads);
+			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
+
+			rx = *shifted_pointers;
+			ry = *(shifted_pointers + 1);
+			rz = *(shifted_pointers + 2);
+
+			RPY_Mij_block(*(as+i), *(as+j), rx, ry, rz, Mij_values);
+
+			*shifted_results = *Mij_values;
+			*(shifted_results + 1) = *(Mij_values + 1);
+			*(shifted_results + 2) = *(Mij_values + 2);
+			*(shifted_results + 3) = *(Mij_values + 3);
+			*(shifted_results + 4) = *(Mij_values + 4);
+			*(shifted_results + 5) = *(Mij_values + 5);
+
+			free(Mij_values);
+		}
+	}
+
+	for (j = 0; j < number_of_beads; j++)
+	{
+		r = 6*results_position(j, j, number_of_beads);
+		J = 3*j;
+		J1 = J + 1;
+		J2 = J + 2;
+
+		M_matrix[J + J*N] = results[r];
+		M_matrix[J1 + J1*N] = results[r + 1];
+		M_matrix[J2 + J2*N] = results[r + 2];
+
+		for (i = j+1; i < number_of_beads; i++)
+		{
+			r = 6*results_position(i, j, number_of_beads);
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
+
+			M_matrix[I + J*N] = results[r];
+			M_matrix[J + I*N] = results[r];
+			M_matrix[I1 + J1*N] = results[r + 1];
+			M_matrix[J1 + I1*N] = results[r + 1];
+			M_matrix[I2 + J2*N] = results[r + 2];
+			M_matrix[J2 + I2*N] = results[r + 2];
+			M_matrix[I1 + J*N] = results[r + 3];
+			M_matrix[I + J1*N] = results[r + 3];
+			M_matrix[J + I1*N] = results[r + 3];
+			M_matrix[J1 + I*N] = results[r + 3];
+			M_matrix[I2 + J*N] = results[r + 4];
+			M_matrix[I + J2*N] = results[r + 4];
+			M_matrix[J + I2*N] = results[r + 4];
+			M_matrix[J2 + I*N] = results[r + 4];
+			M_matrix[I2 + J1*N] = results[r + 5];
+			M_matrix[I1 + J2*N] = results[r + 5];
+			M_matrix[J1 + I2*N] = results[r + 5];
+			M_matrix[J2 + I1*N] = results[r + 5];
+		}
+	}
+
+	free(results);
 }
 
 // -------------------------------------------------------------------------------
 
-static void RPY_O_function(double rx, double ry, double rz, double* matrix)
+void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double alpha, int m_max, int n_max, int number_of_beads, double* M_matrix)
 {
-	double dist2 = rx*rx + ry*ry + rz*rz;
+	register int i = 0;
+	register int j = 0;
 
-	double dist = sqrt(dist2);
+	int I, J, J1, J2, I1, I2;
 
-	double dist3 = dist2 * dist;
+	int r;
 
-	*matrix = ( 1 + rx*rx / dist2 ) / dist;
+	int N = 3*number_of_beads;
 
-	*(matrix+1) = ( 1 + ry*ry / dist2 ) / dist;
+	double* vector;
 
-	*(matrix+2) = ( 1 + rz*rz / dist2 ) / dist;
+	double* shifted_results;
 
-	*(matrix+3) = rx*ry / dist3;
+	double* shifted_pointers;
 
-	*(matrix+4) = rx*rz / dist3;
+	double rx, ry, rz;
 
-	*(matrix+5) = ry*rz / dist3;
+	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
+
+	for (j = 0; j < number_of_beads; j++)
+	{
+		vector = calloc(6, sizeof(double));
+
+		RPY_Smith_Mii_block(*(as+j), box_length, alpha, m_max, n_max, vector);
+
+		shifted_results = results + 6*results_position(j,j,number_of_beads);
+
+		*(shifted_results) = *(vector);
+		*(shifted_results + 1) = *(vector + 1);
+		*(shifted_results + 2) = *(vector + 2);
+
+		free(vector);
+
+		for (i = j + 1; i < number_of_beads; i++)
+		{
+			vector = calloc(6, sizeof(double));
+
+			shifted_results = results + 6*results_position(i,j,number_of_beads);
+			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
+
+			rx = *shifted_pointers;
+			ry = *(shifted_pointers + 1);
+			rz = *(shifted_pointers + 2);
+
+			RPY_Smith_Mij_block(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m_max, n_max, vector);
+
+			*shifted_results = *vector;
+			*(shifted_results + 1) = *(vector + 1);
+			*(shifted_results + 2) = *(vector + 2);
+			*(shifted_results + 3) = *(vector + 3);
+			*(shifted_results + 4) = *(vector + 4);
+			*(shifted_results + 5) = *(vector + 5);
+
+			free(vector);
+		}
+	}
+
+	for (j = 0; j < number_of_beads; j++)
+	{
+		r = 6*results_position(j, j, number_of_beads);
+		J = 3*j;
+		J1 = J + 1;
+		J2 = J + 2;
+
+		M_matrix[J + J*N] = results[r];
+		M_matrix[J1 + J1*N] = results[r + 1];
+		M_matrix[J2 + J2*N] = results[r + 2];
+		M_matrix[J1 + J*N] = results[r + 3];
+		M_matrix[J + J1*N] = results[r + 3];
+		M_matrix[J2 + J*N] = results[r + 4];
+		M_matrix[J + J2*N] = results[r + 4];
+		M_matrix[J2 + J1*N] = results[r + 5];
+		M_matrix[J1 + J2*N] = results[r + 5];
+
+		for (i = j+1; i < number_of_beads; i++)
+		{
+			r = 6*results_position(i, j, number_of_beads);
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
+
+			M_matrix[I + J*N] = results[r];
+			M_matrix[J + I*N] = results[r];
+			M_matrix[I1 + J1*N] = results[r + 1];
+			M_matrix[J1 + I1*N] = results[r + 1];
+			M_matrix[I2 + J2*N] = results[r + 2];
+			M_matrix[J2 + I2*N] = results[r + 2];
+			M_matrix[I1 + J*N] = results[r + 3];
+			M_matrix[I + J1*N] = results[r + 3];
+			M_matrix[J + I1*N] = results[r + 3];
+			M_matrix[J1 + I*N] = results[r + 3];
+			M_matrix[I2 + J*N] = results[r + 4];
+			M_matrix[I + J2*N] = results[r + 4];
+			M_matrix[J + I2*N] = results[r + 4];
+			M_matrix[J2 + I*N] = results[r + 4];
+			M_matrix[I2 + J1*N] = results[r + 5];
+			M_matrix[I1 + J2*N] = results[r + 5];
+			M_matrix[J1 + I2*N] = results[r + 5];
+			M_matrix[J2 + I1*N] = results[r + 5];
+		}
+	}
+
+	free(results);
 }
 
 // -------------------------------------------------------------------------------
 
-static void RPY_Q_function(double rx, double ry, double rz, double* matrix)
+void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double* correction_matrix)
+{
+	register int i = 0;
+
+	register int j = 0;
+
+	register int k = 0;
+
+	double* nf2b;
+
+	double* ff2b;
+
+	double rx, ry, rz;
+
+	int I, I1, I2, J, J1, J2, r;
+
+	int N = 3*number_of_beads;
+
+	double* shifted_pointers;
+
+	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
+
+	for (j = 0; j < number_of_beads; j++)
+	{
+
+		for (i = j + 1; i < number_of_beads; i++)
+		{
+			nf2b = calloc(18, sizeof(double));
+
+			ff2b = calloc(18, sizeof(double));
+
+			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
+
+			rx = *(shifted_pointers);
+			ry = *(shifted_pointers+1);
+			rz = *(shifted_pointers+2);
+
+			JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, nf2b);
+
+			RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, ff2b);
+
+			for (k = 0; k < 18; k++)
+			{
+				*(results+k) = *(nf2b+k) - *(ff2b+k);
+			}
+
+			J = 3*j;
+			J1 = J + 1;
+			J2 = J + 2;
+
+			correction_matrix[J + J*N] += results[0];
+			correction_matrix[J1 + J1*N] += results[1];
+			correction_matrix[J2 + J2*N] += results[2];
+			correction_matrix[J1 + J*N] += results[3];
+			correction_matrix[J + J1*N] += results[3];
+			correction_matrix[J2 + J*N] += results[4];
+			correction_matrix[J + J2*N] += results[4];
+			correction_matrix[J2 + J1*N] += results[5];
+			correction_matrix[J1 + J2*N] += results[5];
+
+			r = 6;
+			I = 3*i;
+			I1 = I + 1;
+			I2 = I + 2;
+
+			correction_matrix[I + I*N] += results[r];
+			correction_matrix[I1 + I1*N] += results[r + 1];
+			correction_matrix[I2 + I2*N] += results[r + 2];
+			correction_matrix[I1 + I*N] += results[r + 3];
+			correction_matrix[I + I1*N] += results[r + 3];
+			correction_matrix[I2 + I*N] += results[r + 4];
+			correction_matrix[I + I2*N] += results[r + 4];
+			correction_matrix[I2 + I1*N] += results[r + 5];
+			correction_matrix[I1 + I2*N] += results[r + 5];
+
+			r = 12;
+
+			correction_matrix[I + J*N] += results[r];
+			correction_matrix[J + I*N] += results[r];
+			correction_matrix[I1 + J1*N] += results[r + 1];
+			correction_matrix[J1 + I1*N] += results[r + 1];
+			correction_matrix[I2 + J2*N] += results[r + 2];
+			correction_matrix[J2 + I2*N] += results[r + 2];
+			correction_matrix[I1 + J*N] += results[r + 3];
+			correction_matrix[I + J1*N] += results[r + 3];
+			correction_matrix[J + I1*N] += results[r + 3];
+			correction_matrix[J1 + I*N] += results[r + 3];
+			correction_matrix[I2 + J*N] += results[r + 4];
+			correction_matrix[I + J2*N] += results[r + 4];
+			correction_matrix[J + I2*N] += results[r + 4];
+			correction_matrix[J2 + I*N] += results[r + 4];
+			correction_matrix[I2 + J1*N] += results[r + 5];
+			correction_matrix[I1 + J2*N] += results[r + 5];
+			correction_matrix[J1 + I2*N] += results[r + 5];
+			correction_matrix[J2 + I1*N] += results[r + 5];
+
+
+			free(nf2b);
+
+			free(ff2b);
+		}
+	}
+
+	free(results);
+}
+
+// -------------------------------------------------------------------------------
+
+static inline double RPY_Mii_block(double a)
+{
+	return 1.0 / ( 6 * M_PI * a );
+}
+
+// -------------------------------------------------------------------------------
+
+static void RPY_Mij_block(double ai, double aj, double rx, double ry, double rz, double* matrix)
+{
+	double al, as;
+
+	if (ai > aj)
+	{
+		al = ai;
+		as = aj;
+	}
+	else
+	{
+		al = aj;
+		as = ai;
+	}
+	double dist2 = rx*rx + ry*ry + rz*rz;
+	double dist = sqrt(dist2);
+	double aij2 = ai*ai + aj*aj;
+
+	if (dist > (ai + aj))
+	{
+		double coef1 = 1.0 / ( 8 * M_PI * dist );
+		double coef2 = 1.0 + aij2 / ( 3 * dist2 );
+		double coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
+
+		*matrix = coef1 * ( coef2 + coef3 * rx * rx );
+		*(matrix+1) = coef1 * ( coef2 + coef3 * ry * ry );
+		*(matrix+2) = coef1 * ( coef2 + coef3 * rz * rz );
+		*(matrix+3) = coef1 * coef3 * rx * ry;
+		*(matrix+4) = coef1 * coef3 * rx * rz;
+		*(matrix+5) = coef1 * coef3 * ry * rz;
+	}
+	else if (dist <= (al - as))
+	{
+		double temp = 1.0 / ( 6 * M_PI * al );
+
+		*matrix = temp;
+		*(matrix+1) = temp;
+		*(matrix+2) = temp;
+	}
+	else
+	{
+		double dist3 = dist2 * dist;
+
+		double coef1 = 1.0 / ( 6 * M_PI * ai * aj );
+		double coef2 = 16 * dist3 * ( ai + aj );
+		double coef3 = (ai - aj) * (ai - aj) + 3*dist2;
+		coef3 *= coef3;
+		double coef4 = (coef2 - coef3) / 32 / dist3;
+		double coef5 = ( (ai - aj)*(ai - aj) - dist2 );
+		coef5 *= 3 * coef5;
+		double coef6 = coef5 / ( 32 * dist3 ) / dist2;
+
+		*matrix = coef1 * ( coef4 + coef6 * rx * rx );
+		*(matrix+1) = coef1 * ( coef4 + coef6 * ry * ry );
+		*(matrix+2) = coef1 * ( coef4 + coef6 * rz * rz );
+		*(matrix+3) = coef1 * coef6 * rx * ry;
+		*(matrix+4) = coef1 * coef6 * rx * rz;
+		*(matrix+5) = coef1 * coef6 * ry * rz;
+	}
+}
+
+// -------------------------------------------------------------------------------
+
+static void RPY_Smith_Mii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix)
+{
+	double coef1 = 1.0 / ( 6 * M_PI * a );
+	double coef2 = 3 * a / ( 4 * box_length );
+	double coef3 = a * a * a / ( 2 * box_length * box_length * box_length );
+
+	double* comp1 = calloc(6, sizeof(double));
+	double* comp2 = calloc(6, sizeof(double));
+
+	RPY_Smith_Oii_block(a, box_length, alpha, m_max, n_max, comp1);
+	RPY_Smith_Qii_block(a, box_length, alpha, m_max, n_max, comp2);
+
+	*matrix = coef1 * ( 1.0 + coef2 * *comp1 + coef3 * *comp2 );
+	*(matrix+1) = coef1 * ( 1.0 + coef2 * *(comp1+1) + coef3 * *(comp2+1) );
+	*(matrix+2) = coef1 * ( 1.0 + coef2 * *(comp1+2) + coef3 * *(comp2+2) );
+
+	*(matrix+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
+	*(matrix+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
+	*(matrix+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
+
+	free(comp1);
+	free(comp2);
+}
+
+// -------------------------------------------------------------------------------
+
+static void RPY_Smith_Mij_block(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m_max, int n_max, double* matrix)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
-	double dist = sqrt(dist2);
+	double sigmax = rx / box_length;
+	double sigmay = ry / box_length;
+	double sigmaz = rz / box_length;
 
-	double dist3 = dist2 * dist;
+	double coef1 = 1.0 / ( 6 * M_PI * ai );
+	double coef2 = 3 * ai / ( 4 * box_length );
+	double coef3;
 
-	double dist5 = dist3 * dist2;
+	if (ai == aj)
+	{
+		coef3 = ai * ai * ai / ( 2 * box_length * box_length * box_length );
+	}
+	else
+	{
+		coef3 = ai * ( ai * ai + aj * aj ) / ( 4 * box_length * box_length * box_length );
+	}
 
-	*matrix = ( 1 - 3 * rx*rx / dist2 ) / dist3;
+	double* comp1 = calloc(6, sizeof(double));
+	double* comp2 = calloc(6, sizeof(double));
 
-	*(matrix+1) = ( 1 - 3 * ry*ry / dist2 ) / dist3;
+	RPY_Smith_Oij_block(sigmax, sigmay, sigmaz, alpha, m_max, n_max, comp1);
+	RPY_Smith_Qij_block(sigmax, sigmay, sigmaz, alpha, m_max, n_max, comp2);
 
-	*(matrix+2) = ( 1 - 3 * rz*rz / dist2 ) / dist3;
+	*matrix = coef1 * ( coef2 * *comp1 + coef3 * *comp2 );
+	*(matrix+1) = coef1 * ( coef2 * *(comp1+1) + coef3 * *(comp2+1) );
+	*(matrix+2) = coef1 * ( coef2 * *(comp1+2) + coef3 * *(comp2+2) );
+	*(matrix+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
+	*(matrix+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
+	*(matrix+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
 
-	*(matrix+3) = -3 * rx*ry / dist5;
 
-	*(matrix+4) = -3 * rx*rz / dist5;
+	if (dist2 < (ai + aj)*(ai + aj))
+	{
+		double dist = sqrt(dist2);
 
-	*(matrix+5) = -3 * ry*rz / dist5;
+		double aij2 = ai*ai + aj*aj;
+
+		double* Aij = calloc(6, sizeof(double));
+
+		RPY_Mij_block(ai, aj, rx, ry, rz, Aij);
+
+		*matrix += *(Aij);
+		*(matrix+1) += *(Aij+1);
+		*(matrix+2) += *(Aij+2);
+		*(matrix+3) += *(Aij+3);
+		*(matrix+4) += *(Aij+4);
+		*(matrix+5) += *(Aij+5);
+
+		coef1 = 1.0 / ( 8 * M_PI * dist );
+		coef2 = 1.0 + aij2 / ( 3 * dist2 );
+		coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
+
+		*matrix -= coef1 * ( coef2 + coef3 * rx * rx);
+		*(matrix+1) -= coef1 * ( coef2 + coef3 * ry * ry );
+		*(matrix+2) -= coef1 * ( coef2 + coef3 * rz * rz );
+		*(matrix+3) -= coef1 * coef3 * rx * ry;
+		*(matrix+4) -= coef1 * coef3 * rx * rz;
+		*(matrix+5) -= coef1 * coef3 * ry * rz;
+
+		free(Aij);
+	}
+
+	free(comp1);
+
+	free(comp2);
 }
 
 // -------------------------------------------------------------------------------
@@ -481,386 +944,400 @@ static void RPY_Smith_Qij_block(double sigmax, double sigmay, double sigmaz, dou
 
 // -------------------------------------------------------------------------------
 
-static inline double RPY_Mii_block(double a)
+static void RPY_O_function(double rx, double ry, double rz, double* matrix)
 {
-	return 1.0 / ( 6 * M_PI * a );
-}
-
-// -------------------------------------------------------------------------------
-
-static void RPY_Mij_block(double ai, double aj, double rx, double ry, double rz, double* matrix)
-{
-	double al, as;
-
-	if (ai > aj)
-	{
-		al = ai;
-		as = aj;
-	}
-	else
-	{
-		al = aj;
-		as = ai;
-	}
 	double dist2 = rx*rx + ry*ry + rz*rz;
+
 	double dist = sqrt(dist2);
-	double aij2 = ai*ai + aj*aj;
 
-	if (dist > (ai + aj))
-	{
-		double coef1 = 1.0 / ( 8 * M_PI * dist );
-		double coef2 = 1.0 + aij2 / ( 3 * dist2 );
-		double coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
+	double dist3 = dist2 * dist;
 
-		*matrix = coef1 * ( coef2 + coef3 * rx * rx );
-		*(matrix+1) = coef1 * ( coef2 + coef3 * ry * ry );
-		*(matrix+2) = coef1 * ( coef2 + coef3 * rz * rz );
-		*(matrix+3) = coef1 * coef3 * rx * ry;
-		*(matrix+4) = coef1 * coef3 * rx * rz;
-		*(matrix+5) = coef1 * coef3 * ry * rz;
-	}
-	else if (dist <= (al - as))
-	{
-		double temp = 1.0 / ( 6 * M_PI * al );
+	*matrix = ( 1 + rx*rx / dist2 ) / dist;
 
-		*matrix = temp;
-		*(matrix+1) = temp;
-		*(matrix+2) = temp;
-	}
-	else
-	{
-		double dist3 = dist2 * dist;
+	*(matrix+1) = ( 1 + ry*ry / dist2 ) / dist;
 
-		double coef1 = 1.0 / ( 6 * M_PI * ai * aj );
-		double coef2 = 16 * dist3 * ( ai + aj );
-		double coef3 = (ai - aj) * (ai - aj) + 3*dist2;
-		coef3 *= coef3;
-		double coef4 = (coef2 - coef3) / 32 / dist3;
-		double coef5 = ( (ai - aj)*(ai - aj) - dist2 );
-		coef5 *= 3 * coef5;
-		double coef6 = coef5 / ( 32 * dist3 ) / dist2;
+	*(matrix+2) = ( 1 + rz*rz / dist2 ) / dist;
 
-		*matrix = coef1 * ( coef4 + coef6 * rx * rx );
-		*(matrix+1) = coef1 * ( coef4 + coef6 * ry * ry );
-		*(matrix+2) = coef1 * ( coef4 + coef6 * rz * rz );
-		*(matrix+3) = coef1 * coef6 * rx * ry;
-		*(matrix+4) = coef1 * coef6 * rx * rz;
-		*(matrix+5) = coef1 * coef6 * ry * rz;
-	}
+	*(matrix+3) = rx*ry / dist3;
+
+	*(matrix+4) = rx*rz / dist3;
+
+	*(matrix+5) = ry*rz / dist3;
 }
 
 // -------------------------------------------------------------------------------
 
-static void RPY_Smith_Mii_block(double a, double box_length, double alpha, int m_max, int n_max, double* matrix)
-{
-	double coef1 = 1.0 / ( 6 * M_PI * a );
-	double coef2 = 3 * a / ( 4 * box_length );
-	double coef3 = a * a * a / ( 2 * box_length * box_length * box_length );
-
-	double* comp1 = calloc(6, sizeof(double));
-	double* comp2 = calloc(6, sizeof(double));
-
-	RPY_Smith_Oii_block(a, box_length, alpha, m_max, n_max, comp1);
-	RPY_Smith_Qii_block(a, box_length, alpha, m_max, n_max, comp2);
-
-	*matrix = coef1 * ( 1.0 + coef2 * *comp1 + coef3 * *comp2 );
-	*(matrix+1) = coef1 * ( 1.0 + coef2 * *(comp1+1) + coef3 * *(comp2+1) );
-	*(matrix+2) = coef1 * ( 1.0 + coef2 * *(comp1+2) + coef3 * *(comp2+2) );
-
-	*(matrix+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
-	*(matrix+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
-	*(matrix+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
-
-	free(comp1);
-	free(comp2);
-}
-
-// -------------------------------------------------------------------------------
-
-static void RPY_Smith_Mij_block(double ai, double aj, double rx, double ry, double rz, double box_length, double alpha, int m_max, int n_max, double* matrix)
+static void RPY_Q_function(double rx, double ry, double rz, double* matrix)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
-	double sigmax = rx / box_length;
-	double sigmay = ry / box_length;
-	double sigmaz = rz / box_length;
+	double dist = sqrt(dist2);
 
-	double coef1 = 1.0 / ( 6 * M_PI * ai );
-	double coef2 = 3 * ai / ( 4 * box_length );
-	double coef3;
+	double dist3 = dist2 * dist;
 
-	if (ai == aj)
-	{
-		coef3 = ai * ai * ai / ( 2 * box_length * box_length * box_length );
-	}
-	else
-	{
-		coef3 = ai * ( ai * ai + aj * aj ) / ( 4 * box_length * box_length * box_length );
-	}
+	double dist5 = dist3 * dist2;
 
-	double* comp1 = calloc(6, sizeof(double));
-	double* comp2 = calloc(6, sizeof(double));
+	*matrix = ( 1 - 3 * rx*rx / dist2 ) / dist3;
 
-	RPY_Smith_Oij_block(sigmax, sigmay, sigmaz, alpha, m_max, n_max, comp1);
-	RPY_Smith_Qij_block(sigmax, sigmay, sigmaz, alpha, m_max, n_max, comp2);
+	*(matrix+1) = ( 1 - 3 * ry*ry / dist2 ) / dist3;
 
-	*matrix = coef1 * ( coef2 * *comp1 + coef3 * *comp2 );
-	*(matrix+1) = coef1 * ( coef2 * *(comp1+1) + coef3 * *(comp2+1) );
-	*(matrix+2) = coef1 * ( coef2 * *(comp1+2) + coef3 * *(comp2+2) );
-	*(matrix+3) = coef1 * ( coef2 * *(comp1+3) + coef3 * *(comp2+3) );
-	*(matrix+4) = coef1 * ( coef2 * *(comp1+4) + coef3 * *(comp2+4) );
-	*(matrix+5) = coef1 * ( coef2 * *(comp1+5) + coef3 * *(comp2+5) );
+	*(matrix+2) = ( 1 - 3 * rz*rz / dist2 ) / dist3;
 
+	*(matrix+3) = -3 * rx*ry / dist5;
 
-	if (dist2 < (ai + aj)*(ai + aj))
-	{
-		double dist = sqrt(dist2);
+	*(matrix+4) = -3 * rx*rz / dist5;
 
-		double aij2 = ai*ai + aj*aj;
-
-		double* Aij = calloc(6, sizeof(double));
-
-		RPY_Mij_block(ai, aj, rx, ry, rz, Aij);
-
-		*matrix += *(Aij);
-		*(matrix+1) += *(Aij+1);
-		*(matrix+2) += *(Aij+2);
-		*(matrix+3) += *(Aij+3);
-		*(matrix+4) += *(Aij+4);
-		*(matrix+5) += *(Aij+5);
-
-		coef1 = 1.0 / ( 8 * M_PI * dist );
-		coef2 = 1.0 + aij2 / ( 3 * dist2 );
-		coef3 = ( 1.0 - aij2 / dist2 ) / dist2;
-
-		*matrix -= coef1 * ( coef2 + coef3 * rx * rx);
-		*(matrix+1) -= coef1 * ( coef2 + coef3 * ry * ry );
-		*(matrix+2) -= coef1 * ( coef2 + coef3 * rz * rz );
-		*(matrix+3) -= coef1 * coef3 * rx * ry;
-		*(matrix+4) -= coef1 * coef3 * rx * rz;
-		*(matrix+5) -= coef1 * coef3 * ry * rz;
-
-		free(Aij);
-	}
-
-	free(comp1);
-
-	free(comp2);
+	*(matrix+5) = -3 * ry*rz / dist5;
 }
 
 // -------------------------------------------------------------------------------
 
-static inline int results_position(int i, int j, int N)
+static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
 {
-	int position = i + j*N;
+	double Mi = RPY_Mii_block(ai);
 
-	return position - j*(j+1)/2;
+	double Mj = RPY_Mii_block(aj);
+
+	double* Mij = calloc(6, sizeof(double));
+
+	RPY_Mij_block(ai, aj, rx, ry, rz, Mij);
+
+	double* matrix = calloc(6*6, sizeof(double));
+
+	*matrix = Mi;
+	*(matrix+7) = Mi;
+	*(matrix+14) = Mi;
+	*(matrix+21) = Mj;
+	*(matrix+28) = Mj;
+	*(matrix+35) = Mj;
+
+	*(matrix+3) = *(Mij);
+	*(matrix+4) = *(Mij+3);
+	*(matrix+5) = *(Mij+4);
+	*(matrix+9) = *(Mij+3);
+	*(matrix+10) = *(Mij+1);
+	*(matrix+11) = *(Mij+5);
+	*(matrix+15) = *(Mij+4);
+	*(matrix+16) = *(Mij+5);
+	*(matrix+17) = *(Mij+2);
+
+	*(matrix+18) = *(Mij);
+	*(matrix+19) = *(Mij+3);
+	*(matrix+20) = *(Mij+4);
+	*(matrix+24) = *(Mij+3);
+	*(matrix+25) = *(Mij+1);
+	*(matrix+26) = *(Mij+5);
+	*(matrix+30) = *(Mij+4);
+	*(matrix+31) = *(Mij+5);
+	*(matrix+32) = *(Mij+2);
+
+	inverse(matrix,6);
+
+	// block 00
+
+	*R_matrix = *matrix;
+	*(R_matrix+1) = *(matrix+7);
+	*(R_matrix+2) = *(matrix+14);
+	*(R_matrix+3) = *(matrix+6);
+	*(R_matrix+4) = *(matrix+12);
+	*(R_matrix+5) = *(matrix+13);
+
+	// block 11
+
+	*(R_matrix+6) = *(matrix+21);
+	*(R_matrix+7) = *(matrix+28);
+	*(R_matrix+8) = *(matrix+35);
+	*(R_matrix+9) = *(matrix+27);
+	*(R_matrix+10) = *(matrix+33);
+	*(R_matrix+11) = *(matrix+34);
+
+	// block 10
+
+	*(R_matrix+12) = *(matrix+3);
+	*(R_matrix+13) = *(matrix+10);
+	*(R_matrix+14) = *(matrix+17);
+	*(R_matrix+15) = *(matrix+9);
+	*(R_matrix+16) = *(matrix+15);
+	*(R_matrix+17) = *(matrix+16);
+
+	free(Mij);
+
+	free(matrix);
 }
 
 // -------------------------------------------------------------------------------
 
-void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_matrix)
+static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
 {
-	register int i = 0;
-	register int j = 0;
+	double dist2 = rx*rx + ry*ry + rz*rz;
 
-	double* Mij_values;
+	double dist = sqrt(dist2);
 
-	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
+	double s = 2*dist/(ai + aj);
 
-	double* shifted_results;
+	double l = aj/ai;
 
-	double* shifted_pointers;
+	double xa11l = JO_XA11_term(s, l);
 
-	double rx, ry, rz, diag;
+	double ya11l = JO_YA11_term(s, l);
 
-	int r, I, I1, I2, J, J1, J2;
+	double xa11linv = JO_XA11_term(s, 1/l);
 
-	int N = 3*number_of_beads;
+	double ya11linv = JO_YA11_term(s, 1/l);
 
-	for (j = 0; j < number_of_beads; j++)
+	double xa12linv = JO_XA12_term(s, 1/l);
+
+	double ya12linv = JO_YA12_term(s, 1/l);
+
+	double mult = 3 * M_PI * ( ai + aj );
+
+	int i;
+
+	// block 00
+
+	*R_matrix = xa11l*rx*rx/dist2 + ya11l*(1 - rx*rx/dist2); // 00
+
+	*(R_matrix+1) = xa11l*ry*ry/dist2 + ya11l*(1 - ry*ry/dist2); // 11
+
+	*(R_matrix+2) = xa11l*rz*rz/dist2 + ya11l*(1 - rz*rz/dist2); // 22
+
+	*(R_matrix+3) = (xa11l - ya11l)*rx*ry/dist2; // 10
+
+	*(R_matrix+4) = (xa11l - ya11l)*rx*rz/dist2; // 20
+
+	*(R_matrix+5) = (xa11l - ya11l)*ry*rz/dist2; // 21
+
+	// block 11
+
+	*(R_matrix+6) = xa11linv*rx*rx/dist2 + ya11linv*(1 - rx*rx/dist2); // 33
+
+	*(R_matrix+7) = xa11linv*ry*ry/dist2 + ya11linv*(1 - ry*ry/dist2); // 44
+
+	*(R_matrix+8) = xa11linv*rz*rz/dist2 + ya11linv*(1 - rz*rz/dist2); // 55
+
+	*(R_matrix+9) = (xa11linv - ya11linv)*rx*ry/dist2; // 43
+
+	*(R_matrix+10) = (xa11linv - ya11linv)*rx*rz/dist2; // 53
+
+	*(R_matrix+11) = (xa11linv - ya11linv)*ry*rz/dist2; // 54
+
+	// block 10
+
+	*(R_matrix+12) = xa12linv*rx*rx/dist2 + ya12linv*(1 - rx*rx/dist2); // 30
+
+	*(R_matrix+13) = xa12linv*ry*ry/dist2 + ya12linv*(1 - ry*ry/dist2); // 41
+
+	*(R_matrix+14) = xa12linv*rz*rz/dist2 + ya12linv*(1 - rz*rz/dist2); // 52
+
+	*(R_matrix+15) = (xa12linv - ya12linv)*rx*ry/dist2; // 40
+
+	*(R_matrix+16) = (xa12linv - ya12linv)*rx*rz/dist2; // 50
+
+	*(R_matrix+17) = (xa12linv - ya12linv)*ry*rz/dist2; // 51
+
+	for (i = 0; i < 18; i++)
 	{
-		diag = RPY_Mii_block(*(as+j));
-
-		shifted_results = results + 6*results_position(j,j,number_of_beads);
-
-		*shifted_results = diag;
-		*(shifted_results + 1) = diag;
-		*(shifted_results + 2) = diag;
-
-		for (i = j + 1; i < number_of_beads; i++)
-		{
-			Mij_values = calloc(6, sizeof(double));
-
-			shifted_results = results + 6*results_position(i,j,number_of_beads);
-			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
-
-			rx = *shifted_pointers;
-			ry = *(shifted_pointers + 1);
-			rz = *(shifted_pointers + 2);
-
-			RPY_Mij_block(*(as+i), *(as+j), rx, ry, rz, Mij_values);
-
-			*shifted_results = *Mij_values;
-			*(shifted_results + 1) = *(Mij_values + 1);
-			*(shifted_results + 2) = *(Mij_values + 2);
-			*(shifted_results + 3) = *(Mij_values + 3);
-			*(shifted_results + 4) = *(Mij_values + 4);
-			*(shifted_results + 5) = *(Mij_values + 5);
-
-			free(Mij_values);
-		}
+		*(R_matrix+i) *= mult;
 	}
-
-	for (j = 0; j < number_of_beads; j++)
-	{
-		r = 6*results_position(j, j, number_of_beads);
-		J = 3*j;
-		J1 = J + 1;
-		J2 = J + 2;
-
-		M_matrix[J + J*N] = results[r];
-		M_matrix[J1 + J1*N] = results[r + 1];
-		M_matrix[J2 + J2*N] = results[r + 2];
-
-		for (i = j+1; i < number_of_beads; i++)
-		{
-			r = 6*results_position(i, j, number_of_beads);
-			I = 3*i;
-			I1 = I + 1;
-			I2 = I + 2;
-
-			M_matrix[I + J*N] = results[r];
-			M_matrix[J + I*N] = results[r];
-			M_matrix[I1 + J1*N] = results[r + 1];
-			M_matrix[J1 + I1*N] = results[r + 1];
-			M_matrix[I2 + J2*N] = results[r + 2];
-			M_matrix[J2 + I2*N] = results[r + 2];
-			M_matrix[I1 + J*N] = results[r + 3];
-			M_matrix[I + J1*N] = results[r + 3];
-			M_matrix[J + I1*N] = results[r + 3];
-			M_matrix[J1 + I*N] = results[r + 3];
-			M_matrix[I2 + J*N] = results[r + 4];
-			M_matrix[I + J2*N] = results[r + 4];
-			M_matrix[J + I2*N] = results[r + 4];
-			M_matrix[J2 + I*N] = results[r + 4];
-			M_matrix[I2 + J1*N] = results[r + 5];
-			M_matrix[I1 + J2*N] = results[r + 5];
-			M_matrix[J1 + I2*N] = results[r + 5];
-			M_matrix[J2 + I1*N] = results[r + 5];
-		}
-	}
-
-	free(results);
 }
 
 // -------------------------------------------------------------------------------
 
-void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double alpha, int m_max, int n_max, int number_of_beads, double* M_matrix)
+static double JO_XA11_term(double s, double l)
 {
-	register int i = 0;
-	register int j = 0;
+	double XA11_value = 0.0;
 
-	int I, J, J1, J2, I1, I2;
+	double s2 = 1.0 - 4.0 / ( s * s );
 
-	int r;
+	double logs2 = log(s2);
 
-	int N = 3*number_of_beads;
+	int m, m1;
 
-	double* vector;
+	double mult;
 
-	double* shifted_results;
+	XA11_value += JO_Xg_polynomial(l, 1)/s2;
 
-	double* shifted_pointers;
+	XA11_value -= JO_Xg_polynomial(l, 2)*logs2;
 
-	double rx, ry, rz;
+	XA11_value -= JO_Xg_polynomial(l, 3)*s2*logs2;
 
-	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
+	XA11_value += JO_Xf_polynomial(l, 0) - JO_Xg_polynomial(l, 1);
 
-	for (j = 0; j < number_of_beads; j++)
+	for (m = 1; m < 12; m++)
 	{
-		vector = calloc(6, sizeof(double));
-
-		RPY_Smith_Mii_block(*(as+j), box_length, alpha, m_max, n_max, vector);
-
-		shifted_results = results + 6*results_position(j,j,number_of_beads);
-
-		*(shifted_results) = *(vector);
-		*(shifted_results + 1) = *(vector + 1);
-		*(shifted_results + 2) = *(vector + 2);
-
-		free(vector);
-
-		for (i = j + 1; i < number_of_beads; i++)
+		if (m % 2 == 1)
 		{
-			vector = calloc(6, sizeof(double));
+			continue;
+		}
+		else
+		{
+			if (m == 2)
+			{
+				m1 = -2;
+			}
+			else
+			{
+				m1 = m - 2;
+			}
+			
+			mult = pow(2/s, m);
 
-			shifted_results = results + 6*results_position(i,j,number_of_beads);
-			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
+			XA11_value += mult * ( pow(2, -m) * pow(1+l, -m) * JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
 
-			rx = *shifted_pointers;
-			ry = *(shifted_pointers + 1);
-			rz = *(shifted_pointers + 2);
-
-			RPY_Smith_Mij_block(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m_max, n_max, vector);
-
-			*shifted_results = *vector;
-			*(shifted_results + 1) = *(vector + 1);
-			*(shifted_results + 2) = *(vector + 2);
-			*(shifted_results + 3) = *(vector + 3);
-			*(shifted_results + 4) = *(vector + 4);
-			*(shifted_results + 5) = *(vector + 5);
-
-			free(vector);
+			XA11_value += mult * ( 4.0 / ( m * m1 ) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
 		}
 	}
 
-	for (j = 0; j < number_of_beads; j++)
+	return XA11_value;
+}
+
+// -------------------------------------------------------------------------------
+
+static double JO_YA11_term(double s, double l)
+{
+	double YA11_value = 0.0;
+
+	double s2 = 1.0 - 4.0 / ( s * s );
+
+	double logs2 = log(s2);
+
+	int m, m1;
+
+	double mult;
+
+	YA11_value -= JO_Yg_polynomial(l, 2)*logs2;
+
+	YA11_value -= JO_Yg_polynomial(l, 3)*s2*logs2;
+
+	YA11_value += JO_Yf_polynomial(l, 0);
+
+	for (m = 1; m < 12; m++)
 	{
-		r = 6*results_position(j, j, number_of_beads);
-		J = 3*j;
-		J1 = J + 1;
-		J2 = J + 2;
-
-		M_matrix[J + J*N] = results[r];
-		M_matrix[J1 + J1*N] = results[r + 1];
-		M_matrix[J2 + J2*N] = results[r + 2];
-		M_matrix[J1 + J*N] = results[r + 3];
-		M_matrix[J + J1*N] = results[r + 3];
-		M_matrix[J2 + J*N] = results[r + 4];
-		M_matrix[J + J2*N] = results[r + 4];
-		M_matrix[J2 + J1*N] = results[r + 5];
-		M_matrix[J1 + J2*N] = results[r + 5];
-
-		for (i = j+1; i < number_of_beads; i++)
+		if (m % 2 == 1)
 		{
-			r = 6*results_position(i, j, number_of_beads);
-			I = 3*i;
-			I1 = I + 1;
-			I2 = I + 2;
+			continue;
+		}
+		else
+		{
+			if (m == 2)
+			{
+				m1 = -2;
+			}
+			else
+			{
+				m1 = m - 2;
+			}
 
-			M_matrix[I + J*N] = results[r];
-			M_matrix[J + I*N] = results[r];
-			M_matrix[I1 + J1*N] = results[r + 1];
-			M_matrix[J1 + I1*N] = results[r + 1];
-			M_matrix[I2 + J2*N] = results[r + 2];
-			M_matrix[J2 + I2*N] = results[r + 2];
-			M_matrix[I1 + J*N] = results[r + 3];
-			M_matrix[I + J1*N] = results[r + 3];
-			M_matrix[J + I1*N] = results[r + 3];
-			M_matrix[J1 + I*N] = results[r + 3];
-			M_matrix[I2 + J*N] = results[r + 4];
-			M_matrix[I + J2*N] = results[r + 4];
-			M_matrix[J + I2*N] = results[r + 4];
-			M_matrix[J2 + I*N] = results[r + 4];
-			M_matrix[I2 + J1*N] = results[r + 5];
-			M_matrix[I1 + J2*N] = results[r + 5];
-			M_matrix[J1 + I2*N] = results[r + 5];
-			M_matrix[J2 + I1*N] = results[r + 5];
+			mult = pow(2/s, m);
+
+			YA11_value += mult * ( pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2) );
+
+			YA11_value += mult*4.0/(m*m1)*JO_Yg_polynomial(l, 3);
 		}
 	}
 
-	free(results);
+	return YA11_value;
+}
+
+// -------------------------------------------------------------------------------
+
+static double JO_XA12_term(double s, double l)
+{
+	double XA12_value = 0.0;
+
+	double s2 = 1.0 - 4.0 / ( s * s );
+
+	double logs = log((s + 2)/(s - 2));
+
+	int m, m1;
+
+	double mult, divisor;
+
+	XA12_value += 2.0/s*JO_Xg_polynomial(l, 1)/s2;
+
+	XA12_value += JO_Xg_polynomial(l, 2)*logs;
+
+	XA12_value += JO_Xg_polynomial(l, 3)*s2*logs + 4*JO_Xg_polynomial(l, 3)/s;
+
+	for (m = 1; m < 12; m++)
+	{
+		if (m % 2 == 0)
+		{
+			continue;
+		}
+		else
+		{
+			if (m == 2)
+			{
+				m1 = -2;
+			}
+			else
+			{
+				m1 = m - 2;
+			}
+
+			mult = pow(2/s, m);
+
+			XA12_value += mult * ( pow(2, -m)*pow(1 + l, -m)*JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
+
+			XA12_value += mult * ( 4.0/(m*m1) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
+		}
+
+	}
+
+	divisor = -(1.0 + l)/2;
+
+	return XA12_value / divisor;
+}
+
+// -------------------------------------------------------------------------------
+
+static double JO_YA12_term(double s, double l)
+{
+	double YA12_value = 0.0;
+
+	double s2 = 1.0 - 4.0 / ( s * s );
+
+	double logs = log((s + 2)/(s - 2));
+
+	int m, m1;
+
+	double mult, divisor;
+
+	YA12_value += JO_Yg_polynomial(l, 2)*logs;
+
+	YA12_value += JO_Yg_polynomial(l, 3)*s2*logs;
+
+	YA12_value += 4*JO_Yg_polynomial(l, 3)/s;
+
+	for (m = 1; m < 12; m++)
+	{
+		if (m % 2 == 0)
+		{
+			continue;
+		}
+		else
+		{
+			if (m == 2)
+			{
+				m1 = -1;
+			}
+			else
+			{
+				m1 = m - 2;
+			}
+
+			mult = pow(2/s, m);
+
+			YA12_value += mult*(pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2));
+
+			YA12_value += mult*(4.0/(m*m1)*JO_Yg_polynomial(l, 3));
+		}
+	}
+
+	divisor = -(1.0 + l)/2;
+
+	return YA12_value / divisor;
 }
 
 // -------------------------------------------------------------------------------
@@ -1109,458 +1586,27 @@ static double JO_Yg_polynomial(double l, int degree)
 
 // -------------------------------------------------------------------------------
 
-static double JO_XA11_term(double s, double l)
+static void inverse(double* matrix, int matrix_dimension)
 {
-	double XA11_value = 0.0;
+    int *IPIV = calloc(matrix_dimension, sizeof(int));
+    int LWORK = matrix_dimension * matrix_dimension;
+    double *WORK = calloc(LWORK, sizeof(double));
+    int INFO;
 
-	double s2 = 1.0 - 4.0 / ( s * s );
+    dgetrf_(&matrix_dimension, &matrix_dimension, matrix, &matrix_dimension, IPIV, &INFO);
+    dgetri_(&matrix_dimension, matrix, &matrix_dimension, IPIV, WORK, &LWORK, &INFO);
 
-	double logs2 = log(s2);
-
-	int m, m1;
-
-	double mult;
-
-	XA11_value += JO_Xg_polynomial(l, 1)/s2;
-
-	XA11_value -= JO_Xg_polynomial(l, 2)*logs2;
-
-	XA11_value -= JO_Xg_polynomial(l, 3)*s2*logs2;
-
-	XA11_value += JO_Xf_polynomial(l, 0) - JO_Xg_polynomial(l, 1);
-
-	for (m = 1; m < 12; m++)
-	{
-		if (m % 2 == 1)
-		{
-			continue;
-		}
-		else
-		{
-			if (m == 2)
-			{
-				m1 = -2;
-			}
-			else
-			{
-				m1 = m - 2;
-			}
-			
-			mult = pow(2/s, m);
-
-			XA11_value += mult * ( pow(2, -m) * pow(1+l, -m) * JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
-
-			XA11_value += mult * ( 4.0 / ( m * m1 ) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
-		}
-	}
-
-	return XA11_value;
+    free(IPIV);
+    free(WORK);
 }
 
 // -------------------------------------------------------------------------------
 
-static double JO_YA11_term(double s, double l)
+static inline int results_position(int i, int j, int N)
 {
-	double YA11_value = 0.0;
+	int position = i + j*N;
 
-	double s2 = 1.0 - 4.0 / ( s * s );
-
-	double logs2 = log(s2);
-
-	int m, m1;
-
-	double mult;
-
-	YA11_value -= JO_Yg_polynomial(l, 2)*logs2;
-
-	YA11_value -= JO_Yg_polynomial(l, 3)*s2*logs2;
-
-	YA11_value += JO_Yf_polynomial(l, 0);
-
-	for (m = 1; m < 12; m++)
-	{
-		if (m % 2 == 1)
-		{
-			continue;
-		}
-		else
-		{
-			if (m == 2)
-			{
-				m1 = -2;
-			}
-			else
-			{
-				m1 = m - 2;
-			}
-
-			mult = pow(2/s, m);
-
-			YA11_value += mult * ( pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2) );
-
-			YA11_value += mult*4.0/(m*m1)*JO_Yg_polynomial(l, 3);
-		}
-	}
-
-	return YA11_value;
+	return position - j*(j+1)/2;
 }
 
 // -------------------------------------------------------------------------------
-
-static double JO_XA12_term(double s, double l)
-{
-	double XA12_value = 0.0;
-
-	double s2 = 1.0 - 4.0 / ( s * s );
-
-	double logs = log((s + 2)/(s - 2));
-
-	int m, m1;
-
-	double mult, divisor;
-
-	XA12_value += 2.0/s*JO_Xg_polynomial(l, 1)/s2;
-
-	XA12_value += JO_Xg_polynomial(l, 2)*logs;
-
-	XA12_value += JO_Xg_polynomial(l, 3)*s2*logs + 4*JO_Xg_polynomial(l, 3)/s;
-
-	for (m = 1; m < 12; m++)
-	{
-		if (m % 2 == 0)
-		{
-			continue;
-		}
-		else
-		{
-			if (m == 2)
-			{
-				m1 = -2;
-			}
-			else
-			{
-				m1 = m - 2;
-			}
-
-			mult = pow(2/s, m);
-
-			XA12_value += mult * ( pow(2, -m)*pow(1 + l, -m)*JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
-
-			XA12_value += mult * ( 4.0/(m*m1) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
-		}
-
-	}
-
-	divisor = -(1.0 + l)/2;
-
-	return XA12_value / divisor;
-}
-
-// -------------------------------------------------------------------------------
-
-static double JO_YA12_term(double s, double l)
-{
-	double YA12_value = 0.0;
-
-	double s2 = 1.0 - 4.0 / ( s * s );
-
-	double logs = log((s + 2)/(s - 2));
-
-	int m, m1;
-
-	double mult, divisor;
-
-	YA12_value += JO_Yg_polynomial(l, 2)*logs;
-
-	YA12_value += JO_Yg_polynomial(l, 3)*s2*logs;
-
-	YA12_value += 4*JO_Yg_polynomial(l, 3)/s;
-
-	for (m = 1; m < 12; m++)
-	{
-		if (m % 2 == 0)
-		{
-			continue;
-		}
-		else
-		{
-			if (m == 2)
-			{
-				m1 = -1;
-			}
-			else
-			{
-				m1 = m - 2;
-			}
-
-			mult = pow(2/s, m);
-
-			YA12_value += mult*(pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2));
-
-			YA12_value += mult*(4.0/(m*m1)*JO_Yg_polynomial(l, 3));
-		}
-	}
-
-	divisor = -(1.0 + l)/2;
-
-	return YA12_value / divisor;
-}
-
-// -------------------------------------------------------------------------------
-
-static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
-{
-	double Mi = RPY_Mii_block(ai);
-
-	double Mj = RPY_Mii_block(aj);
-
-	double* Mij = calloc(6, sizeof(double));
-
-	RPY_Mij_block(ai, aj, rx, ry, rz, Mij);
-
-	double* matrix = calloc(6*6, sizeof(double));
-
-	*matrix = Mi;
-	*(matrix+7) = Mi;
-	*(matrix+14) = Mi;
-	*(matrix+21) = Mj;
-	*(matrix+28) = Mj;
-	*(matrix+35) = Mj;
-
-	*(matrix+3) = *(Mij);
-	*(matrix+4) = *(Mij+3);
-	*(matrix+5) = *(Mij+4);
-	*(matrix+9) = *(Mij+3);
-	*(matrix+10) = *(Mij+1);
-	*(matrix+11) = *(Mij+5);
-	*(matrix+15) = *(Mij+4);
-	*(matrix+16) = *(Mij+5);
-	*(matrix+17) = *(Mij+2);
-
-	*(matrix+18) = *(Mij);
-	*(matrix+19) = *(Mij+3);
-	*(matrix+20) = *(Mij+4);
-	*(matrix+24) = *(Mij+3);
-	*(matrix+25) = *(Mij+1);
-	*(matrix+26) = *(Mij+5);
-	*(matrix+30) = *(Mij+4);
-	*(matrix+31) = *(Mij+5);
-	*(matrix+32) = *(Mij+2);
-
-	inverse(matrix,6);
-
-	// block 00
-
-	*R_matrix = *matrix;
-	*(R_matrix+1) = *(matrix+7);
-	*(R_matrix+2) = *(matrix+14);
-	*(R_matrix+3) = *(matrix+6);
-	*(R_matrix+4) = *(matrix+12);
-	*(R_matrix+5) = *(matrix+13);
-
-	// block 11
-
-	*(R_matrix+6) = *(matrix+21);
-	*(R_matrix+7) = *(matrix+28);
-	*(R_matrix+8) = *(matrix+35);
-	*(R_matrix+9) = *(matrix+27);
-	*(R_matrix+10) = *(matrix+33);
-	*(R_matrix+11) = *(matrix+34);
-
-	// block 10
-
-	*(R_matrix+12) = *(matrix+3);
-	*(R_matrix+13) = *(matrix+10);
-	*(R_matrix+14) = *(matrix+17);
-	*(R_matrix+15) = *(matrix+9);
-	*(R_matrix+16) = *(matrix+15);
-	*(R_matrix+17) = *(matrix+16);
-
-	free(Mij);
-
-	free(matrix);
-}
-
-// -------------------------------------------------------------------------------
-
-static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
-{
-	double dist2 = rx*rx + ry*ry + rz*rz;
-
-	double dist = sqrt(dist2);
-
-	double s = 2*dist/(ai + aj);
-
-	double l = aj/ai;
-
-	double xa11l = JO_XA11_term(s, l);
-
-	double ya11l = JO_YA11_term(s, l);
-
-	double xa11linv = JO_XA11_term(s, 1/l);
-
-	double ya11linv = JO_YA11_term(s, 1/l);
-
-	double xa12linv = JO_XA12_term(s, 1/l);
-
-	double ya12linv = JO_YA12_term(s, 1/l);
-
-	double mult = 3 * M_PI * ( ai + aj );
-
-	int i;
-
-	// block 00
-
-	*R_matrix = xa11l*rx*rx/dist2 + ya11l*(1 - rx*rx/dist2); // 00
-
-	*(R_matrix+1) = xa11l*ry*ry/dist2 + ya11l*(1 - ry*ry/dist2); // 11
-
-	*(R_matrix+2) = xa11l*rz*rz/dist2 + ya11l*(1 - rz*rz/dist2); // 22
-
-	*(R_matrix+3) = (xa11l - ya11l)*rx*ry/dist2; // 10
-
-	*(R_matrix+4) = (xa11l - ya11l)*rx*rz/dist2; // 20
-
-	*(R_matrix+5) = (xa11l - ya11l)*ry*rz/dist2; // 21
-
-	// block 11
-
-	*(R_matrix+6) = xa11linv*rx*rx/dist2 + ya11linv*(1 - rx*rx/dist2); // 33
-
-	*(R_matrix+7) = xa11linv*ry*ry/dist2 + ya11linv*(1 - ry*ry/dist2); // 44
-
-	*(R_matrix+8) = xa11linv*rz*rz/dist2 + ya11linv*(1 - rz*rz/dist2); // 55
-
-	*(R_matrix+9) = (xa11linv - ya11linv)*rx*ry/dist2; // 43
-
-	*(R_matrix+10) = (xa11linv - ya11linv)*rx*rz/dist2; // 53
-
-	*(R_matrix+11) = (xa11linv - ya11linv)*ry*rz/dist2; // 54
-
-	// block 10
-
-	*(R_matrix+12) = xa12linv*rx*rx/dist2 + ya12linv*(1 - rx*rx/dist2); // 30
-
-	*(R_matrix+13) = xa12linv*ry*ry/dist2 + ya12linv*(1 - ry*ry/dist2); // 41
-
-	*(R_matrix+14) = xa12linv*rz*rz/dist2 + ya12linv*(1 - rz*rz/dist2); // 52
-
-	*(R_matrix+15) = (xa12linv - ya12linv)*rx*ry/dist2; // 40
-
-	*(R_matrix+16) = (xa12linv - ya12linv)*rx*rz/dist2; // 50
-
-	*(R_matrix+17) = (xa12linv - ya12linv)*ry*rz/dist2; // 51
-
-	for (i = 0; i < 18; i++)
-	{
-		*(R_matrix+i) *= mult;
-	}
-}
-
-// -------------------------------------------------------------------------------
-
-void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double* correction_matrix)
-{
-	register int i = 0;
-
-	register int j = 0;
-
-	register int k = 0;
-
-	double* nf2b;
-
-	double* ff2b;
-
-	double rx, ry, rz;
-
-	int I, I1, I2, J, J1, J2, r;
-
-	int N = 3*number_of_beads;
-
-	double* shifted_pointers;
-
-	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
-
-	for (j = 0; j < number_of_beads; j++)
-	{
-
-		for (i = j + 1; i < number_of_beads; i++)
-		{
-			nf2b = calloc(18, sizeof(double));
-
-			ff2b = calloc(18, sizeof(double));
-
-			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
-
-			rx = *(shifted_pointers);
-			ry = *(shifted_pointers+1);
-			rz = *(shifted_pointers+2);
-
-			JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, nf2b);
-
-			RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, ff2b);
-
-			for (k = 0; k < 18; k++)
-			{
-				*(results+k) = *(nf2b+k) - *(ff2b+k);
-			}
-
-			J = 3*j;
-			J1 = J + 1;
-			J2 = J + 2;
-
-			correction_matrix[J + J*N] += results[0];
-			correction_matrix[J1 + J1*N] += results[1];
-			correction_matrix[J2 + J2*N] += results[2];
-			correction_matrix[J1 + J*N] += results[3];
-			correction_matrix[J + J1*N] += results[3];
-			correction_matrix[J2 + J*N] += results[4];
-			correction_matrix[J + J2*N] += results[4];
-			correction_matrix[J2 + J1*N] += results[5];
-			correction_matrix[J1 + J2*N] += results[5];
-
-			r = 6;
-			I = 3*i;
-			I1 = I + 1;
-			I2 = I + 2;
-
-			correction_matrix[I + I*N] += results[r];
-			correction_matrix[I1 + I1*N] += results[r + 1];
-			correction_matrix[I2 + I2*N] += results[r + 2];
-			correction_matrix[I1 + I*N] += results[r + 3];
-			correction_matrix[I + I1*N] += results[r + 3];
-			correction_matrix[I2 + I*N] += results[r + 4];
-			correction_matrix[I + I2*N] += results[r + 4];
-			correction_matrix[I2 + I1*N] += results[r + 5];
-			correction_matrix[I1 + I2*N] += results[r + 5];
-
-			r = 12;
-
-			correction_matrix[I + J*N] += results[r];
-			correction_matrix[J + I*N] += results[r];
-			correction_matrix[I1 + J1*N] += results[r + 1];
-			correction_matrix[J1 + I1*N] += results[r + 1];
-			correction_matrix[I2 + J2*N] += results[r + 2];
-			correction_matrix[J2 + I2*N] += results[r + 2];
-			correction_matrix[I1 + J*N] += results[r + 3];
-			correction_matrix[I + J1*N] += results[r + 3];
-			correction_matrix[J + I1*N] += results[r + 3];
-			correction_matrix[J1 + I*N] += results[r + 3];
-			correction_matrix[I2 + J*N] += results[r + 4];
-			correction_matrix[I + J2*N] += results[r + 4];
-			correction_matrix[J + I2*N] += results[r + 4];
-			correction_matrix[J2 + I*N] += results[r + 4];
-			correction_matrix[I2 + J1*N] += results[r + 5];
-			correction_matrix[I1 + J2*N] += results[r + 5];
-			correction_matrix[J1 + I2*N] += results[r + 5];
-			correction_matrix[J2 + I1*N] += results[r + 5];
-
-
-			free(nf2b);
-
-			free(ff2b);
-		}
-	}
-
-	free(results);
-}
