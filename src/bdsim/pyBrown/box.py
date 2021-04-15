@@ -16,7 +16,6 @@
 
 import math
 import numpy as np
-import sys
 
 from scipy.constants import Boltzmann
 
@@ -33,29 +32,20 @@ class Box():
 		self.beads = beads
 		self.inp = input_data
 
-		# handling pseudorandom number generation
-		self.seed = self.inp["seed"]
-		np.random.seed(self.seed)
-		self.draw_count = 0
+		self.initialize_pseudorandom_number_generation()
 
-		self.immobile_labels = self.inp["immobile_labels"]
 		self.handle_bead_mobility()
 		self.labels = self.handle_bead_labels()
 
-		# handling basic physical parameters
-		self.box_length = self.inp["box_length"]
-		self.T = self.inp["T"]
-		self.kBT = Boltzmann*self.T
-		self.viscosity = self.inp["viscosity"]
+		self.set_physical_constants()
 
 		self.hydrodynamics = self.inp["hydrodynamics"]
 		if self.hydrodynamics == "nohi":
-			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
-			self.B = np.sqrt( self.D )
+			self.compute_Dff_matrix()
+			self.decompose_D_matrix()
+
 		if self.hydrodynamics == "rpy_smith" or self.hydrodynamics == "rpy_smith_lub":
-			self.alpha = self.inp["ewald_alpha"]
-			self.m_max = self.inp["ewald_real"]
-			self.n_max = self.inp["ewald_imag"]
+			self.set_ewald_summation_parameters()
 
 		self.propagation_scheme = self.inp["propagation_scheme"]
 		if self.propagation_scheme == "midpoint":
@@ -63,38 +53,11 @@ class Box():
 
 		self.overlaps = self.inp["check_overlaps"]
 		
-		# handling external forces
-		self.Fex = np.array( self.inp["external_force"] )
-		self.F = np.array( list(self.Fex)*len(self.mobile_beads) )
-		self.handle_external_force_restricted_to_region()
+		self.set_external_force()
 
-		# handling flow measurement
-		self.is_flux = False
-		if "measure_flux" in self.inp.keys():
-			self.is_flux = True
-			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
-			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
-			self.net_flux = {label: 0 for label in self.mobile_labels}
+		self.set_flux_measurement_parameters()
 
-		self.is_concentration = False
-		if "measure_concentration" in self.inp.keys():
-			self.is_concentration = True
-			if "x" in self.inp["measure_concentration"].keys():
-				self.is_concentration_region_x = True
-				self.concentration_region_x = self.inp["measure_concentration"]["x"]
-			else:
-				self.is_concentration_region_x = False
-			if "y" in self.inp["measure_concentration"].keys():
-				self.is_concentration_region_y = True
-				self.concentration_region_y = self.inp["measure_concentration"]["y"]
-			else:
-				self.is_concentration_region_y = False
-			if "z" in self.inp["measure_concentration"].keys():
-				self.is_concentration_region_z = True
-				self.concentration_region_z = self.inp["measure_concentration"]["z"]
-			else:
-				self.is_concentration_region_z = False
-			self.concentration = {label: 0 for label in self.mobile_labels}
+		self.set_concentration_measurement_parameters()
 
 	#-------------------------------------------------------------------------------
 
@@ -236,7 +199,34 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
+	def initialize_pseudorandom_number_generation(self):
+
+		self.seed = self.inp["seed"]
+		np.random.seed(self.seed)
+		self.draw_count = 0
+
+	#-------------------------------------------------------------------------------
+
+	def set_physical_constants(self):
+
+		self.box_length = self.inp["box_length"]
+		self.T = self.inp["T"]
+		self.kBT = Boltzmann*self.T
+		self.viscosity = self.inp["viscosity"]
+
+	#-------------------------------------------------------------------------------
+
+	def set_ewald_summation_parameters(self):
+
+		self.alpha = self.inp["ewald_alpha"]
+		self.m_max = self.inp["ewald_real"]
+		self.n_max = self.inp["ewald_imag"]
+
+	#-------------------------------------------------------------------------------
+
 	def handle_bead_mobility(self):
+
+		self.immobile_labels = self.inp["immobile_labels"]
 
 		self.mobile_beads = []
 		self.immobile_beads = []
@@ -310,6 +300,49 @@ class Box():
 						self.F[3*i:3*i+3] = np.zeros(3)
 						continue
 				self.F[3*i:3*i+3] = self.Fex
+
+	#-------------------------------------------------------------------------------
+
+	def set_external_force(self):
+
+		self.Fex = np.array( self.inp["external_force"] )
+		self.F = np.array( list(self.Fex)*len(self.mobile_beads) )
+		self.handle_external_force_restricted_to_region()
+
+	#-------------------------------------------------------------------------------
+
+	def set_flux_measurement_parameters(self):
+
+		self.is_flux = False
+		if "measure_flux" in self.inp.keys():
+			self.is_flux = True
+			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
+			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
+			self.net_flux = {label: 0 for label in self.mobile_labels}
+
+	#-------------------------------------------------------------------------------
+
+	def set_concentration_measurement_parameters(self):
+
+		self.is_concentration = False
+		if "measure_concentration" in self.inp.keys():
+			self.is_concentration = True
+			if "x" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_x = True
+				self.concentration_region_x = self.inp["measure_concentration"]["x"]
+			else:
+				self.is_concentration_region_x = False
+			if "y" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_y = True
+				self.concentration_region_y = self.inp["measure_concentration"]["y"]
+			else:
+				self.is_concentration_region_y = False
+			if "z" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_z = True
+				self.concentration_region_z = self.inp["measure_concentration"]["z"]
+			else:
+				self.is_concentration_region_z = False
+			self.concentration = {label: 0 for label in self.mobile_labels}
 
 	#-------------------------------------------------------------------------------
 
@@ -426,25 +459,29 @@ class Box():
 	# @timing
 	def compute_Dff_matrix(self):
 
-		if self.hydrodynamics == "rpy":
+		if self.hydrodynamics == "nohi":
+
+			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
+
+		elif self.hydrodynamics == "rpy":
 
 			self.D = RPY_M_matrix(self.mobile_beads, self.rij)
 
 			self.D *= self.kBT * 10**19 / self.viscosity
 
-		if self.hydrodynamics == "rpy_smith":
+		elif self.hydrodynamics == "rpy_smith":
 
 			self.D = RPY_Smith_M_matrix(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max)
 
 			self.D *= self.kBT * 10**19 / self.viscosity
 
-		if self.hydrodynamics == "rpy_lub":
+		elif self.hydrodynamics == "rpy_lub":
 
 			self.Mff = RPY_M_matrix(self.mobile_beads, self.rij) * 10**19 / self.viscosity
 
 			self.Rff = np.linalg.inv( self.Mff )
 
-		if self.hydrodynamics == "rpy_smith_lub":
+		elif self.hydrodynamics == "rpy_smith_lub":
 
 			self.Mff = RPY_Smith_M_matrix(self.mobile_beads, self.rij, self.box_length, self.alpha, self.m_max, self.n_max) * 10**19 / self.viscosity
 
@@ -464,6 +501,12 @@ class Box():
 	# @timing
 	def decompose_D_matrix(self):
 
-		self.B = np.linalg.cholesky(self.D)
+		if self.hydrodynamics == "nohi":
+
+			self.B = np.sqrt( self.D )
+
+		else:
+
+			self.B = np.linalg.cholesky(self.D)
 
 	#-------------------------------------------------------------------------------
