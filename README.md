@@ -22,7 +22,7 @@ To compile, type following commands in a terminal:
 ./configure --prefix=DIR --with-lapack=LAPACK_LIBS
 ```
 where ``DIR`` is the installation directory (``/usr/local`` by default) 
-and ``LAPACK_LIBS`` is lapack libraries to use (e.g. ``--with-lapack="-l lapack"``.
+and ``LAPACK_LIBS`` is lapack libraries to use (e.g. ``--with-lapack="-l lapack"``).
 
 Then proceed with:
 
@@ -74,4 +74,4 @@ make test
 
 ## Contribute
 
-## Licensce
+## License
