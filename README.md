@@ -1,4 +1,4 @@
-# pyBD
+# pyBrown
 
 Brownian and Stokesian dynamics simulation software.
 Copyright &copy;2021- Tomasz Skóra [tskora@ichf.edu.pl](mailto:tskora@ichf.edu.pl)
@@ -7,10 +7,11 @@ Copyright &copy;2021- Tomasz Skóra [tskora@ichf.edu.pl](mailto:tskora@ichf.edu.
 
 - [x] Brownian dynamics w/o hydrodynamic interactions
 - [x] Brownian dynamics w hydrodynamic interactions
-- [x] flux through an arbitrary plane (working on output)
+- [x] Stokesian dynamics
+- [x] flux through an arbitrary plane
 - [x] immobile beads
-- [ ] Stokesian dynamics (not optimized yet, but works)
 - [ ] bead-bead interactions (inter- and intramolecular)
+- [ ] bead chemistry
 - [ ] various propagation schemes (EM, IGT, ...)
 
 ## Quick start
@@ -20,17 +21,18 @@ To compile, type following commands in a terminal:
 ```shell
 ./configure --prefix=DIR --with-lapack=LAPACK_LIBS
 ```
-where DIR is the installation directory (/usr/local by default) 
-and LAPACK_LIBS is lapack libraries to use (e.g. --with-lapack="-l lapack"
+where ``DIR`` is the installation directory (``/usr/local`` by default) 
+and ``LAPACK_LIBS`` is lapack libraries to use (e.g. ``--with-lapack="-l lapack"``.
 
-then proceed with 
+Then proceed with:
 
 ```shell
 make
 make install
 ```
 
-If you want tests, go to directory src/bdsims/tests and type 
+If you want tests, go to directory ``src/bdsim/tests`` and type:
+
 ```shell
 make test
 ```
