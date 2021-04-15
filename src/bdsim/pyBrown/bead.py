@@ -17,8 +17,6 @@
 import math
 import numpy as np
 
-from pyBrown.output import timing
-
 #-------------------------------------------------------------------------------
 
 class Bead():
