@@ -31,6 +31,7 @@ class Box():
 
 		self.beads = beads
 		self.inp = input_data
+		self.box_length = self.inp["box_length"]
 
 		self.initialize_pseudorandom_number_generation()
 
@@ -209,7 +210,6 @@ class Box():
 
 	def set_physical_constants(self):
 
-		self.box_length = self.inp["box_length"]
 		self.T = self.inp["T"]
 		self.kBT = Boltzmann*self.T
 		self.viscosity = self.inp["viscosity"]
