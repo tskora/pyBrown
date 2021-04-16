@@ -24,6 +24,12 @@ Then to compile and install proceed with:
     $ make
     $ make install
 
+To ensure that all ``python`` packages needed by ``pyBrown`` are present on your computer you can run
+
+.. code-block:: console
+
+    $ pip3 install -r requirements.txt
+
 If you want to run unit tests, go to a project directory ``src/bdsim/tests`` and type:
 
 .. code-block:: console
