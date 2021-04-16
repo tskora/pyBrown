@@ -20,8 +20,30 @@ import numpy as np
 #-------------------------------------------------------------------------------
 
 class Bead():
+	"""This is a class representing spherical beads used in Brownian and Stokesian dynamics simulations.
+
+	:param r: cartesian coordinates of the bead center
+	:type r: class: `numpy.ndarray(3)`
+	:param a: hydrodynamic radius
+	:type a: `float`
+	:param label: bead label
+	:type label: `string`
+	:param mobile: is bead mobile
+	:type mobile: `bool`
+	"""
 
 	def __init__(self, coords, hydrodynamic_radius, label = "XXX", mobile = True):
+		"""Constructor method
+
+		:param coords: cartesian coordinates of the bead center
+		:type coords: `[float, float, float]`
+		:param hydrodynamic_radius: hydrodynamic radius
+		:type hydrodynamic_radius: `float`
+		:param label: bead label, defaults to `"XXX"`
+		:type label: `string`
+		:param mobile: is bead mobile, defaults to `True`
+		:type mobile: `bool`
+		"""
 
 		self.r = np.array(coords)
 		self.a = hydrodynamic_radius
@@ -31,12 +53,29 @@ class Bead():
 	#-------------------------------------------------------------------------------
 
 	def translate(self, vector):
+		"""Moves a bead by the provided vector.
+		
+		:param vector: translation vector
+		:type vector: class: `numpy.ndarray(3)`
+		"""
 
 		if self.mobile: self.r += vector
 
 	#-------------------------------------------------------------------------------
 
 	def translate_and_return_flux(self, vector, normal, plane_point):
+		"""Moves a bead by the provided vector and returns flux through the provided plane
+		
+		:param vector: translation vector
+		:type vector: class: `numpy.ndarray(3)`
+		:param normal: plane normal vector
+		:type noraal: class: `numpy.ndarray(3)`
+		:param plane_point: any point in the plane
+		:type plane_point: class: `numpy.ndarray(3)`
+		
+		:return: flux through the provided plane
+		:rtype: `int`
+		"""
 
 		r0 = np.array( [self.r[0], self.r[1], self.r[2]] )
 
@@ -55,6 +94,12 @@ class Bead():
 	#-------------------------------------------------------------------------------
 
 	def keep_in_box(self, box_length):
+		"""Moves the bead into the box if it is outside of it by using a combination of
+		translations parallel to the box sides and with length of a box length
+		
+		:param box_length: simulation box length
+		:type box_length: `float`
+		"""
 
 		for i in range(3):
 			while self.r[i] < -box_length / 2:
@@ -88,6 +133,18 @@ class Bead():
 #-------------------------------------------------------------------------------
 
 def pointer_pbc(bead1, bead2, box_size):
+	"""Computes the voctor pointing from `bead1` to `bead2` (its closest translational replica)
+	
+	:param bead1: bead from which the vector points
+	:type bead1: class: `bead.Bead`
+	:param bead2: bead to which the vector points
+	:type bead2: class: `bead.Bead`
+	:param box_size: simulation box length
+	:type box_size: `float`
+	
+	:return: pointing vector
+	:rtype: class: `numpy.ndarray(3)`
+	"""
 
 	pointer = bead2.r - bead1.r
 
@@ -102,6 +159,18 @@ def pointer_pbc(bead1, bead2, box_size):
 #-------------------------------------------------------------------------------
 
 def distance_pbc(bead1, bead2, box_size):
+	"""Computes the distance between `bead1` and `bead2` (its closest translational replica)
+
+	:param bead1: bead
+	:type bead1: class: `bead.Bead`
+	:param bead2: bead
+	:type bead2: class: `bead.Bead`
+	:param box_size: simulation box length
+	:type box_size: `float`
+
+	:return: distance
+	:rtype: `float`
+	"""
 
 	pointer = bead1.r - bead2.r
 
@@ -116,6 +185,18 @@ def distance_pbc(bead1, bead2, box_size):
 #-------------------------------------------------------------------------------
 
 def overlap_pbc(bead1, bead2, box_size):
+	"""Checks if there is an overlap between `bead1` and `bead2` (its closest translational replica)
+	
+	:param bead1: bead
+	:type bead1: class: `bead.Bead`
+	:param bead2: bead
+	:type bead2: class: `bead.Bead`
+	:param box_size: simulation box length
+	:type box_size: `float`
+
+	:return: do beads overlap?
+	:rtype: `bool`
+	"""
 
 	dist = distance_pbc(bead1, bead2, box_size)
 
