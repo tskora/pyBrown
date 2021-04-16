@@ -19,7 +19,7 @@ Copyright &copy;2021- Tomasz Skóra [tskora@ichf.edu.pl](mailto:tskora@ichf.edu.
 To compile, type following commands in a terminal:
 
 ```shell
-./configure --prefix=DIR --with-lapack=LAPACK_LIBS
+$ ./configure --prefix=DIR --with-lapack=LAPACK_LIBS
 ```
 where ``DIR`` is the installation directory (``/usr/local`` by default) 
 and ``LAPACK_LIBS`` is lapack libraries to use (e.g. ``--with-lapack="-l lapack"``).
@@ -27,26 +27,31 @@ and ``LAPACK_LIBS`` is lapack libraries to use (e.g. ``--with-lapack="-l lapack"
 Then proceed with:
 
 ```shell
-make
-make install
+$ make
+$ make install
+```
+
+To ensure that all needed ``python`` are accessible on your computers, you can run:
+```shell
+$ pip3 install -r requirements.txt
 ```
 
 If you want tests, go to directory ``src/bdsim/tests`` and type:
 
 ```shell
-make test
+$ make test
 ```
 
 If you want documentation in html, go to directory ``docs/`` and type:
 
 ```shell
-make html
+$ make html
 ```
 
 If you want documentation in pdf, go to directory ``docs/`` and type:
 
 ```shell
-make latexpdf
+$ make latexpdf
 ```
 
 ## Example input
