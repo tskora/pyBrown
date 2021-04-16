@@ -31,7 +31,9 @@ release = '0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx_rtd_theme']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx_rtd_theme']
+
+todo_include_todos= True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -56,3 +58,25 @@ pygments_style = 'sphinx'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# -- Options for LatexPDF output ----------------------------------------------
+
+latex_engine = 'xelatex'
+
+latex_elements = {
+'papersize': 'a4paper',
+# remove blank pages (between the title page and the TOC, etc.)
+'classoptions': ',openany,oneside'
+}
+
+# The name of an image file (relative to this directory) to place at the top of
+# the title page.
+# latex_logo = './_static/banner-large.png'
+
+# For "manual" documents, if this is true, then toplevel headings are parts,
+# not chapters.
+latex_use_parts = True
+
+# If false, no module index is generated.
+latex_domain_indices = True
+

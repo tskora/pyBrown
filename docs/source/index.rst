@@ -1,13 +1,14 @@
 pyBrown
 ========
 
-Overview
----------
+    *These motions were such as to satisfy me ... that they arose neither from currents in the fluid, nor from its gradual evaporation, but belonged to the particle itself*
+    - `Robert Brown <https://en.wikipedia.org/wiki/Robert_Brown_(botanist,_born_1773)>`_
+
+.. rubric:: Overview
 
 ``pyBrown`` is a Brownian and Stokesian dynamics package and simulation tool. It is written in mainly in python, with the most demanding computationally functions written in C.
 
-Quickstart
------------
+.. rubric:: Quickstart
 
 To configure, type the following command in the command line:
 
@@ -36,6 +37,24 @@ If you want to run unit tests, go to a project directory ``src/bdsim/tests`` and
 
     $ make test
 
+.. _units:
+
+.. rubric:: Units
+
++-------------------+----------------------------+
+| Physical property |             Unit           |
++===================+============================+
+|    Temperature    |         kelvin (*K*)       |
++-------------------+----------------------------+
+|     Viscosity     |          poise (*P*)       |
++-------------------+----------------------------+
+|       Time        |       picosecond (*ps*)    |
++-------------------+----------------------------+
+|      Distance     |        angstrom (*Å*)      |
++-------------------+----------------------------+
+|       Force       | joule per angstrom (*J/Å*) |
++-------------------+----------------------------+
+
 .. warning::
     The work on ``pyBrown`` is still in progress. Some functionalities may be temporally unavailable.
 
@@ -53,8 +72,7 @@ If you want to run unit tests, go to a project directory ``src/bdsim/tests`` and
    reference/authors
    reference/license
 
-Indices and tables
--------------------
+.. rubric:: Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`

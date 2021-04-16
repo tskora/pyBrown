@@ -198,8 +198,8 @@ Unfortunately, this technique does not work for ``CONFIG_SHELL`` due to an Autoc
 
     $ CONFIG_SHELL=/bin/bash ./configure CONFIG_SHELL=/bin/bash
 
-'configure' Invocation
-***********************
+``configure`` Invocation
+*************************
 
 ``configure`` recognizes the following options to control how it operates.
 
