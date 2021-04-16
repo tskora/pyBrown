@@ -4,8 +4,8 @@ pyBrown
 .. toctree::
    :maxdepth: 4
 
-   bead
-   box
-   diffusion
-   input
-   output
+   modules/bead
+   modules/box
+   modules/diffusion
+   modules/input
+   modules/output
