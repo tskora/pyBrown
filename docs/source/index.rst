@@ -47,7 +47,6 @@ If you want to run unit tests, go to a project directory ``src/bdsim/tests`` and
    reference/authors
    reference/license
 
-
 Indices and tables
 -------------------
 
