@@ -37,6 +37,18 @@ If you want tests, go to directory ``src/bdsim/tests`` and type:
 make test
 ```
 
+If you want documentation in html, go to directory ``docs/`` and type:
+
+```shell
+make html
+```
+
+If you want documentation in pdf, go to directory ``docs/`` and type:
+
+```shell
+make latexpdf
+```
+
 ## Example input
 
 ```json

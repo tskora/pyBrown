@@ -75,7 +75,7 @@ Beads
 
 Structure file consists of lines with a following structure::
 
-``sub label index x y z a q 2r ε m``
+``sub label index x y z a q 2r e m``
 
 Only the ``sub`` string is identical in every line. All the others should be replaced with values specific to a bead.
 
@@ -85,7 +85,7 @@ Only the ``sub`` string is identical in every line. All the others should be rep
 - ``a (float)`` -- hydrodynamic radius (*Å*)
 - ``q (float)`` -- electric charge (*e*)
 - ``2r`` -- double the hard core radius (*Å*)
-- ``ε`` -- Lennard-Jones energy (*?*),
+- ``e`` -- Lennard-Jones energy (*?*),
 - ``m`` -- bead mass (*?*)
 
 .. warning::
