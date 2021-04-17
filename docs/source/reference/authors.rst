@@ -3,7 +3,7 @@ Authors
 
 The following people contributed to the development of ``pyBrown``.
 
-Tomasz Skóra **(lead developer)**
+Tomasz Skóra **(creator, lead developer)**
 
 contact: tskora@ichf.edu.pl
 

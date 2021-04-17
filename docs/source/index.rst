@@ -64,6 +64,7 @@ If you want to run unit tests, go to a project directory ``src/bdsim/tests`` and
 
    getting_started/installation
    getting_started/preparing_input
+   getting_started/running_simulation
 
 .. toctree::
    :maxdepth: 1
