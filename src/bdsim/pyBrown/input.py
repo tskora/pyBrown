@@ -22,31 +22,37 @@ from pyBrown.bead import Bead
 #-------------------------------------------------------------------------------
 
 class InputData:
+    """This is a class parsing and storing input json file.
+
+    :param input_data: keyword-value pairs loaded from the input JSON file
+    :type input_data: class: `dictionary`
+
+    Constructor method
+
+    :param input_filename: the name of the input `.json` file with simulalion configuration
+    :type input_filename: `string`
+    :param obligatory_keywords: the list of obligatory keywords, defaults to `[]`
+    :type obligatory_keywords: class: `list`
+    :param defaults: the dictionary containg default keyword-value pairs, deaults to `{}`
+    :type defaults: class: `dictionary`
+    """
 
     def __init__(self, input_filename, obligatory_keywords = [], defaults = {}):
+        """Constructor method
+
+        :param input_filename: the name of the input `.json` file with simulalion configuration
+        :type input_filename: `string`
+        :param obligatory_keywords: the list of obligatory keywords, defaults to `[]`
+        :type obligatory_keywords: class: `list`
+        :param defaults: the dictionary containg default keyword-value pairs, deaults to `{}`
+        :type defaults: class: `dictionary`
+        """
 
         self._read_input_file(input_filename)
 
         self._complete_with_defaults(defaults)
 
         self._check_for_missing_keywords(obligatory_keywords)
-
-    #---------------------------------------------------------------------------
-
-    def __str__(self):
-
-        string_representation = ''
-
-        for keyword in self.input_data.keys():
-            string_representation += '{}: {}\n'.format(keyword, self.input_data[keyword])
-
-        return string_representation
-
-    #---------------------------------------------------------------------------
-
-    def __repr__(self):
-
-        return self.__str__()
 
     #---------------------------------------------------------------------------
 
@@ -73,9 +79,34 @@ class InputData:
             assert keyword in self.input_data.keys(),\
                 'Missing {} keyword in input JSON file.'.format(keyword)
 
+    #---------------------------------------------------------------------------
+
+    def __str__(self):
+
+        string_representation = ''
+
+        for keyword in self.input_data.keys():
+            string_representation += '{}: {}\n'.format(keyword, self.input_data[keyword])
+
+        return string_representation
+
+    #---------------------------------------------------------------------------
+
+    def __repr__(self):
+
+        return self.__str__()
+
 #-------------------------------------------------------------------------------
 
 def read_str_file(input_str_filename):
+    """Reads bead positions and parameters.
+
+    :param input_str_filename: the name of the input `.str` file with bead initial coordinates and parameters
+    :type input_str_filename: `string`
+
+    :return: list of bead objects
+    :rtype: class: list of objects of class: `Bead`
+    """
 
     with open(input_str_filename) as str_file:
         

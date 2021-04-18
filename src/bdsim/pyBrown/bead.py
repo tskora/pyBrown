@@ -30,20 +30,20 @@ class Bead():
 	:type label: `string`
 	:param mobile: is bead mobile
 	:type mobile: `bool`
+
+	Constructor method
+
+	:param coords: cartesian coordinates of the bead center
+	:type coords: `[float, float, float]`
+	:param hydrodynamic_radius: hydrodynamic radius
+	:type hydrodynamic_radius: `float`
+	:param label: bead label, defaults to `"XXX"`
+	:type label: `string`
+	:param mobile: is bead mobile, defaults to `True`
+	:type mobile: `bool`
 	"""
 
 	def __init__(self, coords, hydrodynamic_radius, label = "XXX", mobile = True):
-		"""Constructor method
-
-		:param coords: cartesian coordinates of the bead center
-		:type coords: `[float, float, float]`
-		:param hydrodynamic_radius: hydrodynamic radius
-		:type hydrodynamic_radius: `float`
-		:param label: bead label, defaults to `"XXX"`
-		:type label: `string`
-		:param mobile: is bead mobile, defaults to `True`
-		:type mobile: `bool`
-		"""
 
 		self.r = np.array(coords)
 		self.a = hydrodynamic_radius
