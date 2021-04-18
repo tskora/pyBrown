@@ -6,7 +6,7 @@ pyBrown
 
 .. rubric:: Overview
 
-``pyBrown`` is a Brownian and Stokesian dynamics package and simulation tool. It is written in mainly in python, with the most demanding computationally functions written in C.
+``pyBrown`` is a Brownian and Stokesian dynamics package and simulation tool. It is written mainly in ``python 3``, with the most computationally demanding functions written in ``C``. Brownian and Stokesian dynamics are computational methods to simulate systems driven by thermal fluctuations. Hydrodynamic interactions are taken into account using far-field *Rotne-Prager-Yamakawa* approximation but correcting for near-field lubrication effects is available as well.
 
 .. rubric:: Quickstart
 
@@ -16,7 +16,7 @@ To configure, type the following command in the command line:
 
     $ ./configure --prefix=DIR --with-lapack=LAPACK_LIBS
 
-where ``DIR`` is the installation directory (``/usr/local`` by default) and ``LAPACK_LIBS`` is lapack libraries to use (e.g. ``--with-lapack="-l lapack"``).
+where ``DIR`` is the installation directory (``/usr/local/`` by default) and ``LAPACK_LIBS`` is lapack libraries to use (e.g. ``--with-lapack="-llapack"``).
 
 Then to compile and install proceed with:
 
@@ -31,7 +31,7 @@ To ensure that all ``python`` packages needed by ``pyBrown`` are present on your
 
     $ pip3 install -r requirements.txt
 
-If you want to run unit tests, go to a project directory ``src/bdsim/tests`` and type:
+If you want to run unit tests, go to a project directory ``src/bdsim/tests/`` and type:
 
 .. code-block:: console
 
