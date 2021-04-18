@@ -1,7 +1,7 @@
-bead
+Bead
 =====
 
-.. automodule:: bead
+.. automodule:: pyBrown.bead
    :members:
    :undoc-members:
    :show-inheritance:
