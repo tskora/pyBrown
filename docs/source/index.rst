@@ -68,6 +68,16 @@ If you want to run unit tests, go to a project directory ``src/bdsim/tests/`` an
 
 .. toctree::
    :maxdepth: 1
+   :caption: API
+
+   modules/bead
+   modules/box
+   modules/diffusion
+   modules/input
+   modules/output
+
+.. toctree::
+   :maxdepth: 1
    :caption: Reference
 
    reference/authors

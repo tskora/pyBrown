@@ -1,5 +1,5 @@
-bead module
-===========
+bead
+=====
 
 .. automodule:: bead
    :members:

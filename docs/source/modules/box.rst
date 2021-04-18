@@ -1,5 +1,5 @@
-box module
-==========
+box
+====
 
 .. automodule:: box
    :members:
