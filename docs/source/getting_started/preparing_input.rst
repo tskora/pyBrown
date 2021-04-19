@@ -53,6 +53,28 @@ Input/Output
 - ``"input_str_filename": string`` -- the name of the input ``.str`` file (*see above*), **required**
 - ``"output_xyz_filename": string`` -- the name of the output ``.xyz`` file to which ``pyBrown`` writes the trajectory, **required**
 - ``"output_rst_filename": string`` -- the name of the binary ``.rst`` file from which``pyBrown`` can restart simulation
+- ``"filename_range": [int, int]`` -- provided that all your input and output files have names of a following form: ``"name_{}.str``, ``name_{}.xyz`` itp., ``pyBrown`` will iteratively substitute numbers from filename range instead of ``{}``, resulting with sequence of runs for consecutive jobs,
+
+.. note::
+    
+    If for example input file looks in a following way:
+    
+    .. code:: JSON
+
+        {
+            "input_str_filename": "test_{}.str",
+            "output_xyz_filename": "test_{}.xyz",
+            "output_rst_filename": "test_{}.rst",
+            "filename_range": [1, 3],
+            "some_other_keywords": "some values"
+        }
+
+    then ``pyBrown`` will load ``test_1.str``, run the simulation writing restart to ``test_1.rst`` and trajectory to ``test_1.xyz``. After completing, it will load ``test_2.str`` and write to ``test_2.rst`` and ``test_2.xyz``. After completing the second job, ``pyBrown`` will end the run. If we swap "filename_range" value for ``[1, 11]`` 10 jobs will be ran consecutively.
+
+.. warning::
+
+    If you use ``"filename_range"`` keyword and manually set ``"seed"`` keyword, seed will be the same for all jobs.
+
 - ``"xyz_write_freq": int`` -- the frequency of writing to the ``.xyz`` file (every ... timesteps), default: ``1``
 - ``"rst_write_freq": int`` -- the frequency of writing to the ``.rst`` file (every ... timesteps).
 

@@ -37,6 +37,22 @@ If you want to run unit tests, go to a project directory ``src/bdsim/tests/`` an
 
     $ make test
 
+To run simulation, prepare ``.str`` and ``.json`` input files and type:
+
+.. code-block:: console
+
+    $ BD.py INPUT_JSON_FILENAME
+
+where instead of ``INPUT_JSON_FILENAME`` substitute the name of your input ``.json`` file.
+
+If you want to restart your simulation, provided that you have restart file, type:
+
+.. code-block:: console
+
+    $ BD-restart.py RESTART_FILENAME
+
+where instead of ``RESTART_FILENAME`` substitute the name of your restart file.
+
 .. _units:
 
 .. rubric:: Units
