@@ -100,6 +100,8 @@ def main(input_filename):
 
 	for index in range(len(str_filenames)):
 
+		timestamp( '{} job', str_filenames[index] )
+
 		extra_output_filenames = []
 
 		if concentration:
