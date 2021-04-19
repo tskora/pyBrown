@@ -37,7 +37,7 @@ class InputData:
     :type defaults: class: `dictionary`
     """
 
-    def __init__(self, input_filename, obligatory_keywords = [], defaults = {}):
+    def __init__(self, input_filename, obligatory_keywords = [], defaults = {}, all_keywords = None):
         """Constructor method
 
         :param input_filename: the name of the input `.json` file with simulalion configuration
@@ -53,6 +53,10 @@ class InputData:
         self._complete_with_defaults(defaults)
 
         self._check_for_missing_keywords(obligatory_keywords)
+
+        if all_keywords is not None:
+
+            self._abort_if_unknown_keyword_present(all_keywords)
 
     #---------------------------------------------------------------------------
 
@@ -78,6 +82,14 @@ class InputData:
         for keyword in obligatory_keywords:
             assert keyword in self.input_data.keys(),\
                 'Missing {} keyword in input JSON file.'.format(keyword)
+
+    #---------------------------------------------------------------------------
+
+    def _abort_if_unknown_keyword_present(self, all_keywords):
+
+        for keyword in self.input_data:
+            assert keyword in all_keywords,\
+                'Unrecognized {} keyword in input JSON file.'.format(keyword)
 
     #---------------------------------------------------------------------------
 

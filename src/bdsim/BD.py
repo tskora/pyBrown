@@ -47,8 +47,12 @@ def main(input_filename):
 				"propagation_scheme": "ermak", "check_overlaps": True,
 				"external_force": [0.0, 0.0, 0.0]}
 
+	all_keywords = required_keywords + list(defaults.keys()) +\
+				   [ "output_rst_filename", "filename_range", "rst_write_freq",
+				     "m_midpoint", "external_force_region", "measure_flux" ]
+
 	timestamp( 'Reading input from {} file', input_filename )
-	i = InputData(input_filename, required_keywords, defaults)
+	i = InputData(input_filename, required_keywords, defaults, all_keywords)
 	timestamp( 'Input data:\n{}', i )
 
 	disable_progress_bar = not i.input_data["progress_bar"]
