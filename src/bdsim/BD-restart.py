@@ -18,18 +18,15 @@
 
 import click
 import pickle
-import os
-import shutil
 import time
 
 from contextlib import ExitStack
 from tqdm import tqdm
 
-from BD import write_to_xyz_file, write_to_restart_file, write_to_con_file, write_to_flux_file
-
 from pyBrown.box import Box
 from pyBrown.input import read_str_file, InputData
-from pyBrown.output import timestamp
+from pyBrown.output import timestamp, write_to_xyz_file, write_to_restart_file,\
+						   write_to_con_file, write_to_flux_file, truncate_output_file_during_restart
 
 @click.command()
 @click.argument('restart_filename',
@@ -98,9 +95,9 @@ def main(restart_filename, json_filename):
 		rst_filenames = [ rst_filename ]
 
 
-	if concentration: truncate_file(con_filenames[index_rst], con_file_length_rst)
-	if flux: truncate_file(flux_filenames[index_rst], flux_file_length_rst)
-	truncate_file(xyz_filenames[index_rst], xyz_file_length_rst)
+	if concentration: truncate_output_file_during_restart(con_filenames[index_rst], con_file_length_rst)
+	if flux: truncate_output_file_during_restart(flux_filenames[index_rst], flux_file_length_rst)
+	truncate_output_file_during_restart(xyz_filenames[index_rst], xyz_file_length_rst)
 
 	dt = input_data["dt"]
 	n_steps = input_data["number_of_steps"]
@@ -163,25 +160,6 @@ def main(restart_filename, json_filename):
 		end = time.time()
 	
 		print('{} seconds elapsed'.format(end-start))
-
-#-------------------------------------------------------------------------------
-
-def truncate_file(filename, line):
-    
-    tmp_filename = filename+'.tmp'
-    
-    with open(filename, 'r') as source:
-        with open(tmp_filename, 'w') as destination:
-            for i in range(line):
-                destination.write( source.readline() )
-                
-    with open(filename, 'w') as destination:
-        with open(tmp_filename, 'r') as source:
-            for line in source:
-                destination.write(line)
-                
-    if os.path.exists(tmp_filename):
-        os.remove(tmp_filename)
 
 #-------------------------------------------------------------------------------
 

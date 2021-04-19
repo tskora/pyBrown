@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
 
+import os
+import pickle
+import shutil
 import time
 
 #-------------------------------------------------------------------------------
@@ -35,5 +38,96 @@ def timing(f):
 
         return ret
     return wrap
+
+#-------------------------------------------------------------------------------
+
+def truncate_output_file_during_restart(filename, line):
+    
+    tmp_filename = filename+'.tmp'
+    
+    with open(filename, 'r') as source:
+        with open(tmp_filename, 'w') as destination:
+            for i in range(line):
+                destination.write( source.readline() )
+                
+    with open(filename, 'w') as destination:
+        with open(tmp_filename, 'r') as source:
+            for line in source:
+                destination.write(line)
+                
+    if os.path.exists(tmp_filename):
+        os.remove(tmp_filename)
+
+#-------------------------------------------------------------------------------
+
+def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads):
+
+	xyz_file.write('{}\n'.format(len(beads)))
+	xyz_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
+	for bead in beads:
+		xyz_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+
+#-------------------------------------------------------------------------------
+
+def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_output_filenames = []):
+
+	with open(restart_filename, 'wb', buffering = 0) as restart_file:
+		pickle.dump(index, restart_file)
+		pickle.dump(j, restart_file)
+		pickle.dump(box, restart_file)
+		pickle.dump(_file_length(xyz_filename), restart_file)
+		for extra_output_filename in extra_output_filenames:
+			pickle.dump(_file_length(extra_output_filename), restart_file)
+
+	shutil.copy(restart_filename, restart_filename+"2")
+
+#-------------------------------------------------------------------------------
+
+def write_to_con_file(con_file, j, dt, concentration):
+
+	concentration_labels = list(concentration.keys())
+
+	if j == 0:
+
+		first_line_string = 'time/ps' + ' {}' * len(concentration_labels) + '\n'
+
+		con_file.write(first_line_string.format(*concentration_labels))
+
+	else:
+
+		line_string = '{}' + ' {}' * len(concentration) + '\n'
+
+		concentration_for_given_label = [ concentration[key] for key in concentration_labels ]
+
+		con_file.write(line_string.format(j*dt, *concentration_for_given_label))
+
+#-------------------------------------------------------------------------------
+
+def write_to_flux_file(flux_file, j, dt, net_flux):
+
+	net_flux_labels = list(net_flux.keys())
+
+	if j == 0:
+
+		first_line_string = 'time/ps' + ' {}' * len(net_flux_labels) + '\n'
+
+		flux_file.write(first_line_string.format(*net_flux_labels))
+
+	else:
+
+		line_string = '{}' + ' {}'*len(net_flux) + '\n'
+
+		net_flux_for_given_label = [ net_flux[key] for key in net_flux_labels ]
+
+		flux_file.write(line_string.format(j*dt, *net_flux_for_given_label))
+
+#-------------------------------------------------------------------------------
+
+def _file_length(filename):
+	i = -1
+	with open(filename, "r") as file:
+		for i, l in enumerate(file):
+			pass
+	return i + 1
 
 #-------------------------------------------------------------------------------
