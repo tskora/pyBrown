@@ -26,6 +26,15 @@ from pyBrown.output import timestamp, timing
 #-------------------------------------------------------------------------------
 
 class Box():
+	"""This is a class representing simulation box and allowing to propagate dynamics.
+
+	Constructor method
+
+	:param beads: list of bead objects
+	:type beads: class: `list` of objects of class: `Bead`
+	:param input_data: class: `dictionary`
+	:type input_data: keyword-value pairs
+	"""
 
 	def __init__(self, beads, input_data):
 
@@ -62,13 +71,18 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	def __str__(self):
-
-		return 'simulation box'
-
-	#-------------------------------------------------------------------------------
-
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True):
+		"""Single propagation of dynamics
+
+		:param dt: timestep
+		:type dt: `float`
+		:param build_Dff: switch on/off building Rotne-Prager-Yamakawa tensor in this step, defaults to `True`
+		:type build_Dff: `bool`
+		:param build_Dnf: switch on/off computing lubrication correction in this step, defaults to `True`
+		:type Dnf: `bool`
+		:param cholesky: switch on/off performing Choleski decomposition in this step, defaults to `True`
+		:type cholesky: `bool`
+		"""
 
 		if self.is_flux:
 			self.net_flux = {label: 0 for label in self.mobile_labels}
@@ -106,6 +120,7 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	def sync_seed(self):
+		"""Synchronizing random number generation after restart."""
 
 		np.random.seed(self.seed)
 
@@ -507,5 +522,11 @@ class Box():
 					continue
 
 			self.concentration[bead.label] += 1
+
+	#-------------------------------------------------------------------------------
+
+	def __str__(self):
+
+		return 'simulation box'
 
 	#-------------------------------------------------------------------------------

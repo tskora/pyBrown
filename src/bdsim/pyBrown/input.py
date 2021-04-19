@@ -117,7 +117,7 @@ def read_str_file(input_str_filename):
     :type input_str_filename: `string`
 
     :return: list of bead objects
-    :rtype: class: list of objects of class: `Bead`
+    :rtype: class: `list` of objects of class: `Bead`
     """
 
     with open(input_str_filename) as str_file:
