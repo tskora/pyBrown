@@ -33,20 +33,20 @@ class Box():
 		self.inp = input_data
 		self.box_length = self.inp["box_length"]
 
-		self.initialize_pseudorandom_number_generation()
+		self._initialize_pseudorandom_number_generation()
 
-		self.handle_bead_mobility()
-		self.labels = self.handle_bead_labels()
+		self._handle_bead_mobility()
+		self.labels = self._handle_bead_labels()
 
-		self.set_physical_constants()
+		self._set_physical_constants()
 
 		self.hydrodynamics = self.inp["hydrodynamics"]
 		if self.hydrodynamics == "nohi":
-			self.compute_Dff_matrix()
-			self.decompose_D_matrix()
+			self._compute_Dff_matrix()
+			self._decompose_D_matrix()
 
 		if self.hydrodynamics == "rpy_smith" or self.hydrodynamics == "rpy_smith_lub":
-			self.set_ewald_summation_parameters()
+			self._set_ewald_summation_parameters()
 
 		self.propagation_scheme = self.inp["propagation_scheme"]
 		if self.propagation_scheme == "midpoint":
@@ -54,11 +54,11 @@ class Box():
 
 		self.overlaps = self.inp["check_overlaps"]
 		
-		self.set_external_force()
+		self._set_external_force()
 
-		self.set_flux_measurement_parameters()
+		self._set_flux_measurement_parameters()
 
-		self.set_concentration_measurement_parameters()
+		self._set_concentration_measurement_parameters()
 
 	#-------------------------------------------------------------------------------
 
@@ -68,7 +68,6 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	# @timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True):
 
 		if self.is_flux:
@@ -79,116 +78,30 @@ class Box():
 		# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
 		if self.hydrodynamics != "nohi":
 
-			self.compute_rij_matrix()
+			self._compute_rij_matrix()
 
 		if self.hydrodynamics != "nohi":
 
 			if build_Dff:
-				self.compute_Dff_matrix()
+				self._compute_Dff_matrix()
 
 			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
 
 				if build_Dnf:
-					self.compute_Dtot_matrix()
+					self._compute_Dtot_matrix()
 
 			if cholesky:
-				self.decompose_D_matrix()
+				self._decompose_D_matrix()
 
-		self.compute_forces()
+		self._compute_forces()
 
-		if self.propagation_scheme == "ermak": self.ermak_step(dt)
+		if self.propagation_scheme == "ermak": self._ermak_step(dt)
 
-		if self.propagation_scheme == "midpoint": self.midpoint_step(dt, build_Dff, build_Dnf, cholesky)
+		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
 
-		self.keep_beads_in_box()
+		self._keep_beads_in_box()
 
-		if self.is_concentration: self.compute_concentration_in_region()
-
-	#-------------------------------------------------------------------------------
-
-	def ermak_step(self, dt):
-
-		self.deterministic_step(dt)
-
-		while True:
-
-			self.generate_random_vector()
-
-			self.stochastic_step(dt)
-
-			if self.overlaps:
-
-				if self.check_overlaps():
-					self.stochastic_step(dt, mult = -1)
-				else:
-					break
-
-			else:
-
-				break
-
-	#-------------------------------------------------------------------------------
-
-	def midpoint_step(self, dt, build_Dff, build_Dnf, cholesky):
-
-		D0 = np.copy(self.D)
-
-		B0 = np.copy(self.B)
-
-		while True:
-
-			self.deterministic_step(dt, mult = 1.0 / self.m_midpoint)
-
-			self.generate_random_vector()
-
-			self.stochastic_step(dt, mult = 1.0 / self.m_midpoint)
-
-			# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
-			if self.hydrodynamics != "nohi":
-
-				self.compute_rij_matrix()
-
-			if self.hydrodynamics != "nohi":
-
-				if build_Dff:
-					self.compute_Dff_matrix()
-
-				if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-
-					if build_Dnf:
-						self.compute_Dtot_matrix()
-
-				if cholesky:
-					self.decompose_D_matrix()
-
-			deterministic_drift = self.m_midpoint * dt / ( 2 * self.kBT ) * ( self.D - D0 ) @ self.F
-
-			stochastic_drift = self.m_midpoint / 2 * math.sqrt(2 * dt) * ( self.B - B0 ) @ self.N
-
-			drift = stochastic_drift + deterministic_drift
-
-			self.D = D0
-
-			self.B = B0
-
-			self.deterministic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
-
-			self.stochastic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
-
-			self.translate_beads(drift)
-
-			if self.overlaps:
-
-				if self.check_overlaps():
-					self.deterministic_step(dt, mult = -1)
-					self.stochastic_step(dt, mult = -1)
-					self.translate_beads(-drift)
-				else:
-					break
-
-			else:
-
-				break
+		if self.is_concentration: self._compute_concentration_in_region()
 
 	#-------------------------------------------------------------------------------
 
@@ -200,163 +113,94 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	def initialize_pseudorandom_number_generation(self):
+	def _ermak_step(self, dt):
 
-		self.seed = self.inp["seed"]
-		np.random.seed(self.seed)
-		self.draw_count = 0
+		self._deterministic_step(dt)
 
-	#-------------------------------------------------------------------------------
+		while True:
 
-	def set_physical_constants(self):
+			self._generate_random_vector()
 
-		self.T = self.inp["T"]
-		self.kBT = Boltzmann*self.T
-		self.viscosity = self.inp["viscosity"]
+			self._stochastic_step(dt)
 
-	#-------------------------------------------------------------------------------
+			if self.overlaps:
 
-	def set_ewald_summation_parameters(self):
-
-		self.alpha = self.inp["ewald_alpha"]
-		self.m_max = self.inp["ewald_real"]
-		self.n_max = self.inp["ewald_imag"]
-
-	#-------------------------------------------------------------------------------
-
-	def handle_bead_mobility(self):
-
-		self.immobile_labels = self.inp["immobile_labels"]
-
-		self.mobile_beads = []
-		self.immobile_beads = []
-		self.mobile_bead_indices = []
-		self.immobile_bead_indices = []
-
-		for i, bead in enumerate( self.beads ):
-
-			if bead.label in self.immobile_labels:
-				bead.mobile = False
-				self.immobile_beads.append(bead)
-				self.immobile_bead_indices.append(i)
-
+				if self._check_overlaps():
+					self._stochastic_step(dt, mult = -1)
+				else:
+					break
 
 			else:
-				self.mobile_beads.append(bead)
-				self.mobile_bead_indices.append(i)
+
+				break
 
 	#-------------------------------------------------------------------------------
 
-	def handle_bead_labels(self):
+	def _midpoint_step(self, dt, build_Dff, build_Dnf, cholesky):
 
-		self.labels = []
-		self.mobile_labels = []
+		D0 = np.copy(self.D)
 
-		for bead in self.beads:
-			if bead.label not in self.labels:
-				self.labels.append(bead.label)
-				if bead.mobile == True:
-					self.mobile_labels.append(bead.label)
+		B0 = np.copy(self.B)
 
-	#-------------------------------------------------------------------------------
+		while True:
 
-	def handle_external_force_restricted_to_region(self):
+			self._deterministic_step(dt, mult = 1.0 / self.m_midpoint)
 
-		self.is_external_force_region = False
-		if "external_force_region" in self.inp.keys():
-			self.is_external_force_region = True
-			if "x" in self.inp["external_force_region"].keys():
-				self.is_external_force_region_x = True
-				self.Fex_region_x = self.inp["external_force_region"]["x"]
+			self._generate_random_vector()
+
+			self._stochastic_step(dt, mult = 1.0 / self.m_midpoint)
+
+			# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
+			if self.hydrodynamics != "nohi":
+
+				self._compute_rij_matrix()
+
+			if self.hydrodynamics != "nohi":
+
+				if build_Dff:
+					self._compute_Dff_matrix()
+
+				if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+
+					if build_Dnf:
+						self._compute_Dtot_matrix()
+
+				if cholesky:
+					self._decompose_D_matrix()
+
+			deterministic_drift = self.m_midpoint * dt / ( 2 * self.kBT ) * ( self.D - D0 ) @ self.F
+
+			stochastic_drift = self.m_midpoint / 2 * math.sqrt(2 * dt) * ( self.B - B0 ) @ self.N
+
+			drift = stochastic_drift + deterministic_drift
+
+			self.D = D0
+
+			self.B = B0
+
+			self._deterministic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
+
+			self._stochastic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
+
+			self._translate_beads(drift)
+
+			if self.overlaps:
+
+				if self._check_overlaps():
+					self._deterministic_step(dt, mult = -1)
+					self._stochastic_step(dt, mult = -1)
+					self._translate_beads(-drift)
+				else:
+					break
+
 			else:
-				self.is_external_force_region_x = False
-			if "y" in self.inp["external_force_region"].keys():
-				self.is_external_force_region_y = True
-				self.Fex_region_y = self.inp["external_force_region"]["y"]
-			else:
-				self.is_external_force_region_y = False
-			if "z" in self.inp["external_force_region"].keys():
-				self.is_external_force_region_z = True
-				self.Fex_region_z = self.inp["external_force_region"]["z"]
-			else:
-				self.is_external_force_region_z = False
 
-	#-------------------------------------------------------------------------------
-
-	def prepare_region_dependent_external_force(self):
-
-		if self.is_external_force_region:
-			for i, bead in enumerate(self.mobile_beads):
-				if self.is_external_force_region_x:
-					if bead.r[0] < self.Fex_region_x[0] or bead.r[0] > self.Fex_region_x[1]:
-						self.F[3*i:3*i+3] = np.zeros(3)
-						continue
-				if self.is_external_force_region_y:
-					if bead.r[1] < self.Fex_region_y[0] or bead.r[1] > self.Fex_region_y[1]:
-						self.F[3*i:3*i+3] = np.zeros(3)
-						continue
-				if self.is_external_force_region_z:
-					if bead.r[2] < self.Fex_region_z[0] or bead.r[2] > self.Fex_region_z[1]:
-						self.F[3*i:3*i+3] = np.zeros(3)
-						continue
-				self.F[3*i:3*i+3] = self.Fex
-
-	#-------------------------------------------------------------------------------
-
-	def set_external_force(self):
-
-		self.Fex = np.array( self.inp["external_force"] )
-		self.F = np.array( list(self.Fex)*len(self.mobile_beads) )
-		self.handle_external_force_restricted_to_region()
-
-	#-------------------------------------------------------------------------------
-
-	def set_flux_measurement_parameters(self):
-
-		self.is_flux = False
-		if "measure_flux" in self.inp.keys():
-			self.is_flux = True
-			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
-			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
-			self.net_flux = {label: 0 for label in self.mobile_labels}
-
-	#-------------------------------------------------------------------------------
-
-	def set_concentration_measurement_parameters(self):
-
-		self.is_concentration = False
-		if "measure_concentration" in self.inp.keys():
-			self.is_concentration = True
-			if "x" in self.inp["measure_concentration"].keys():
-				self.is_concentration_region_x = True
-				self.concentration_region_x = self.inp["measure_concentration"]["x"]
-			else:
-				self.is_concentration_region_x = False
-			if "y" in self.inp["measure_concentration"].keys():
-				self.is_concentration_region_y = True
-				self.concentration_region_y = self.inp["measure_concentration"]["y"]
-			else:
-				self.is_concentration_region_y = False
-			if "z" in self.inp["measure_concentration"].keys():
-				self.is_concentration_region_z = True
-				self.concentration_region_z = self.inp["measure_concentration"]["z"]
-			else:
-				self.is_concentration_region_z = False
-			self.concentration = {label: 0 for label in self.mobile_labels}
+				break
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def compute_forces(self):
-
-		self.prepare_region_dependent_external_force()
-
-		# more to come -- interactions
-
-	#-------------------------------------------------------------------------------
-
-	# @timing
-	def deterministic_step(self, dt, mult = 1.0):
+	def _deterministic_step(self, dt, mult = 1.0):
 
 		# computing displacement due to external force
 		if self.hydrodynamics != "nohi":
@@ -364,11 +208,31 @@ class Box():
 		else:
 			FX = dt / self.kBT * self.D * self.F * mult
 
-		self.translate_beads(FX)
+		self._translate_beads(FX)
 
 	#-------------------------------------------------------------------------------
 
-	def generate_random_vector(self):
+	# @timing
+	def _stochastic_step(self, dt, mult = 1.0):
+
+		if self.hydrodynamics == "nohi":
+			BX = self.B * self.N * math.sqrt(2 * dt) * mult
+		else:
+			BX = self.B @ self.N * math.sqrt(2 * dt) * mult
+
+		self._translate_beads(BX)
+
+	#-------------------------------------------------------------------------------
+
+	def _translate_beads(self, vector):
+
+		for i, bead in enumerate( self.mobile_beads ):
+			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
+
+	#-------------------------------------------------------------------------------
+
+	def _generate_random_vector(self):
 
 		self.N = np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads))
 
@@ -377,51 +241,16 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def stochastic_step(self, dt, mult = 1.0):
+	def _compute_forces(self):
 
-		if self.hydrodynamics == "nohi":
-			BX = self.B * self.N * math.sqrt(2 * dt) * mult
-		else:
-			BX = self.B @ self.N * math.sqrt(2 * dt) * mult
+		self._prepare_region_dependent_external_force()
 
-		self.translate_beads(BX)
-
-	#-------------------------------------------------------------------------------
-
-	def translate_beads(self, vector):
-
-		for i, bead in enumerate( self.mobile_beads ):
-			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
-			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
-
-	#-------------------------------------------------------------------------------
-
-	def keep_beads_in_box(self):
-
-		for i, bead in enumerate( self.mobile_beads ):
-			bead.keep_in_box(self.box_length)
-
-	#-------------------------------------------------------------------------------
-
-	def compute_concentration_in_region(self):
-
-		for bead in self.mobile_beads:
-			if self.is_concentration_region_x:
-				if bead.r[0] < self.concentration_region_x[0] or bead.r[0] > self.concentration_region_x[1]:
-					continue
-			if self.is_concentration_region_y:
-				if bead.r[1] < self.concentration_region_y[0] or bead.r[1] > self.concentration_region_y[1]:
-					continue
-			if self.is_concentration_region_z:
-				if bead.r[2] < self.concentration_region_z[0] or bead.r[2] > self.concentration_region_z[1]:
-					continue
-
-			self.concentration[bead.label] += 1
+		# more to come -- interactions
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def check_overlaps(self):
+	def _check_overlaps(self):
 
 		overlaps = False
 
@@ -445,7 +274,7 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def compute_rij_matrix(self):
+	def _compute_rij_matrix(self):
 
 		self.rij = np.zeros((len(self.mobile_beads), len(self.mobile_beads), 3))
 
@@ -457,7 +286,7 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def compute_Dff_matrix(self):
+	def _compute_Dff_matrix(self):
 
 		if self.hydrodynamics == "nohi":
 
@@ -490,7 +319,7 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def compute_Dtot_matrix(self):
+	def _compute_Dtot_matrix(self):
 
 		self.R = JO_R_lubrication_correction_matrix(self.mobile_beads, self.rij) * self.viscosity / 10**19 + self.Rff
 
@@ -499,7 +328,7 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	# @timing
-	def decompose_D_matrix(self):
+	def _decompose_D_matrix(self):
 
 		if self.hydrodynamics == "nohi":
 
@@ -508,5 +337,175 @@ class Box():
 		else:
 
 			self.B = np.linalg.cholesky(self.D)
+
+	#-------------------------------------------------------------------------------
+
+	def _keep_beads_in_box(self):
+
+		for i, bead in enumerate( self.mobile_beads ):
+			bead.keep_in_box(self.box_length)
+
+	#-------------------------------------------------------------------------------
+
+	def _initialize_pseudorandom_number_generation(self):
+
+		self.seed = self.inp["seed"]
+		np.random.seed(self.seed)
+		self.draw_count = 0
+
+	#-------------------------------------------------------------------------------
+
+	def _set_physical_constants(self):
+
+		self.T = self.inp["T"]
+		self.kBT = Boltzmann*self.T
+		self.viscosity = self.inp["viscosity"]
+
+	#-------------------------------------------------------------------------------
+
+	def _set_ewald_summation_parameters(self):
+
+		self.alpha = self.inp["ewald_alpha"]
+		self.m_max = self.inp["ewald_real"]
+		self.n_max = self.inp["ewald_imag"]
+
+	#-------------------------------------------------------------------------------
+
+	def _handle_bead_mobility(self):
+
+		self.immobile_labels = self.inp["immobile_labels"]
+
+		self.mobile_beads = []
+		self.immobile_beads = []
+		self.mobile_bead_indices = []
+		self.immobile_bead_indices = []
+
+		for i, bead in enumerate( self.beads ):
+
+			if bead.label in self.immobile_labels:
+				bead.mobile = False
+				self.immobile_beads.append(bead)
+				self.immobile_bead_indices.append(i)
+
+
+			else:
+				self.mobile_beads.append(bead)
+				self.mobile_bead_indices.append(i)
+
+	#-------------------------------------------------------------------------------
+
+	def _handle_bead_labels(self):
+
+		self.labels = []
+		self.mobile_labels = []
+
+		for bead in self.beads:
+			if bead.label not in self.labels:
+				self.labels.append(bead.label)
+				if bead.mobile == True:
+					self.mobile_labels.append(bead.label)
+
+	#-------------------------------------------------------------------------------
+
+	def _handle_external_force_restricted_to_region(self):
+
+		self.is_external_force_region = False
+		if "external_force_region" in self.inp.keys():
+			self.is_external_force_region = True
+			if "x" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_x = True
+				self.Fex_region_x = self.inp["external_force_region"]["x"]
+			else:
+				self.is_external_force_region_x = False
+			if "y" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_y = True
+				self.Fex_region_y = self.inp["external_force_region"]["y"]
+			else:
+				self.is_external_force_region_y = False
+			if "z" in self.inp["external_force_region"].keys():
+				self.is_external_force_region_z = True
+				self.Fex_region_z = self.inp["external_force_region"]["z"]
+			else:
+				self.is_external_force_region_z = False
+
+	#-------------------------------------------------------------------------------
+
+	def _prepare_region_dependent_external_force(self):
+
+		if self.is_external_force_region:
+			for i, bead in enumerate(self.mobile_beads):
+				if self.is_external_force_region_x:
+					if bead.r[0] < self.Fex_region_x[0] or bead.r[0] > self.Fex_region_x[1]:
+						self.F[3*i:3*i+3] = np.zeros(3)
+						continue
+				if self.is_external_force_region_y:
+					if bead.r[1] < self.Fex_region_y[0] or bead.r[1] > self.Fex_region_y[1]:
+						self.F[3*i:3*i+3] = np.zeros(3)
+						continue
+				if self.is_external_force_region_z:
+					if bead.r[2] < self.Fex_region_z[0] or bead.r[2] > self.Fex_region_z[1]:
+						self.F[3*i:3*i+3] = np.zeros(3)
+						continue
+				self.F[3*i:3*i+3] = self.Fex
+
+	#-------------------------------------------------------------------------------
+
+	def _set_external_force(self):
+
+		self.Fex = np.array( self.inp["external_force"] )
+		self.F = np.array( list(self.Fex)*len(self.mobile_beads) )
+		self._handle_external_force_restricted_to_region()
+
+	#-------------------------------------------------------------------------------
+
+	def _set_flux_measurement_parameters(self):
+
+		self.is_flux = False
+		if "measure_flux" in self.inp.keys():
+			self.is_flux = True
+			self.flux_normal = np.array(self.inp["measure_flux"]["normal"], float)
+			self.flux_plane_point = np.array(self.inp["measure_flux"]["plane_point"], float)
+			self.net_flux = {label: 0 for label in self.mobile_labels}
+
+	#-------------------------------------------------------------------------------
+
+	def _set_concentration_measurement_parameters(self):
+
+		self.is_concentration = False
+		if "measure_concentration" in self.inp.keys():
+			self.is_concentration = True
+			if "x" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_x = True
+				self.concentration_region_x = self.inp["measure_concentration"]["x"]
+			else:
+				self.is_concentration_region_x = False
+			if "y" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_y = True
+				self.concentration_region_y = self.inp["measure_concentration"]["y"]
+			else:
+				self.is_concentration_region_y = False
+			if "z" in self.inp["measure_concentration"].keys():
+				self.is_concentration_region_z = True
+				self.concentration_region_z = self.inp["measure_concentration"]["z"]
+			else:
+				self.is_concentration_region_z = False
+			self.concentration = {label: 0 for label in self.mobile_labels}
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_concentration_in_region(self):
+
+		for bead in self.mobile_beads:
+			if self.is_concentration_region_x:
+				if bead.r[0] < self.concentration_region_x[0] or bead.r[0] > self.concentration_region_x[1]:
+					continue
+			if self.is_concentration_region_y:
+				if bead.r[1] < self.concentration_region_y[0] or bead.r[1] > self.concentration_region_y[1]:
+					continue
+			if self.is_concentration_region_z:
+				if bead.r[2] < self.concentration_region_z[0] or bead.r[2] > self.concentration_region_z[1]:
+					continue
+
+			self.concentration[bead.label] += 1
 
 	#-------------------------------------------------------------------------------
