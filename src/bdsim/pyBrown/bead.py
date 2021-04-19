@@ -132,6 +132,12 @@ class Bead():
 
 #-------------------------------------------------------------------------------
 
+def pointer(bead1, bead2):
+
+	return bead2.r - bead1.r
+
+#-------------------------------------------------------------------------------
+
 def pointer_pbc(bead1, bead2, box_size):
 	"""Computes the voctor pointing from `bead1` to `bead2` (its closest translational replica)
 	
@@ -146,7 +152,7 @@ def pointer_pbc(bead1, bead2, box_size):
 	:rtype: class: `numpy.ndarray(3)`
 	"""
 
-	pointer = bead2.r - bead1.r
+	pointer = pointer(bead1, bead2)
 
 	for i in range(3):
 		while pointer[i] >= box_size/2:
@@ -155,6 +161,14 @@ def pointer_pbc(bead1, bead2, box_size):
 			pointer[i] += box_size
 
 	return pointer
+
+#-------------------------------------------------------------------------------
+
+def distance(bead1, bead2):
+
+	pointer = bead1.r - bead2.r
+
+	return math.sqrt( np.sum( pointer**2 ) )
 
 #-------------------------------------------------------------------------------
 
@@ -181,6 +195,12 @@ def distance_pbc(bead1, bead2, box_size):
 			pointer[i] += box_size
 
 	return math.sqrt( np.sum( pointer**2 ) )
+
+#-------------------------------------------------------------------------------
+
+def overlap(bead1, bead2):
+
+	return distance(bead1, bead2) <= bead1.a + bead2.a
 
 #-------------------------------------------------------------------------------
 
