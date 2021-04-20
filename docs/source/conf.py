@@ -14,7 +14,6 @@ import sphinx_rtd_theme
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('../../src/bdsim/pyBrown/'))
 sys.path.insert(0, os.path.abspath('../../src/bdsim/'))
 
 # -- Project information -----------------------------------------------------
@@ -34,7 +33,7 @@ release = '0.1'
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx_rtd_theme']
 
-todo_include_todos= True
+todo_include_todos = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

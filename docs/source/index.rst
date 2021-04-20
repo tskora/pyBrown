@@ -90,6 +90,7 @@ where instead of ``RESTART_FILENAME`` substitute the name of your restart file.
    modules/box
    modules/diffusion
    modules/input
+   modules/interactions
    modules/output
 
 .. toctree::
