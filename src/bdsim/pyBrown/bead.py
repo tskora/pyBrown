@@ -152,23 +152,23 @@ def pointer_pbc(bead1, bead2, box_size):
 	:rtype: class: `numpy.ndarray(3)`
 	"""
 
-	pointer = pointer(bead1, bead2)
+	r = pointer(bead1, bead2)
 
 	for i in range(3):
-		while pointer[i] >= box_size/2:
-			pointer[i] -= box_size
-		while pointer[i] <= -box_size/2:
-			pointer[i] += box_size
+		while r[i] >= box_size/2:
+			r[i] -= box_size
+		while r[i] <= -box_size/2:
+			r[i] += box_size
 
-	return pointer
+	return r
 
 #-------------------------------------------------------------------------------
 
 def distance(bead1, bead2):
 
-	pointer = bead1.r - bead2.r
+	r = pointer(bead1, bead2)
 
-	return math.sqrt( np.sum( pointer**2 ) )
+	return math.sqrt( np.sum( r**2 ) )
 
 #-------------------------------------------------------------------------------
 
@@ -186,15 +186,15 @@ def distance_pbc(bead1, bead2, box_size):
 	:rtype: `float`
 	"""
 
-	pointer = bead1.r - bead2.r
+	r = pointer(bead1, bead2)
 
 	for i in range(3):
-		while pointer[i] >= box_size/2:
-			pointer[i] -= box_size
-		while pointer[i] <= -box_size/2:
-			pointer[i] += box_size
+		while r[i] >= box_size/2:
+			r[i] -= box_size
+		while r[i] <= -box_size/2:
+			r[i] += box_size
 
-	return math.sqrt( np.sum( pointer**2 ) )
+	return math.sqrt( np.sum( r**2 ) )
 
 #-------------------------------------------------------------------------------
 

@@ -214,7 +214,7 @@ class TestBox(unittest.TestCase):
 
 		for i in range(len(beads)):
 
-			b.generate_random_vector()
+			b._generate_random_vector()
 
 			for j in range(3): self.assertEqual(b.N[j], ref[i][j])
 
