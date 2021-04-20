@@ -18,19 +18,41 @@
 
 class Interactions():
 
-	def __init__(self, beads, force_vector, force_function, force_parameters):
+	def __init__(self, force_function, energy_function, auxiliary_force_parameters):
 
-		self.F = 
+		self.force = force_function
+
+		self.energy = energy_function
+
+		self.auxiliary_forca_parameters = auxiliary_force_parameters
 
 		# **kwargs as a method of giving arguments to forces
 
-		
+	def compute_forces_and_energy(self, beads, pointers, F, E):
 
-	def compute_forces(self, beads, pointers):
+		for i, beadi in enumerate(1, beads):
 
-		pass
+			beadi_params = ...
 
-	def compute_energy(self, beads, pointers):
+			for j in range(i-1):
 
-		pass
+				beadj = beads[j]
+
+				pointerij = pointers[i][j]
+
+				beadj_params = ...
+
+				F[3*i:3*(i+1)] += self._compute_force(beadi, beadj, pointerij, **auxiliary_force_parameters)
+
+				F[3*j:3*(j+1)] -= self._compute_force(beadi, beadj, pointerij, **auxiliary_force_parameters)
+
+				E += self._compute_pair_energy(beadi, beadj, pointerij, **auxiliary_force_parameters)
+
+	def _compute_force(self, bead1, bead2, pointer, **kwargs):
+
+		return self.force(bead1, bead2, pointer, ...)
+
+	def _compute_pair_energy(self, bead1, bead2, pointer, **kwargs):
+
+		return self.energy(bead1, bead2, pointer, ...)
 
