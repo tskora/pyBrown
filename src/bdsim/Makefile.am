@@ -6,6 +6,7 @@ PYTHON_LIB = $(PYTHON_LIB_DIR)/bead.py\
 	$(PYTHON_LIB_DIR)/box.py\
 	$(PYTHON_LIB_DIR)/diffusion.py\
 	$(PYTHON_LIB_DIR)/input.py\
+	$(PYTHON_LIB_DIR)/interactions.py\
 	$(PYTHON_LIB_DIR)/output.py
 
 # Provide PYTHON_INSTALL_DIR 
