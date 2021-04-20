@@ -130,6 +130,7 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -241,7 +242,6 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -447,6 +447,7 @@ uninstall-am:
 test:
 	python3 test_bead.py
 	python3 test_box.py
+	python3 test_interactions.py
 	python3 test_diffusion.py
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
