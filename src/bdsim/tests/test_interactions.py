@@ -60,9 +60,9 @@ class TestInteractions(unittest.TestCase):
 
 		E = 0.0
 
-		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, {"alpha": self.alpha})
+		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, {"lennard_jones_alpha": self.alpha})
 
-		E = i.compute_forces_and_energy(self.beads, self.rij, F, E)
+		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
 		self.assertEqual(E, -self.alpha*self.epsilon)
 
@@ -76,9 +76,9 @@ class TestInteractions(unittest.TestCase):
 
 		E = 0.0
 
-		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, {"alpha": self.alpha})
+		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, {"lennard_jones_alpha": self.alpha})
 
-		E = i.compute_forces_and_energy(self.beads, self.rij, F, E)
+		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
 		self.assertEqual(E, self.alpha*self.epsilon)
 
@@ -92,11 +92,11 @@ class TestInteractions(unittest.TestCase):
 
 		E = 0.0
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
 
-		ia = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, {"alpha": self.alpha})
+		ia = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, {"lennard_jones_alpha": self.alpha})
 
-		ir = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, {"alpha": self.alpha})
+		ir = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, {"lennard_jones_alpha": self.alpha})
 
 		Fa = np.zeros(6)
 
@@ -104,11 +104,11 @@ class TestInteractions(unittest.TestCase):
 
 		Ea = Er = 0.0
 
-		E = i.compute_forces_and_energy(self.beads, self.rij, F, E)
+		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
-		Ea = ia.compute_forces_and_energy(self.beads, self.rij, Fa, Ea)
+		Ea += ia.compute_forces_and_energy(self.beads, self.rij, Fa)
 
-		Er = ir.compute_forces_and_energy(self.beads, self.rij, Fr, Er)
+		Er += ir.compute_forces_and_energy(self.beads, self.rij, Fr)
 
 		self.assertEqual(Ea + Er, 0.0)
 
@@ -137,9 +137,9 @@ class TestInteractions(unittest.TestCase):
 				rij[i][j] = pointer(beads[i], beads[j])
 				rij[j][i] = -rij[i][j]
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
 
-		E = i.compute_forces_and_energy(beads, rij, F, E)
+		E += i.compute_forces_and_energy(beads, rij, F)
 
 		self.assertEqual(E, -self.epsilon)
 
@@ -172,9 +172,9 @@ class TestInteractions(unittest.TestCase):
 				rij[i][j] = pointer(beads[i], beads[j])
 				rij[j][i] = -rij[i][j]
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
 
-		E = i.compute_forces_and_energy(beads, rij, F, E)
+		E += i.compute_forces_and_energy(beads, rij, F)
 
 		self.assertEqual(E, -3*self.epsilon)
 
@@ -207,9 +207,9 @@ class TestInteractions(unittest.TestCase):
 				rij[i][j] = pointer(beads[i], beads[j])
 				rij[j][i] = -rij[i][j]
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
 
-		E = i.compute_forces_and_energy(beads, rij, F, E)
+		E += i.compute_forces_and_energy(beads, rij, F)
 
 		self.assertAlmostEqual(E, 0.0, places = 7)
 

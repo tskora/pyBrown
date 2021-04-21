@@ -30,7 +30,9 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
-	def compute_forces_and_energy(self, beads, pointers, F, E = None):
+	def compute_forces_and_energy(self, beads, pointers, F):
+
+		E = 0.0
 
 		for i in range(1, len(beads)):
 
@@ -48,7 +50,7 @@ class Interactions():
 
 				F[3*j:3*(j+1)] -= f
 
-				if E is not None: E += self._compute_pair_energy(beadi, beadj, pointerij, self.auxiliary_force_parameters)
+				E += self._compute_pair_energy(beadi, beadj, pointerij, self.auxiliary_force_parameters)
 
 		return E
 
@@ -64,9 +66,59 @@ class Interactions():
 
 		return self.energy(bead1, bead2, pointer, **auxiliary_force_parameters)
 
+	#-------------------------------------------------------------------------------
+
+	def __str__(self):
+
+		string_template = 'Force: {}, energy: {}, auxiliary parameters: {}'
+
+		return string_template.format(self.force.__name__, self.energy.__name__, self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def __repr__(self):
+
+		return self.__str__()
+
 #-------------------------------------------------------------------------------
 
-def LJ_6_attractive_force(bead1, bead2, pointer, alpha):
+def set_interactions(input_data):
+
+	interactions_for_simulation = []
+
+	_set_lennard_jones_interactions(input_data, interactions_for_simulation)
+
+	return interactions_for_simulation
+
+#-------------------------------------------------------------------------------
+
+def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
+
+	if not input_data["lennard_jones_6"] and not input_data["lennard_jones_12"]:
+
+		return
+
+	aux_keywords = [ "lennard_jones_alpha" ]
+
+	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
+
+	if input_data["lennard_jones_6"] and input_data["lennard_jones_12"]:
+
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, aux)
+
+	elif input_data["lennard_jones_6"]:
+
+		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, aux)
+
+	elif input_data["lennard_jones_12"]:
+
+		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, aux)
+
+	interactions_for_simulation.append(i)
+
+#-------------------------------------------------------------------------------
+
+def LJ_6_attractive_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 	sigma = bead1.hard_core_radius + bead2.hard_core_radius
 
@@ -82,11 +134,11 @@ def LJ_6_attractive_force(bead1, bead2, pointer, alpha):
 
 	versor = pointer / dist
 
-	return 6.0*alpha*epsilon*s6/dist*versor
+	return 6.0*lennard_jones_alpha*epsilon*s6/dist*versor
 
 #-------------------------------------------------------------------------------
 
-def LJ_6_attractive_energy(bead1, bead2, pointer, alpha):
+def LJ_6_attractive_energy(bead1, bead2, pointer, lennard_jones_alpha):
 
 	sigma = bead1.hard_core_radius + bead2.hard_core_radius
 
@@ -98,11 +150,11 @@ def LJ_6_attractive_energy(bead1, bead2, pointer, alpha):
 
 	s6 = s2 * s2 * s2
 
-	return -alpha*epsilon*s6
+	return -lennard_jones_alpha*epsilon*s6
 
 #-------------------------------------------------------------------------------
 
-def LJ_12_repulsive_force(bead1, bead2, pointer, alpha):
+def LJ_12_repulsive_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 	sigma = bead1.hard_core_radius + bead2.hard_core_radius
 
@@ -118,11 +170,11 @@ def LJ_12_repulsive_force(bead1, bead2, pointer, alpha):
 
 	versor = pointer / dist
 
-	return -12.0*alpha*epsilon*s12/dist*versor
+	return -12.0*lennard_jones_alpha*epsilon*s12/dist*versor
 
 #-------------------------------------------------------------------------------
 
-def LJ_12_repulsive_energy(bead1, bead2, pointer, alpha):
+def LJ_12_repulsive_energy(bead1, bead2, pointer, lennard_jones_alpha):
 
 	sigma = bead1.hard_core_radius + bead2.hard_core_radius
 
@@ -134,11 +186,11 @@ def LJ_12_repulsive_energy(bead1, bead2, pointer, alpha):
 
 	s12 = s2 * s2 * s2 * s2 * s2 * s2
 
-	return alpha*epsilon*s12
+	return lennard_jones_alpha*epsilon*s12
 
 #-------------------------------------------------------------------------------
 
-def LJ_6_12_energy(bead1, bead2, pointer, alpha):
+def LJ_6_12_energy(bead1, bead2, pointer, lennard_jones_alpha):
 
 	sigma = bead1.hard_core_radius + bead2.hard_core_radius
 
@@ -152,11 +204,11 @@ def LJ_6_12_energy(bead1, bead2, pointer, alpha):
 
 	s12 = s6 * s6
 
-	return alpha*epsilon*(s12 - s6)
+	return lennard_jones_alpha*epsilon*(s12 - s6)
 
 #-------------------------------------------------------------------------------
 
-def LJ_6_12_force(bead1, bead2, pointer, alpha):
+def LJ_6_12_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 	sigma = bead1.hard_core_radius + bead2.hard_core_radius
 
@@ -174,6 +226,6 @@ def LJ_6_12_force(bead1, bead2, pointer, alpha):
 
 	versor = pointer / dist
 
-	return alpha*epsilon/dist*(6*s6-12*s12)*versor
+	return lennard_jones_alpha*epsilon/dist*(6*s6-12*s12)*versor
 
 

@@ -21,6 +21,7 @@ from scipy.constants import Boltzmann
 
 from pyBrown.bead import overlap_pbc, distance_pbc, pointer_pbc
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
+from pyBrown.interactions import set_interactions
 from pyBrown.output import timestamp, timing
 
 #-------------------------------------------------------------------------------
@@ -62,8 +63,10 @@ class Box():
 			self.m_midpoint = self.inp["m_midpoint"]
 
 		self.overlaps = self.inp["check_overlaps"]
-		
-		self._set_external_force()
+
+		self._initialize_force()
+
+		self._initialize_interactions()
 
 		self._set_flux_measurement_parameters()
 
@@ -89,10 +92,7 @@ class Box():
 		if self.is_concentration:
 			self.concentration = {label: 0 for label in self.mobile_labels}
 
-		# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
-		if self.hydrodynamics != "nohi":
-
-			self._compute_rij_matrix()
+		self._compute_rij_matrix()
 
 		if self.hydrodynamics != "nohi":
 
@@ -165,10 +165,7 @@ class Box():
 
 			self._stochastic_step(dt, mult = 1.0 / self.m_midpoint)
 
-			# for now distances are needed only in hydrodynamics, it will change with adding interbead potential
-			if self.hydrodynamics != "nohi":
-
-				self._compute_rij_matrix()
+			self._compute_rij_matrix()
 
 			if self.hydrodynamics != "nohi":
 
@@ -217,7 +214,6 @@ class Box():
 	# @timing
 	def _deterministic_step(self, dt, mult = 1.0):
 
-		# computing displacement due to external force
 		if self.hydrodynamics != "nohi":
 			FX = dt / self.kBT * self.D @ self.F * mult
 		else:
@@ -258,9 +254,25 @@ class Box():
 	# @timing
 	def _compute_forces(self):
 
-		self._prepare_region_dependent_external_force()
+		self.E = 0.0
 
-		# more to come -- interactions
+		self._prepare_external_force()
+
+		for interaction in self.interactions:
+
+			self.E += interaction.compute_forces_and_energy(self.mobile_beads, self.rij, self.F)
+
+	#-------------------------------------------------------------------------------
+
+	def _prepare_external_force(self):
+
+		if self.is_external_force_region:
+
+			self._prepare_region_dependent_external_force()
+
+		else:
+
+			self.F = np.array(list(self.Fex)*(len(self.mobile_beads)))
 
 	#-------------------------------------------------------------------------------
 
@@ -447,29 +459,35 @@ class Box():
 
 	def _prepare_region_dependent_external_force(self):
 
-		if self.is_external_force_region:
-			for i, bead in enumerate(self.mobile_beads):
-				if self.is_external_force_region_x:
-					if bead.r[0] < self.Fex_region_x[0] or bead.r[0] > self.Fex_region_x[1]:
-						self.F[3*i:3*i+3] = np.zeros(3)
-						continue
-				if self.is_external_force_region_y:
-					if bead.r[1] < self.Fex_region_y[0] or bead.r[1] > self.Fex_region_y[1]:
-						self.F[3*i:3*i+3] = np.zeros(3)
-						continue
-				if self.is_external_force_region_z:
-					if bead.r[2] < self.Fex_region_z[0] or bead.r[2] > self.Fex_region_z[1]:
-						self.F[3*i:3*i+3] = np.zeros(3)
-						continue
-				self.F[3*i:3*i+3] = self.Fex
+		for i, bead in enumerate(self.mobile_beads):
+			if self.is_external_force_region_x:
+				if bead.r[0] < self.Fex_region_x[0] or bead.r[0] > self.Fex_region_x[1]:
+					self.F[3*i:3*i+3] = np.zeros(3)
+					continue
+			if self.is_external_force_region_y:
+				if bead.r[1] < self.Fex_region_y[0] or bead.r[1] > self.Fex_region_y[1]:
+					self.F[3*i:3*i+3] = np.zeros(3)
+					continue
+			if self.is_external_force_region_z:
+				if bead.r[2] < self.Fex_region_z[0] or bead.r[2] > self.Fex_region_z[1]:
+					self.F[3*i:3*i+3] = np.zeros(3)
+					continue
+			self.F[3*i:3*i+3] = self.Fex
 
 	#-------------------------------------------------------------------------------
 
-	def _set_external_force(self):
+	def _initialize_force(self):
 
 		self.Fex = np.array( self.inp["external_force"] )
-		self.F = np.array( list(self.Fex)*len(self.mobile_beads) )
+		self.F = np.zeros( 3*len(self.mobile_beads) )
+		self.E = 0.0
 		self._handle_external_force_restricted_to_region()
+
+	#-------------------------------------------------------------------------------
+
+	def _initialize_interactions(self):
+
+		self.interactions = set_interactions(self.inp)
 
 	#-------------------------------------------------------------------------------
 
