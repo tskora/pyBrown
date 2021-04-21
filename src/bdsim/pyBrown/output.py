@@ -103,6 +103,20 @@ def write_to_con_file(con_file, j, dt, concentration):
 
 #-------------------------------------------------------------------------------
 
+def write_to_enr_file(enr_file, j, dt, E):
+
+	if j == 0:
+
+		first_line_string = 'time/ps energy/J\n'
+
+		enr_file.write(first_line_string)
+
+	line_string = '{} {}\n'
+
+	enr_file.write(line_string.format(j*dt, E))
+
+#-------------------------------------------------------------------------------
+
 def write_to_flux_file(flux_file, j, dt, net_flux):
 
 	net_flux_labels = list(net_flux.keys())
