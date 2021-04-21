@@ -41,7 +41,7 @@ class TestBox(unittest.TestCase):
 					  	   "viscosity": 0.01, "external_force": [0, 0, 0],
 					  	   "immobile_labels": [], "propagation_scheme": "ermak",
 					  	   "check_overlaps": True, "lennard_jones_6": False,
-					  	   "lennard_jones_12": False}
+					  	   "lennard_jones_12": False, "energy_unit": "joule"}
 
 		self.test_filename = 'test_box.txt'
 
