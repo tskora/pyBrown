@@ -40,7 +40,8 @@ class TestBox(unittest.TestCase):
 		self.mock_input = {"hydrodynamics": "nohi", "box_length": 35.0, "T": 298.0,
 					  	   "viscosity": 0.01, "external_force": [0, 0, 0],
 					  	   "immobile_labels": [], "propagation_scheme": "ermak",
-					  	   "check_overlaps": True}
+					  	   "check_overlaps": True, "lennard_jones_6": False,
+					  	   "lennard_jones_12": False}
 
 		self.test_filename = 'test_box.txt'
 
