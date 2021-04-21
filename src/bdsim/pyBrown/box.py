@@ -21,7 +21,7 @@ from scipy.constants import Boltzmann
 
 from pyBrown.bead import overlap_pbc, distance_pbc, pointer_pbc
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
-from pyBrown.interactions import set_interactions
+from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timestamp, timing
 
 #-------------------------------------------------------------------------------
@@ -63,6 +63,10 @@ class Box():
 			self.m_midpoint = self.inp["m_midpoint"]
 
 		self.overlaps = self.inp["check_overlaps"]
+
+		self.is_energy = False
+		if "enr_write_freq" in self.inp.keys():
+			self.is_energy = True
 
 		self._initialize_force()
 
@@ -262,6 +266,16 @@ class Box():
 
 			self.E += interaction.compute_forces_and_energy(self.mobile_beads, self.rij, self.F)
 
+		if self.inp["energy_unit"] == "joule":
+
+			pass
+
+		elif self.inp["energy_unit"] == "kcal/mol":
+
+			self.E = kcal_per_mole_to_joule(self.E)
+
+			self.F = kcal_per_mole_to_joule(self.F)
+
 	#-------------------------------------------------------------------------------
 
 	def _prepare_external_force(self):
@@ -286,6 +300,7 @@ class Box():
 				pointer = self.beads[i].r - self.beads[j].r
 				radii_sum = self.beads[i].a + self.beads[j].a
 				radii_sum_pbc = self.box_length - radii_sum
+
 				if ( pointer[0] > radii_sum and pointer[0] < radii_sum_pbc ) or ( pointer[0] < -radii_sum and pointer[0] > -radii_sum_pbc ):
 					continue
 				elif ( pointer[1] > radii_sum and pointer[1] < radii_sum_pbc ) or ( pointer[1] < -radii_sum and pointer[1] > -radii_sum_pbc ):
