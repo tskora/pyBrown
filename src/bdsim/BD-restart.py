@@ -26,7 +26,8 @@ from tqdm import tqdm
 from pyBrown.box import Box
 from pyBrown.input import read_str_file, InputData
 from pyBrown.output import timestamp, write_to_xyz_file, write_to_restart_file,\
-						   write_to_con_file, write_to_flux_file, truncate_output_file_during_restart
+						   write_to_con_file, write_to_enr_file, write_to_flux_file,\
+						   truncate_output_file_during_restart
 
 @click.command()
 @click.argument('restart_filename',
@@ -44,6 +45,7 @@ def main(restart_filename, json_filename):
 		box_rst = pickle.load(restart_file)
 		xyz_file_length_rst = pickle.load(restart_file)
 		if box_rst.is_concentration: con_file_length_rst = pickle.load(restart_file)
+		if box_rst.is_energy: enr_file_length_rst = pickle.load(restart_file)
 		if box_rst.is_flux: flux_file_length_rst = pickle.load(restart_file)
 
 	input_data = box_rst.inp
@@ -69,6 +71,12 @@ def main(restart_filename, json_filename):
 	else:
 		concentration = False
 
+	if box_rst.is_energy:
+		energy = True
+		n_enr = input_data["enr_write_freq"]
+	else:
+		energy = False
+
 	if box_rst.is_flux:
 		flux = True
 		n_flux = input_data["measure_flux"]["flux_freq"] # is it needed? it does not work yet anyways
@@ -76,6 +84,7 @@ def main(restart_filename, json_filename):
 		flux = False
 
 	if concentration: con_filename = input_data["measure_concentration"]["output_concentration_filename"]
+	if energy: enr_filename = input_data["output_enr_filename"]
 	if flux: flux_filename = input_data["measure_flux"]["output_flux_filename"]
 	str_filename = input_data["input_str_filename"]
 	xyz_filename = input_data["output_xyz_filename"]
@@ -83,12 +92,14 @@ def main(restart_filename, json_filename):
 
 	if "filename_range" in input_data.keys():
 		if concentration: con_filenames = [ con_filename.format(j) for j in range(*input_data["filename_range"]) ]
+		if energy: enr_filenames = [ enr_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		if flux: flux_filenames = [ flux_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		str_filenames = [ str_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		xyz_filenames = [ xyz_filename.format(j) for j in range(*input_data["filename_range"]) ]
 		rst_filenames = [ rst_filename.format(j) for j in range(*input_data["filename_range"]) ]
 	else:
 		if concentration: con_filenames = [ con_filename ]
+		if energy: enr_filenames = [ enr_filename ]
 		if flux: flux_filenames = [ flux_filename ]
 		str_filenames = [ str_filename ]
 		xyz_filenames = [ xyz_filename ]
@@ -96,6 +107,7 @@ def main(restart_filename, json_filename):
 
 
 	if concentration: truncate_output_file_during_restart(con_filenames[index_rst], con_file_length_rst)
+	if energy: truncate_output_file_during_restart(enr_filenames[index_rst], enr_file_length_rst)
 	if flux: truncate_output_file_during_restart(flux_filenames[index_rst], flux_file_length_rst)
 	truncate_output_file_during_restart(xyz_filenames[index_rst], xyz_file_length_rst)
 
@@ -114,6 +126,9 @@ def main(restart_filename, json_filename):
 		if concentration:
 			con_filename = con_filenames[index]
 			extra_output_filenames.append(con_filename)
+		if energy:
+			enr_filename = enr_filenames[index]
+			extra_output_filenames.append(enr_filename)
 		if flux:
 			flux_filename = flux_filenames[index]
 			extra_output_filenames.append(flux_filename)
@@ -138,6 +153,7 @@ def main(restart_filename, json_filename):
 		with ExitStack() as stack:
 
 			if concentration: con_file = stack.enter_context(open(con_filename, filemode, buffering = 1))
+			if energy: enr_file = stack.enter_context(open(enr_filename, filemode, buffering = 1))
 			if flux: flux_file = stack.enter_context(open(flux_filename, filemode, buffering = 1))
 			xyz_file = stack.enter_context(open(xyz_filename, filemode, buffering = 1))
 
@@ -153,6 +169,10 @@ def main(restart_filename, json_filename):
 						write_to_flux_file(flux_file, j, dt, box.net_flux)
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
+
+				if energy:
+					if j % n_enr == 0:
+						write_to_enr_file(enr_file, j, dt, box.E)
 
 				if j != 0 and j % n_restart == 0:
 					write_to_restart_file(rst_filename, index, j, box, xyz_filename, extra_output_filenames)

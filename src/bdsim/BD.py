@@ -26,7 +26,7 @@ from tqdm import tqdm
 from pyBrown.box import Box
 from pyBrown.input import read_str_file, InputData
 from pyBrown.output import timestamp, write_to_xyz_file, write_to_restart_file,\
-						   write_to_con_file, write_to_flux_file
+						   write_to_con_file, write_to_enr_file, write_to_flux_file
 
 @click.command()
 @click.argument('input_filename',
@@ -45,10 +45,12 @@ def main(input_filename):
 				"seed": np.random.randint(2**32 - 1), "immobile_labels": [],
 				"propagation_scheme": "ermak", "check_overlaps": True,
 				"external_force": [0.0, 0.0, 0.0], "lennard_jones_6": False, "lennard_jones_12": False,
-				"lennard_jones_alpha": 4.0}
+				"lennard_jones_alpha": 4.0, "energy_unit": "joule"}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
-				   [ "output_rst_filename", "filename_range", "rst_write_freq",
+				   [ "output_rst_filename", "rst_write_freq",
+				     "output_enr_filename", "enr_write_freq",
+				     "filename_range",
 				     "m_midpoint", "external_force_region", "measure_flux" ]
 
 	timestamp( 'Reading input from {} file', input_filename )
@@ -56,6 +58,8 @@ def main(input_filename):
 	timestamp( 'Input data:\n{}', i )
 
 	disable_progress_bar = not i.input_data["progress_bar"]
+
+	energy_unit = i.input_data["energy_unit"]
 
 	if "measure_concentration" in i.input_data.keys():
 		concentration = True
@@ -102,6 +106,18 @@ def main(input_filename):
 	else:
 		restart = False
 
+	if "enr_write_freq" in i.input_data.keys():
+		energy = True
+		n_enr = i.input_data["enr_write_freq"]
+		enr_filename = i.input_data["output_enr_filename"]
+		if "filename_range" in i.input_data.keys():
+			enr_filenames = [ enr_filename.format(j) for j in range(*i.input_data["filename_range"]) ]
+		else:
+			enr_filenames = [ enr_filename ]
+	else:
+		energy = False
+
+
 	for index in range(len(str_filenames)):
 
 		timestamp( '{} job', str_filenames[index] )
@@ -111,6 +127,9 @@ def main(input_filename):
 		if concentration:
 			con_filename = con_filenames[index]
 			extra_output_filenames.append(con_filename)
+		if energy:
+			enr_filename = enr_filenames[index]
+			extra_output_filenames.append(enr_filename)
 		if flux:
 			flux_filename = flux_filenames[index]
 			extra_output_filenames.append(flux_filename)
@@ -129,6 +148,7 @@ def main(input_filename):
 		with ExitStack() as stack:
 
 			if concentration: con_file = stack.enter_context(open(con_filename, "w", buffering = 1))
+			if energy: enr_file = stack.enter_context(open(enr_filename, "w", buffering = 1))
 			if flux: flux_file = stack.enter_context(open(flux_filename, "w", buffering = 1))
 			xyz_file = stack.enter_context(open(xyz_filename, "w", buffering = 1))
 
@@ -144,6 +164,10 @@ def main(input_filename):
 						write_to_flux_file(flux_file, j, dt, box.net_flux)
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
+
+				if energy:
+					if j % n_enr == 0:
+						write_to_enr_file(enr_file, j, dt, box.E)
 
 				if restart:
 					if j != 0 and j % n_restart == 0:
