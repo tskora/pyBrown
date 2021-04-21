@@ -20,7 +20,7 @@ import math
 
 class Interactions():
 
-	def __init__(self, force_function, energy_function, auxiliary_force_parameters):
+	def __init__(self, force_function, energy_function, auxiliary_force_parameters, energy_unit = "joule"):
 
 		self.force = force_function
 
@@ -228,4 +228,10 @@ def LJ_6_12_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 	return lennard_jones_alpha*epsilon/dist*(6*s6-12*s12)*versor
 
+#-------------------------------------------------------------------------------
 
+def kcal_per_mole_to_joule(value):
+
+	return 10**(-21) * 6.9477 * value
+
+#-------------------------------------------------------------------------------
