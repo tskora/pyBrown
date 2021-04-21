@@ -44,7 +44,8 @@ def main(input_filename):
 				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1, "progress_bar": False,
 				"seed": np.random.randint(2**32 - 1), "immobile_labels": [],
 				"propagation_scheme": "ermak", "check_overlaps": True,
-				"external_force": [0.0, 0.0, 0.0]}
+				"external_force": [0.0, 0.0, 0.0], "lennard_jones_6": False, "lennard_jones_12": False,
+				"lennard_jones_alpha": 4.0}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
 				   [ "output_rst_filename", "filename_range", "rst_write_freq",
