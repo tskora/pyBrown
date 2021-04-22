@@ -20,7 +20,12 @@ import numpy as np
 #-------------------------------------------------------------------------------
 
 class Bead():
-	"""This is a class representing spherical beads used in Brownian and Stokesian dynamics simulations.
+	"""This is a class representing spherical beads used in Brownian and Stokesian
+	dynamics simulations. First and foremost, it contains geometric parameters of athebead --
+	the position of its center and its hydrodynamic radius. Apart from that, bead's
+	label (name) is present there as well. Finally, bead parametrization with respect to
+	Lennard-Jones interaction potential is contained -- Lennard-Jones energy and radius.
+	Energy units are declared independently in input`.json` file.
 
 	:param r: cartesian coordinates of the bead center
 	:type r: class: `numpy.ndarray(3)`
@@ -30,6 +35,14 @@ class Bead():
 	:type label: `string`
 	:param mobile: is bead mobile
 	:type mobile: `bool`
+	:param hard_core_radius: Lennard-Jones radius: for two interacting particles
+							 the potential crosses $0$ for separation equal to
+							 sum of their Lennard-Jones (or hard core) radii.
+	:type hard_core_radius: `float`
+	:param epsilon_LJ: Lennard-Jones energy: for two interacting particles the
+					   depth of the potential is equal to geometric mean of their
+					   Lennard-Jones energies.
+	:type epsilon_LJ: `float`
 
 	Constructor method
 
@@ -39,6 +52,13 @@ class Bead():
 	:type hydrodynamic_radius: `float`
 	:param label: bead label, defaults to `"XXX"`
 	:type label: `string`
+	:param hard_core_radius: radius used in computing Lennard-Jones
+							 potential, defaults to `hydrodynamic_radius`
+	:type hard_core_radius: `float`
+	:param epsilon_LJ: energy of Lennard-Jones interaction (for two beads
+					   interaction energy is a geometric mean of their Lennard-Jones
+					   energies), defaults to `0.0`
+	:type epsilon_LJ: `float`
 	:param mobile: is bead mobile, defaults to `True`
 	:type mobile: `bool`
 	"""
@@ -66,7 +86,10 @@ class Bead():
 	#-------------------------------------------------------------------------------
 
 	def translate_and_return_flux(self, vector, normal, plane_point):
-		"""Moves a bead by the provided vector and returns flux through the provided plane
+		"""Moves a bead by the provided vector and returns flux through the provided plane.
+		Plane is defined by its normal vector and any point lying on the plane. `1` is returned
+		if particle goes through the plana in the direction of the normal vector, `-1` if in the
+		opposite direction and `0` if the particle does not go through the plane whatsoever.
 		
 		:param vector: translation vector
 		:type vector: class: `numpy.ndarray(3)`
@@ -97,7 +120,8 @@ class Bead():
 
 	def keep_in_box(self, box_length):
 		"""Moves the bead into the box if it is outside of it by using a combination of
-		translations parallel to the box sides and with length of a box length
+		translations parallel to the box sides and with length of a box length. Box's interior
+		lies between `-box_length/2` and `box_length/2`.
 		
 		:param box_length: simulation box length
 		:type box_length: `float`
@@ -170,7 +194,7 @@ def distance(bead1, bead2):
 
 	r = pointer(bead1, bead2)
 
-	return math.sqrt( np.sum( r**2 ) )
+	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
 
 #-------------------------------------------------------------------------------
 
@@ -196,7 +220,7 @@ def distance_pbc(bead1, bead2, box_size):
 		while r[i] <= -box_size/2:
 			r[i] += box_size
 
-	return math.sqrt( np.sum( r**2 ) )
+	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
 
 #-------------------------------------------------------------------------------
 
