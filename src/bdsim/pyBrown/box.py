@@ -122,9 +122,11 @@ class Box():
 	def sync_seed(self):
 		"""Synchronizing random number generation after restart."""
 
-		np.random.seed(self.seed)
+		pass
 
-		np.random.normal(0.0, 1.0, self.draw_count)
+		# np.random.seed(self.seed)
+
+		# np.random.normal(0.0, 1.0, self.draw_count)
 
 	#-------------------------------------------------------------------------------
 
@@ -249,7 +251,9 @@ class Box():
 
 	def _generate_random_vector(self):
 
-		self.N = np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads))
+		# self.N = np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads))
+
+		self.N = self.pseudorandom_number_generator.normal(0.0, 1.0, 3 * len(self.mobile_beads))
 
 		self.draw_count += 3 * len(self.mobile_beads)
 
@@ -364,9 +368,12 @@ class Box():
 
 	def _initialize_pseudorandom_number_generation(self):
 
-		self.seed = self.inp["seed"]
-		np.random.seed(self.seed)
+		self.pseudorandom_number_generator = np.random.RandomState(self.inp["seed"])
 		self.draw_count = 0
+
+		# self.seed = self.inp["seed"]
+		# np.random.seed(self.seed)
+		# self.draw_count = 0
 
 	#-------------------------------------------------------------------------------
 
