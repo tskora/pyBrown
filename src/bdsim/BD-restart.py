@@ -142,7 +142,6 @@ def main(restart_filename, json_filename):
 			bs = box_rst.beads
 			box = box_rst
 			j0 = j_rst+1
-			box.sync_seed()
 			filemode = 'a'
 		else:
 			bs = read_str_file(str_filename)

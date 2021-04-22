@@ -123,17 +123,6 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	def sync_seed(self):
-		"""Synchronizing random number generation after restart."""
-
-		pass
-
-		# np.random.seed(self.seed)
-
-		# np.random.normal(0.0, 1.0, self.draw_count)
-
-	#-------------------------------------------------------------------------------
-
 	def _ermak_step(self, dt):
 
 		self._deterministic_step(dt)
@@ -250,8 +239,6 @@ class Box():
 	#-------------------------------------------------------------------------------
 
 	def _generate_random_vector(self):
-
-		# self.N = np.random.normal(0.0, 1.0, 3 * len(self.mobile_beads))
 
 		self.N = self.pseudorandom_number_generator.normal(0.0, 1.0, 3 * len(self.mobile_beads))
 

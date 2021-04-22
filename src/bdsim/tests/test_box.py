@@ -73,8 +73,6 @@ class TestBox(unittest.TestCase):
 
 				b = pickle.load(test_file)
 
-			b.sync_seed()
-
 			for _ in range(M//2): b.propagate( 0.001 )
 
 			restarted = [ bead.r[i] for bead in b.beads for i in range(3) ]
@@ -108,8 +106,6 @@ class TestBox(unittest.TestCase):
 			with open(self.test_filename, 'rb') as test_file:
 
 				b = pickle.load(test_file)
-
-			b.sync_seed()
 
 			for _ in range(M//2): b.propagate( 0.001 )
 
