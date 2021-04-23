@@ -79,7 +79,6 @@ def main(restart_filename, json_filename):
 
 	if box_rst.is_flux:
 		flux = True
-		n_flux = input_data["measure_flux"]["flux_freq"] # is it needed? it does not work yet anyways
 	else:
 		flux = False
 
@@ -164,8 +163,7 @@ def main(restart_filename, json_filename):
 					write_to_con_file(con_file, j, dt, box.concentration)
 
 				if flux: 
-					if j % n_flux == 0:
-						write_to_flux_file(flux_file, j, dt, box.net_flux)
+					write_to_flux_file(flux_file, j, dt, box.net_flux)
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 

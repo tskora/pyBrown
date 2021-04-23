@@ -34,17 +34,19 @@ from pyBrown.output import timestamp, write_to_xyz_file, write_to_restart_file,\
 def main(input_filename):
 
 	# here the list of keywords that are required for program to work is provided
-	required_keywords = ["box_length", "output_xyz_filename", "input_str_filename",
-						 "dt", "T", "viscosity", "number_of_steps"]
+	required_keywords = ["output_xyz_filename", "input_str_filename",
+						 "box_length", "T", "viscosity", "dt", "number_of_steps"]
 
 	# here the dict of keywords:default values is provided
 	# if given keyword is absent in JSON, it is added with respective default value
 	defaults = {"debug": False, "verbose": False, "hydrodynamics": "nohi",
-				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0, "diff_freq": 1,
-				"lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1, "progress_bar": False,
+				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0,
+				"diff_freq": 1, "lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1,
+				"progress_bar": False,
 				"seed": np.random.randint(2**32 - 1), "immobile_labels": [],
 				"propagation_scheme": "ermak", "check_overlaps": True,
-				"external_force": [0.0, 0.0, 0.0], "lennard_jones_6": False, "lennard_jones_12": False,
+				"external_force": [0.0, 0.0, 0.0],
+				"lennard_jones_6": False, "lennard_jones_12": False,
 				"lennard_jones_alpha": 4.0, "energy_unit": "joule"}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
@@ -59,8 +61,6 @@ def main(input_filename):
 
 	disable_progress_bar = not i.input_data["progress_bar"]
 
-	energy_unit = i.input_data["energy_unit"]
-
 	if "measure_concentration" in i.input_data.keys():
 		concentration = True
 		con_filename = i.input_data["measure_concentration"]["output_concentration_filename"]
@@ -69,7 +69,6 @@ def main(input_filename):
 
 	if "measure_flux" in i.input_data.keys():
 		flux = True
-		n_flux = i.input_data["measure_flux"]["flux_freq"] # is it needed? it does not work yet anyways
 		flux_filename = i.input_data["measure_flux"]["output_flux_filename"]
 	else:
 		flux = False
@@ -160,8 +159,7 @@ def main(input_filename):
 					write_to_con_file(con_file, j, dt, box.concentration)
 
 				if flux: 
-					if j % n_flux == 0:
-						write_to_flux_file(flux_file, j, dt, box.net_flux)
+					write_to_flux_file(flux_file, j, dt, box.net_flux)
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
