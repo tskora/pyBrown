@@ -267,6 +267,12 @@ class Box():
 
 			self.F = kcal_per_mole_to_joule(self.F)
 
+		elif self.inp["energy_unit"] == "eV":
+
+			self.E = eV_to_joule(self.E)
+
+			self.F = eV_to_joule(self.F)
+
 	#-------------------------------------------------------------------------------
 
 	def _prepare_external_force(self):
