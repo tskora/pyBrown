@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
 
+import importlib
 import math
 
 #-------------------------------------------------------------------------------
@@ -88,6 +89,8 @@ def set_interactions(input_data):
 
 	_set_lennard_jones_interactions(input_data, interactions_for_simulation)
 
+	_set_custom_interactions(input_data, interactions_for_simulation)
+
 	return interactions_for_simulation
 
 #-------------------------------------------------------------------------------
@@ -115,6 +118,43 @@ def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
 		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, aux)
 
 	interactions_for_simulation.append(i)
+
+#-------------------------------------------------------------------------------
+
+def _set_custom_interactions(input_data, interactions_for_simulation):
+
+	if not input_data["custom_interactions"]:
+
+		return
+
+	filename = input_data["custom_interactions_filename"]
+
+	aux = input_data["auxiliary_custom_interactions_keywords"]
+
+	custom_module = importlib.import_module( filename.split('.')[0] )
+
+	energy_functions = [ function_name for function_name in dir(custom_module) if function_name[0] != "_" if function_name[-6:] == "energy" ]
+
+	force_functions = [ function_name for function_name in dir(custom_module) if function_name[0] != "_" if function_name[-5:] == "force" ]
+
+	energy_dictionary = { e[:-6]:e for e in energy_functions }
+
+	force_dictionary = { f[:-5]:f for f in force_functions }
+
+	assert len(energy_functions) == len(force_functions), """unequal number of energy and force 
+															 functions in custom interactions file"""
+
+	assert energy_dictionary.keys() == force_dictionary.keys(), """different names of force and
+																  energy functions in custom 
+																  interactions file"""
+
+	for key in energy_dictionary.keys():
+
+		ff = eval( 'custom_module.' + force_dictionary[key] )
+
+		ef = eval( 'custom_module.' + energy_dictionary[key] )
+
+		interactions_for_simulation.append( Interactions(ff, ef, aux) )
 
 #-------------------------------------------------------------------------------
 

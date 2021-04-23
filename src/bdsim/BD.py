@@ -47,13 +47,16 @@ def main(input_filename):
 				"propagation_scheme": "ermak", "check_overlaps": True,
 				"external_force": [0.0, 0.0, 0.0],
 				"lennard_jones_6": False, "lennard_jones_12": False,
-				"lennard_jones_alpha": 4.0, "energy_unit": "joule"}
+				"lennard_jones_alpha": 4.0, "energy_unit": "joule",
+				"custom_interactions": False}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
 				   [ "output_rst_filename", "rst_write_freq",
 				     "output_enr_filename", "enr_write_freq",
 				     "filename_range",
-				     "m_midpoint", "external_force_region", "measure_flux" ]
+				     "m_midpoint", "external_force_region", "measure_flux",
+				     "custom_interactions_filename",
+				     "auxiliary_custom_interactions_keywords" ]
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults, all_keywords)
