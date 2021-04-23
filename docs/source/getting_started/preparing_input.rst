@@ -1,3 +1,5 @@
+.. _preparing-input:
+
 Preparing input
 ----------------
 
@@ -52,8 +54,9 @@ Input/Output
 
 - ``"input_str_filename": string`` -- the name of the input ``.str`` file (*see above*), **required**
 - ``"output_xyz_filename": string`` -- the name of the output ``.xyz`` file to which ``pyBrown`` writes the trajectory, **required**
+- ``"output_enr_filename": string`` -- the name of the output ``.enr`` file to which ``pyBrown`` writes the energy
 - ``"output_rst_filename": string`` -- the name of the binary ``.rst`` file from which``pyBrown`` can restart simulation
-- ``"filename_range": [int, int]`` -- provided that all your input and output files have names of a following form: ``"name_{}.str``, ``name_{}.xyz`` itp., ``pyBrown`` will iteratively substitute numbers from filename range instead of ``{}``, resulting with sequence of runs for consecutive jobs,
+- ``"filename_range": [int, int]`` -- provided that all your input and output files have names of a following form: ``"name_{}.str``, ``name_{}.xyz`` etc., ``pyBrown`` will iteratively substitute numbers from filename range instead of ``{}``, resulting with sequence of runs for consecutive jobs,
 
 .. note::
     
@@ -73,10 +76,11 @@ Input/Output
 
 .. warning::
 
-    If you use ``"filename_range"`` keyword and manually set ``"seed"`` keyword, seed will be the same for all jobs.
+    If you use ``"filename_range"`` keyword and manually set ``"seed"`` keyword, seed will be **the same** for all jobs.
 
 - ``"xyz_write_freq": int`` -- the frequency of writing to the ``.xyz`` file (every ... timesteps), default: ``1``
-- ``"rst_write_freq": int`` -- the frequency of writing to the ``.rst`` file (every ... timesteps).
+- ``"enr_write_freq": int`` -- the frequency of writing to the ``.enr`` file (every ... timesteps)
+- ``"rst_write_freq": int`` -- the frequency of writing to the ``.rst`` file (every ... timesteps)
 
 - ``"debug": boolean`` -- switching on/off the debug printout, default: ``false``
 - ``"verbose": boolean`` -- switching on/off the verbose printout, default: ``false``
@@ -94,10 +98,17 @@ Simulation box
 - ``"ewald_real": int`` -- the maximal magnitude of the real lattice vectors in Ewald summation of the diffusion tensor, default: ``0``
 - ``"ewald_imag": int`` -- the maximal magnitude of the reciprocal lattice vectors in Ewald summation of the diffusion tensor, default: ``0``
 
-External force
-^^^^^^^^^^^^^^^
+Forces
+^^^^^^^
 
-- ``"external_force": [float, float, float]`` -- external force experienced universally by all beads (*J/Å*), default: ``[0.0, 0.0, 0.0]``
+- ``"energy_unit": string`` -- units in which energy and force (in case of force it is that unit per angstrom) are provided in input files, options: ``"joule"``, ``"kcal/mol"``, ``"eV"``, default: ``"joule"``
+- ``"lennard_jones_6": bool`` -- switching on/off the Lennard-Jones :math:`\propto r^{-6}` attraction between beads (multiplicative coefficients and Lennard-Jones radii of every bead are defined in ``.str`` input file, see :ref:`preparing-input`), default: ``false``
+- ``"lennard_jones_12": bool`` -- switching on/off the Lennard-Jones :math:`\propto r^{-12}` repulsion between beads (multiplicative coefficients and Lennard-Jones radii of every bead are defined in ``.str`` input file, see :ref:`preparing-input`), default: ``false``
+- ``"lennard_jones_alpha": float`` -- Lennard-Jones interaction scaling, if set to ``4.0``, ``ε`` parameter from ``.str`` is equal to depth of combined LJ6-LJ12 potencial, default: ``4.0``
+- ``"custom_interactions": bool`` -- switching on/off reading of energy and force from custom external file, default: ``false``
+- ``"custom_interactions_filename": string`` -- the name of the input ``.py`` file from which custom expressions for energy and force are loaded
+- ``"auxiliary_custom_interactions_keywords": {}`` -- extra parameters for the custom energy and force
+- ``"external_force": [float, float, float]`` -- external force experienced universally by all beads, default: ``[0.0, 0.0, 0.0]``
 
 Propagation
 ^^^^^^^^^^^^

@@ -6,7 +6,7 @@ pyBrown
 
 .. rubric:: Overview
 
-``pyBrown`` is a Brownian and Stokesian dynamics package and simulation tool. It is written mainly in ``python 3``, with the most computationally demanding functions written in ``C``. Brownian and Stokesian dynamics are computational methods to simulate systems driven by thermal fluctuations. Hydrodynamic interactions are taken into account using far-field *Rotne-Prager-Yamakawa* approximation but correcting for near-field lubrication effects is available as well.
+``pyBrown`` is a Brownian and Stokesian dynamics package and simulation tool. It is written mainly in ``python 3``, with the most computationally demanding functions written in ``C``. Brownian and Stokesian dynamics are computational methods to simulate systems driven by thermal fluctuations. Hydrodynamic interactions are taken into account using far-field *Rotne-Prager-Yamakawa* approximation but correcting for near-field *lubrication* effects is available as well.
 
 .. rubric:: Quickstart
 
@@ -25,6 +25,8 @@ Then to compile and install proceed with:
     $ make
     $ make install
 
+You can check :ref:`installation` for more details.
+
 To ensure that all ``python`` packages needed by ``pyBrown`` are present on your computer you can run
 
 .. code-block:: console
@@ -37,7 +39,7 @@ If you want to run unit tests, go to a project directory ``src/bdsim/tests/`` an
 
     $ make test
 
-To run simulation, prepare ``.str`` and ``.json`` input files and type:
+To run simulation, prepare ``.str`` and ``.json`` input files (see :ref:`preparing-input`) and type:
 
 .. code-block:: console
 
@@ -45,13 +47,13 @@ To run simulation, prepare ``.str`` and ``.json`` input files and type:
 
 where instead of ``INPUT_JSON_FILENAME`` substitute the name of your input ``.json`` file.
 
-If you want to restart your simulation, provided that you have restart file, type:
+Provided that you have the restart ``.rst`` file and the trajectory ``.xyz``, you can restart the simulation from the last save typing:
 
 .. code-block:: console
 
     $ BD-restart.py RESTART_FILENAME
 
-where instead of ``RESTART_FILENAME`` substitute the name of your restart file.
+where instead of ``RESTART_FILENAME`` substitute the name of your restart file. For more details regarding running simulations check :ref:`running-simulation`.
 
 .. _units:
 
@@ -68,8 +70,8 @@ where instead of ``RESTART_FILENAME`` substitute the name of your restart file.
 +-------------------+----------------------------+
 |      Distance     |        angstrom (*Å*)      |
 +-------------------+----------------------------+
-|       Force       | joule per angstrom (*J/Å*) |
-+-------------------+----------------------------+
+
+You can choose the energy units by ``"energy_unit"`` keyword in input ``.json`` file. Default is "joule" (*J*), other options are "kcal/mol" (kilocalorie per mol, *kcal/mol*) and "eV" (electronvolt, *eV*). Force unit is then energy unit per angstrom.
 
 .. warning::
     The work on ``pyBrown`` is still in progress. Some functionalities may be temporally unavailable.
