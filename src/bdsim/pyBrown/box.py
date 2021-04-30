@@ -388,12 +388,15 @@ class Box():
 
 	def _initialize_pseudorandom_number_generation(self):
 
-		self.pseudorandom_number_generator = np.random.RandomState(self.inp["seed"])
-		self.draw_count = 0
+		if self.inp["seed"] is None:
+			self.seed = np.random.randint(2**32 - 1)
+		else:
+			self.seed = self.inp["seed"]
 
-		# self.seed = self.inp["seed"]
-		# np.random.seed(self.seed)
-		# self.draw_count = 0
+		timestamp('Random seed: {}', self.seed)
+
+		self.pseudorandom_number_generator = np.random.RandomState(self.seed)
+		self.draw_count = 0
 
 	#-------------------------------------------------------------------------------
 
