@@ -21,11 +21,11 @@ import numpy as np
 
 class Bead():
 	"""This is a class representing spherical beads used in Brownian and Stokesian
-	dynamics simulations. First and foremost, it contains geometric parameters of athebead --
-	the position of its center and its hydrodynamic radius. Apart from that, bead's
-	label (name) is present there as well. Finally, bead parametrization with respect to
-	Lennard-Jones interaction potential is contained -- Lennard-Jones energy and radius.
-	Energy units are declared independently in input`.json` file.
+	dynamics simulations. First and foremost, it contains geometric parameters of the
+	bead -- the position of its center and its hydrodynamic radius. Apart from that,
+	bead's label (name) is present there as well. Finally, bead parametrization with
+	respect to Lennard-Jones interaction potential is contained -- Lennard-Jones energy
+	and radius. Energy units are declared independently in input ``.json`` file.
 
 	:param r: cartesian coordinates of the bead center
 	:type r: class: `numpy.ndarray(3)`
@@ -33,15 +33,15 @@ class Bead():
 	:type a: `float`
 	:param label: bead label
 	:type label: `string`
-	:param mobile: is bead mobile
+	:param mobile: switching on/off mobility of the bead
 	:type mobile: `bool`
 	:param hard_core_radius: Lennard-Jones radius: for two interacting particles
-							 the potential crosses $0$ for separation equal to
-							 sum of their Lennard-Jones (or hard core) radii.
+							 the potential crosses :math:`0` for separation equal to
+							 sum of their Lennard-Jones (hard core) radii.
 	:type hard_core_radius: `float`
 	:param epsilon_LJ: Lennard-Jones energy: for two interacting particles the
-					   depth of the potential is equal to geometric mean of their
-					   Lennard-Jones energies.
+					   depth of the potential (in case of using both LJ6 and LJ12 terms)
+					   is equal to geometric mean of their Lennard-Jones energies.
 	:type epsilon_LJ: `float`
 
 	Constructor method
@@ -59,7 +59,7 @@ class Bead():
 					   interaction energy is a geometric mean of their Lennard-Jones
 					   energies), defaults to `0.0`
 	:type epsilon_LJ: `float`
-	:param mobile: is bead mobile, defaults to `True`
+	:param mobile: switching on/off mobility of the bead, defaults to `True`
 	:type mobile: `bool`
 	"""
 
