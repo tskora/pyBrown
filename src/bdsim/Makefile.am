@@ -7,7 +7,8 @@ PYTHON_LIB = $(PYTHON_LIB_DIR)/bead.py\
 	$(PYTHON_LIB_DIR)/diffusion.py\
 	$(PYTHON_LIB_DIR)/input.py\
 	$(PYTHON_LIB_DIR)/interactions.py\
-	$(PYTHON_LIB_DIR)/output.py
+	$(PYTHON_LIB_DIR)/output.py\
+	$(PYTHON_LIB_DIR)/reactions.py
 
 # Provide PYTHON_INSTALL_DIR 
 # via the configure script with --enable-system-python option
