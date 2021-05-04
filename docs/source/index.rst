@@ -94,6 +94,7 @@ You can choose the energy units by ``"energy_unit"`` keyword in input ``.json`` 
    modules/input
    modules/interactions
    modules/output
+   modules/reactions
 
 .. toctree::
    :maxdepth: 1
