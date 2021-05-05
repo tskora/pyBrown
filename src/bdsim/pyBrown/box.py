@@ -22,7 +22,8 @@ from scipy.constants import Boltzmann
 from pyBrown.bead import overlap_pbc, distance_pbc, pointer_pbc
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
-from pyBrown.output import timestamp, timing
+from pyBrown.output import timing
+from pyBrown.reactions import set_reactions
 
 #-------------------------------------------------------------------------------
 
@@ -71,6 +72,8 @@ class Box():
 		self._initialize_force()
 
 		self._initialize_interactions()
+
+		self._initialize_reactions()
 
 		self._set_flux_measurement_parameters()
 
@@ -275,6 +278,14 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
+	def _check_for_reactions(self):
+
+		for reaction in self.reactions:
+
+			reaction.check_for_reactions(self.beads, self.rij)
+
+	#-------------------------------------------------------------------------------
+
 	def _prepare_external_force(self):
 
 		if self.is_external_force_region:
@@ -393,8 +404,6 @@ class Box():
 		else:
 			self.seed = self.inp["seed"]
 
-		timestamp('Random seed: {}', self.seed)
-
 		self.pseudorandom_number_generator = np.random.RandomState(self.seed)
 		self.draw_count = 0
 
@@ -506,6 +515,12 @@ class Box():
 	def _initialize_interactions(self):
 
 		self.interactions = set_interactions(self.inp)
+
+	#-------------------------------------------------------------------------------
+
+	def _initialize_reactions(self):
+
+		self.reactions = set_reactions(self.inp)
 
 	#-------------------------------------------------------------------------------
 

@@ -22,9 +22,6 @@ from itertools import product
 
 class Reactions():
 
-	# TODO: results of reactions(products), handling of change in bead numbers, possibility
-	# of more than one reaction opportunity at single configuration
-
 	def __init__(self, reaction_string, condition_string):
 
 		self._parse_reaction_string(reaction_string)
@@ -39,9 +36,8 @@ class Reactions():
 
 		bead_indices = [ i for i in range(len(beads)) ]
 
-		unique_ntuples = [ ntuple for ntuple in self._create_unique_ntuples(bead_indices)
-						   if self._is_ntuple_reactive(ntuple, beads) ]
-
+		unique_ntuples = [ ntuple for ntuple in self._unique_ntuples(bead_indices)
+						   if self._ntuple_is_reactive(ntuple, beads) ]
 
 		for ntuple in unique_ntuples:
 
@@ -91,6 +87,14 @@ class Reactions():
 
 	#-------------------------------------------------------------------------------
 
+	def _parse_effect_string(self, effect_string):
+
+		#TODO what reaction effects should be possible?
+
+		pass
+
+	#-------------------------------------------------------------------------------
+
 	def _reaction_criterion(self, ntuple, beads, pointers):
 
 		for i in range(1, len(ntuple)):
@@ -135,13 +139,11 @@ class Reactions():
 
 	def _reaction_effect(self, ntuple, beads, pointers):
 
-		print("reaction")
-
 		self.reaction_count += 1
 
 	#-------------------------------------------------------------------------------
 
-	def _create_unique_ntuples(self, indices):
+	def _unique_ntuples(self, indices):
 
 		ntuples = list( product(indices, repeat = self.number_of_substrates) )
 
@@ -151,7 +153,7 @@ class Reactions():
 
 	#-------------------------------------------------------------------------------
 
-	def _is_ntuple_reactive(self, ntuple, beads):
+	def _ntuple_is_reactive(self, ntuple, beads):
 
 		from_ntuple = { name:0 for name in self.substrates }
 
@@ -179,6 +181,10 @@ class Reactions():
 
 #-------------------------------------------------------------------------------
 
+def set_reactions(input_data):
 
+	reactions_for_simulation = []
+
+	return reactions_for_simulation
 
 #-------------------------------------------------------------------------------
