@@ -147,6 +147,8 @@ def main(input_filename):
 
 		box = Box(bs, i.input_data)
 
+		timestamp('Random seed: {}', box.seed)
+
 		with ExitStack() as stack:
 
 			if concentration: con_file = stack.enter_context(open(con_filename, "w", buffering = 1))

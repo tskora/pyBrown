@@ -148,6 +148,8 @@ def main(restart_filename, json_filename):
 			j0 = 0
 			filemode = 'w'
 
+		timestamp('Random seed: {}', box.seed)
+
 		with ExitStack() as stack:
 
 			if concentration: con_file = stack.enter_context(open(con_filename, filemode, buffering = 1))
