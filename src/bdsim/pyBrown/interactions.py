@@ -16,6 +16,7 @@
 
 import importlib
 import math
+import numpy as np
 
 #-------------------------------------------------------------------------------
 
@@ -35,6 +36,8 @@ class Interactions():
 
 		E = 0.0
 
+		temporary_force = np.zeros(3*len(beads))
+
 		for i in range(1, len(beads)):
 
 			beadi = beads[i]
@@ -47,11 +50,13 @@ class Interactions():
 
 				f = self._compute_force(beadi, beadj, pointerij, self.auxiliary_force_parameters)
 
-				F[3*i:3*(i+1)] += f
+				temporary_force[3*i:3*(i+1)] += f
 
-				F[3*j:3*(j+1)] -= f
+				temporary_force[3*j:3*(j+1)] -= f
 
 				E += self._compute_pair_energy(beadi, beadj, pointerij, self.auxiliary_force_parameters)
+
+		self._rearrange_force_to_ommit_immobile_beads(beads, temporary_force, F)
 
 		return E
 
@@ -66,6 +71,24 @@ class Interactions():
 	def _compute_pair_energy(self, bead1, bead2, pointer, auxiliary_force_parameters):
 
 		return self.energy(bead1, bead2, pointer, **auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def _rearrange_force_to_ommit_immobile_beads(self, beads, temporary_force, F):
+
+		i = 0
+
+		j = 0
+
+		while i < len(beads):
+
+			if beads[i].mobile:
+
+				F[3*j:3*(j+1)] += temporary_force[3*i:3*(i+1)]
+
+				j += 1
+
+			i += 1
 
 	#-------------------------------------------------------------------------------
 

@@ -213,6 +213,47 @@ class TestInteractions(unittest.TestCase):
 
 		self.assertAlmostEqual(E, 0.0, places = 7)
 
+	#---------------------------------------------------------------------------
+
+	def test_energy_of_LJ_particles_with_dummy_immobile_particles(self):
+
+		F = np.zeros(9)
+
+		E = 0.0
+
+		A = 2*2.0**(1/6) / ( np.cos(5*np.pi/6) - np.cos(np.pi/6) )
+
+		bead4 = Bead([A*np.cos(np.pi/6), A*np.sin(np.pi/6), 0.0], 1.0, epsilon_LJ = 1.0)
+
+		bead5 = Bead([A*np.cos(5*np.pi/6), A*np.sin(5*np.pi/6), 0.0], 1.0, epsilon_LJ = 1.0)
+
+		bead6 = Bead([A*np.cos(3*np.pi/2), A*np.sin(3*np.pi/2), 0.0], 1.0, epsilon_LJ = 1.0)
+
+		dummy1 = Bead([5.0, 5.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
+
+		dummy2 = Bead([3.0, 3.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
+
+		dummy3 = Bead([0.0, 0.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
+
+		beads = [ dummy1, bead4, dummy2, bead5, dummy3, bead6 ]
+
+		rij = np.zeros((len(beads), len(beads), 3))
+
+		for i in range(1, len(beads)):
+			for j in range(0, i):
+				rij[i][j] = pointer(beads[i], beads[j])
+				rij[j][i] = -rij[i][j]
+
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
+
+		E += i.compute_forces_and_energy(beads, rij, F)
+
+		self.assertEqual(E, -3*self.epsilon)
+
+		for j in range(9):
+
+			self.assertAlmostEqual(F[j], 0.0, places = 7)
+
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':

@@ -258,7 +258,7 @@ class Box():
 
 		for interaction in self.interactions:
 
-			self.E += interaction.compute_forces_and_energy(self.mobile_beads, self.rij, self.F)
+			self.E += interaction.compute_forces_and_energy(self.beads, self.rij, self.F)
 
 		if self.inp["energy_unit"] == "joule":
 
@@ -435,16 +435,16 @@ class Box():
 		self.immobile_bead_indices = []
 
 		for i, bead in enumerate( self.beads ):
-
 			if bead.label in self.immobile_labels:
 				bead.mobile = False
-				self.immobile_beads.append(bead)
-				self.immobile_bead_indices.append(i)
 
-
-			else:
+		for i, bead in enumerate( self.beads ):
+			if bead.mobile:
 				self.mobile_beads.append(bead)
 				self.mobile_bead_indices.append(i)
+			else:
+				self.immobile_beads.append(bead)
+				self.immobile_bead_indices.append(i)
 
 	#-------------------------------------------------------------------------------
 

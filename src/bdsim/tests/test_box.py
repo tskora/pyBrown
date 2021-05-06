@@ -84,7 +84,7 @@ class TestBox(unittest.TestCase):
 
 	def test_seed_sync_implicit(self):
 
-		self.mock_input["seed"] = np.random.randint(2**32 - 1)
+		self.mock_input["seed"] = None
 
 		beads = [ Bead(np.array([i, j, k], float), 0.1) for i in range(5) for j in range(5) for k in range(5) ]
 
@@ -113,6 +113,22 @@ class TestBox(unittest.TestCase):
 			restarted = [ bead.r[i] for bead in b.beads for i in range(3) ]
 
 			self.assertSequenceEqual( original, restarted )
+
+	#---------------------------------------------------------------------------
+
+	def test_length_of_force_vector_with_immobile_particles(self):
+
+		self.mock_input["seed"] = None
+
+		beads = [ Bead(np.array([i, j, k], float), 0.1) for i in range(5) for j in range(5) for k in range(5) ]
+
+		for i, bead in enumerate(beads):
+
+			if i%5==0: bead.mobile = False
+
+		b = Box(beads, self.mock_input)
+
+		self.assertEqual( len(b.F), 3*(5*5*5-125/5) )
 
 	#---------------------------------------------------------------------------
 
