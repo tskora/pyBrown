@@ -22,13 +22,17 @@ from itertools import product
 
 class Reactions():
 
-	def __init__(self, reaction_string, condition_string):
+	def __init__(self, reaction_string, condition_string, effect_string):
 
 		self._parse_reaction_string(reaction_string)
 
 		self._parse_condition_string(condition_string)
 
+		self._parse_effect_string(effect_string)
+
 		self.reaction_count = 0
+
+		self.end_simulation = False
 
 	#-------------------------------------------------------------------------------
 
@@ -52,6 +56,8 @@ class Reactions():
 		assert '->' in reaction_string, 'Invalid reaction string: no "->" symbol in reaction string'
 
 		if '<->' in reaction_string:
+
+			# not used yet
 
 			lhs, rhs = reaction_string.split('<->')
 
@@ -79,11 +85,13 @@ class Reactions():
 
 		for single_condition in condition_string.split(','):
 
-			label1, label2, string_dist = single_condition.split(' ')
+			label1, label2, sign, string_dist = single_condition.split(' ')
 
 			dist = float(string_dist)
 
-			self.condition_dictionary[label1+" "+label2] = dist
+			self.condition_dictionary[label1+" "+label2] = (sign, dist)
+
+			self.condition_dictionary[label2+" "+label1] = (sign, dist)
 
 	#-------------------------------------------------------------------------------
 
@@ -115,23 +123,33 @@ class Reactions():
 
 				dist = math.sqrt(dist2)
 
-				if bead_i.label+" "+bead_j.label in self.condition_dictionary.keys():
+				assert bead_i.label+" "+bead_j.label in self.condition_dictionary.keys(), 'error in reactions -- unrecognized condition label'
 
-					if dist > self.condition_dictionary[bead_i.label+" "+bead_j.label]:
+				sign, dist_value = self.condition_dictionary[bead_i.label+" "+bead_j.label]
 
-						return False
+				if sign == ">":
 
-				elif bead_j.label+" "+bead_i.label in self.condition_dictionary.keys():
-
-					if dist > self.condition_dictionary[bead_j.label+" "+bead_i.label]:
+					if dist <= dist_value:
 
 						return False
 
-				else:
+				if sign == ">=":
 
-					print('ERROR IN REACTIONS -- unrecognized condition label')
+					if dist < dist_value:
 
-					1/0
+						return False
+
+				if sign == "<=":
+
+					if dist > dist_value:
+
+						return False
+
+				if sign == "<":
+
+					if dist >= dist_value:
+
+						return False
 
 		return True
 
