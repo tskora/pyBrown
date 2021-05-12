@@ -18,11 +18,13 @@ import importlib
 import math
 import numpy as np
 
+from scipy.constants import elementary_charge
+
 #-------------------------------------------------------------------------------
 
 class Interactions():
 
-	def __init__(self, force_function, energy_function, auxiliary_force_parameters, energy_unit = "joule"):
+	def __init__(self, force_function, energy_function, auxiliary_force_parameters):
 
 		self.force = force_function
 
@@ -112,6 +114,8 @@ def set_interactions(input_data):
 
 	_set_lennard_jones_interactions(input_data, interactions_for_simulation)
 
+	_set_coulomb_interactions(input_data, interactions_for_simulation)
+
 	_set_custom_interactions(input_data, interactions_for_simulation)
 
 	return interactions_for_simulation
@@ -139,6 +143,22 @@ def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
 	elif input_data["lennard_jones_12"]:
 
 		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, aux)
+
+	interactions_for_simulation.append(i)
+
+#-------------------------------------------------------------------------------
+
+def _set_coulomb_interactions(input_data, interactions_for_simulation):
+
+	if not input_data["coulomb"]:
+
+		return
+
+	aux_keywords = [ "dielectric_constant" ]
+
+	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
+
+	i = Interactions(coulomb_force, coulomb_energy, aux)
 
 	interactions_for_simulation.append(i)
 
@@ -290,6 +310,32 @@ def LJ_6_12_force(bead1, bead2, pointer, lennard_jones_alpha):
 	versor = pointer / dist
 
 	return lennard_jones_alpha*epsilon/dist*(6*s6-12*s12)*versor
+
+#-------------------------------------------------------------------------------
+
+def coulomb_energy(bead1, bead2, pointer, dielectric_constant):
+
+	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+
+	dist = math.sqrt(dist2)
+
+	k = elementary_charge * elementary_charge / ( 4.0 * np.pi * dielectric_constant )
+
+	return k * bead1.charge * bead2.charge / dist
+
+#-------------------------------------------------------------------------------
+
+def coulomb_force(bead1, bead2, pointer, dielectric_constant):
+
+	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+
+	dist = math.sqrt(dist2)
+
+	k = elementary_charge * elementary_charge / ( 4.0 * np.pi * dielectric_constant )
+
+	versor = pointer / dist
+
+	return -k * bead1.charge * bead2.charge / dist2 * versor
 
 #-------------------------------------------------------------------------------
 

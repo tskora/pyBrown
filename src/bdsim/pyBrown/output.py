@@ -69,6 +69,15 @@ def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads):
 
 #-------------------------------------------------------------------------------
 
+def write_to_str_file(str_file, beads):
+
+	for bead in beads:
+		str_file.write('sub {} {} {} {} {} {} {} {} {} {}\n'.format(bead.label, bead.id, *bead.r, bead.a,
+																  bead.charge, 2*bead.hard_core_radius,
+																  bead.epsilon_LJ, bead.mass))
+
+#-------------------------------------------------------------------------------
+
 def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_output_filenames = []):
 
 	with open(restart_filename, 'wb', buffering = 0) as restart_file:
