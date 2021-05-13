@@ -115,6 +115,8 @@ Propagation
 
 - ``"dt": float`` -- the timestep (*ps*), **required**
 - ``"number_of_steps": int`` -- the total number of simulation steps, **required**
+- ``"propagation_scheme": option`` -- propagation algorithm for the trajectory generation, options: ``"ermak"``, ``"midpoint"``, default: ``"ermak"``
+- ``"m_midpoint": int`` -- inverse of a fraction of the time step made in a prediction part of midpoint algorithm (setting to ``2`` means that half of a time step will be made in a prediction part), default: ``100``
 - ``"check_overlaps": boolean`` -- whether to check overlaps in every simulation step, default: ``true``
 - ``"immobile_labels": [string, ..., string]`` -- label of beads which are to be immobile in simulation, default: ``[]``
 - ``"seed": int`` -- seed for pseudorandom number generation algorithm, default ``np.random.randint(2**32 - 1)``
@@ -123,11 +125,16 @@ Hydrodynamic interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - ``"hydrodynamics": option`` -- the method used to compute diffusion tensor, options: ``"nohi"``, ``"rpy"``, ``"rpy_smith"``, ``"rpy_lub"``, ``rpy_smith_lub``, default: ``"nohi"``
-- ``"propagation_scheme": option`` -- propagation algorithm for the trajectory generation, options: ``"ermak"``, ``"midpoint"``, default: ``"ermak"``
 - ``"m_midpoint": int`` -- the inverse of the timestep fraction made in the first stage of the midpoint propagation scheme
 - ``"diff_freq": int`` -- the frequency of computing far field diffusion tensor (every ... timesteps), default: ``1``
 - ``"lub_freq": int`` -- the frequency of computing near field resistance tensor and total diffusion matrix (every ... timesteps), default: ``1``
 - ``"chol_freq": int`` -- the frequency of performing Cholesky decomposition of diffusion tensor (every ... timesteps), default: ``1``
+- ``"lubrication_cutoff": float`` -- cutoff for lubrication interactions expressed as a ratio of distance between bead surfaces and a sum of their hydrodynamic radii (:math:`s_\mathrm{cutoff} = \frac{r_{ij} - a_i - a_j}{a_i + a_j}`), default: ``1``
+
+.. note::
+
+    Setting ``"lubrication_cutoff"`` to ``2`` means that lubrication correction won't be calculated for beads with surfaces separated by a distance equal to double of the sum of their hydrodynamic radii.
+
 
 Physical conditions
 ^^^^^^^^^^^^^^^^^^^^

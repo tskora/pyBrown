@@ -278,13 +278,15 @@ void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double 
 
 // -------------------------------------------------------------------------------
 
-void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double* correction_matrix)
+void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double cutoff_distance, double* correction_matrix)
 {
 	register int i = 0;
 
 	register int j = 0;
 
 	register int k = 0;
+
+	double dist2, dist;
 
 	double* nf2b;
 
@@ -322,6 +324,14 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 			rx = *(shifted_pointers);
 			ry = *(shifted_pointers+1);
 			rz = *(shifted_pointers+2);
+
+			dist2 = rx*rx + ry*ry + rz*rz;
+			dist = sqrt(dist2);
+
+			if ( (dist - *(as+j) - *(as+i)) / ( *(as+j) + *(as+i) ) > cutoff_distance)
+			{
+				continue;
+			}
 
 			JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_nf2b);
 
@@ -1163,24 +1173,24 @@ static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz
 
 static void Cichocki_2B_R_correction(double* temp_2b, double* result_2b)
 {
-	*result_2b = ( *temp_nf2b + *(temp_nf2b + 6) - 2 * *(temp_nf2b + 12) ) / 4;
-	*(result_2b + 1) = ( *(temp_nf2b + 1) + *(temp_nf2b + 7) - 2 * *(temp_nf2b + 13) ) / 4;
-	*(result_2b + 2) = ( *(temp_nf2b + 2) + *(temp_nf2b + 8) - 2 * *(temp_nf2b + 14) ) / 4;
-	*(result_2b + 3) = ( *(temp_nf2b + 3) + *(temp_nf2b + 9) - 2 * *(temp_nf2b + 15) ) / 4;
-	*(result_2b + 4) = ( *(temp_nf2b + 4) + *(temp_nf2b + 10) - 2 * *(temp_nf2b + 16) ) / 4;
-	*(result_2b + 5) = ( *(temp_nf2b + 5) + *(temp_nf2b + 11) - 2 * *(temp_nf2b + 17) ) / 4;
-	*(result_2b + 6) = ( *temp_nf2b + *(temp_nf2b + 6) - 2 * *(temp_nf2b + 12) ) / 4;
-	*(result_2b + 7) = ( *(temp_nf2b + 1) + *(temp_nf2b + 7) - 2 * *(temp_nf2b + 13) ) / 4;
-	*(result_2b + 8) = ( *(temp_nf2b + 2) + *(temp_nf2b + 8) - 2 * *(temp_nf2b + 14) ) / 4;
-	*(result_2b + 9) = ( *(temp_nf2b + 3) + *(temp_nf2b + 9) - 2 * *(temp_nf2b + 15) ) / 4;
-	*(result_2b + 10) = ( *(temp_nf2b + 4) + *(temp_nf2b + 10) - 2 * *(temp_nf2b + 16) ) / 4;
-	*(result_2b + 11) = ( *(temp_nf2b + 5) + *(temp_nf2b + 11) - 2 * *(temp_nf2b + 17) ) / 4;
-	*(result_2b + 12) = ( 2 * *(temp_nf2b + 12) - *temp_nf2b - *(temp_nf2b + 6) ) / 4;
-	*(result_2b + 13) = ( 2 * *(temp_nf2b + 13) - *(temp_nf2b + 1) - *(temp_nf2b + 7) ) / 4;
-	*(result_2b + 14) = ( 2 * *(temp_nf2b + 14) - *(temp_nf2b + 2) - *(temp_nf2b + 8) ) / 4;
-	*(result_2b + 15) = ( 2 * *(temp_nf2b + 15) - *(temp_nf2b + 3) - *(temp_nf2b + 9) ) / 4;
-	*(result_2b + 16) = ( 2 * *(temp_nf2b + 16) - *(temp_nf2b + 4) - *(temp_nf2b + 10) ) / 4;
-	*(result_2b + 17) = ( 2 * *(temp_nf2b + 17) - *(temp_nf2b + 5) - *(temp_nf2b + 11) ) / 4;
+	*result_2b = ( *temp_2b + *(temp_2b + 6) - 2 * *(temp_2b + 12) ) / 4;
+	*(result_2b + 1) = ( *(temp_2b + 1) + *(temp_2b + 7) - 2 * *(temp_2b + 13) ) / 4;
+	*(result_2b + 2) = ( *(temp_2b + 2) + *(temp_2b + 8) - 2 * *(temp_2b + 14) ) / 4;
+	*(result_2b + 3) = ( *(temp_2b + 3) + *(temp_2b + 9) - 2 * *(temp_2b + 15) ) / 4;
+	*(result_2b + 4) = ( *(temp_2b + 4) + *(temp_2b + 10) - 2 * *(temp_2b + 16) ) / 4;
+	*(result_2b + 5) = ( *(temp_2b + 5) + *(temp_2b + 11) - 2 * *(temp_2b + 17) ) / 4;
+	*(result_2b + 6) = ( *temp_2b + *(temp_2b + 6) - 2 * *(temp_2b + 12) ) / 4;
+	*(result_2b + 7) = ( *(temp_2b + 1) + *(temp_2b + 7) - 2 * *(temp_2b + 13) ) / 4;
+	*(result_2b + 8) = ( *(temp_2b + 2) + *(temp_2b + 8) - 2 * *(temp_2b + 14) ) / 4;
+	*(result_2b + 9) = ( *(temp_2b + 3) + *(temp_2b + 9) - 2 * *(temp_2b + 15) ) / 4;
+	*(result_2b + 10) = ( *(temp_2b + 4) + *(temp_2b + 10) - 2 * *(temp_2b + 16) ) / 4;
+	*(result_2b + 11) = ( *(temp_2b + 5) + *(temp_2b + 11) - 2 * *(temp_2b + 17) ) / 4;
+	*(result_2b + 12) = ( 2 * *(temp_2b + 12) - *temp_2b - *(temp_2b + 6) ) / 4;
+	*(result_2b + 13) = ( 2 * *(temp_2b + 13) - *(temp_2b + 1) - *(temp_2b + 7) ) / 4;
+	*(result_2b + 14) = ( 2 * *(temp_2b + 14) - *(temp_2b + 2) - *(temp_2b + 8) ) / 4;
+	*(result_2b + 15) = ( 2 * *(temp_2b + 15) - *(temp_2b + 3) - *(temp_2b + 9) ) / 4;
+	*(result_2b + 16) = ( 2 * *(temp_2b + 16) - *(temp_2b + 4) - *(temp_2b + 10) ) / 4;
+	*(result_2b + 17) = ( 2 * *(temp_2b + 17) - *(temp_2b + 5) - *(temp_2b + 11) ) / 4;
 }
 
 // -------------------------------------------------------------------------------

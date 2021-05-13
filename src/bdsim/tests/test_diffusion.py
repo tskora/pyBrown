@@ -31,14 +31,16 @@ class TestDiffusion(unittest.TestCase):
 
 		box_length = 30.0
 
+		lubrication_cutoff = 10.0
+
 		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
 		pointers_1 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_1 ] for bi in beads_1 ]
 
 		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
 		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2)
+		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff)
+		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff)
 
 		N = 3*len(beads_1)
 
@@ -52,8 +54,8 @@ class TestDiffusion(unittest.TestCase):
 		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
 		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2)
+		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff)
+		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff)
 
 		N = 3*len(beads_1)
 

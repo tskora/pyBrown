@@ -402,11 +402,15 @@ class TestBox(unittest.TestCase):
 
 	def test_midpoint_rpy_smith_lub(self):
 
+		lubrication_cutoff = 10
+
 		self.mock_input["seed"] = 0
 
 		self.mock_input["propagation_scheme"] = "midpoint"
 
 		self.mock_input["hydrodynamics"] = "rpy_smith_lub"
+
+		self.mock_input["lubrication_cutoff"] = lubrication_cutoff
 
 		self.mock_input["ewald_alpha"] = np.sqrt( np.pi )
 
@@ -448,7 +452,7 @@ class TestBox(unittest.TestCase):
 
 					Rff = np.linalg.inv(Mff)
 
-					Rlc = JO_R_lubrication_correction_matrix(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot = Rlc + Rff
 
@@ -472,7 +476,7 @@ class TestBox(unittest.TestCase):
 
 					Rff_mid = np.linalg.inv(Mff_mid)
 
-					Rlc_mid = JO_R_lubrication_correction_matrix(beads, pointers) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc_mid = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot_mid = Rlc_mid + Rff_mid
 
