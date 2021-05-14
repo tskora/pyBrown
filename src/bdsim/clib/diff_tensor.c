@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see https://www.gnu.org/licenses.
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <omp.h>
 
 // LU decomoposition of a general matrix
 void dgetrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO);
@@ -91,6 +92,7 @@ void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_m
 
 	int N = 3*number_of_beads;
 
+	#pragma acc parallel loop
 	for (j = 0; j < number_of_beads; j++)
 	{
 		diag = RPY_Mii_block(*(as+j));
@@ -125,6 +127,7 @@ void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_m
 		}
 	}
 
+	#pragma acc parallel loop
 	for (j = 0; j < number_of_beads; j++)
 	{
 		r = 6*results_position(j, j, number_of_beads);
@@ -190,6 +193,7 @@ void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double 
 
 	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
 
+	#pragma acc parallel loop
 	for (j = 0; j < number_of_beads; j++)
 	{
 		vector = calloc(6, sizeof(double));
@@ -228,6 +232,7 @@ void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double 
 		}
 	}
 
+	#pragma acc parallel loop
 	for (j = 0; j < number_of_beads; j++)
 	{
 		r = 6*results_position(j, j, number_of_beads);
@@ -306,6 +311,7 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 
 	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
 
+	#pragma acc parallel loop
 	for (j = 0; j < number_of_beads; j++)
 	{
 
