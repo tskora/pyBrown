@@ -311,13 +311,6 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 
 		for (i = j + 1; i < number_of_beads; i++)
 		{
-			nf2b = calloc(18, sizeof(double));
-
-			ff2b = calloc(18, sizeof(double));
-
-			temp_nf2b = calloc(18, sizeof(double));
-
-			temp_ff2b = calloc(18, sizeof(double));
 
 			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
 
@@ -328,82 +321,89 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 			dist2 = rx*rx + ry*ry + rz*rz;
 			dist = sqrt(dist2);
 
-			if ( (dist - *(as+j) - *(as+i)) / ( *(as+j) + *(as+i) ) > cutoff_distance)
+			if ( (dist - *(as+j) - *(as+i)) / ( *(as+j) + *(as+i) ) <= cutoff_distance)
 			{
-				continue;
+				nf2b = calloc(18, sizeof(double));
+
+				ff2b = calloc(18, sizeof(double));
+
+				temp_nf2b = calloc(18, sizeof(double));
+
+				temp_ff2b = calloc(18, sizeof(double));
+
+				JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_nf2b);
+
+				Cichocki_2B_R_correction(temp_nf2b, nf2b);
+
+				RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_ff2b);
+
+				Cichocki_2B_R_correction(temp_ff2b, ff2b);
+
+				for (k = 0; k < 18; k++)
+				{
+					*(results+k) = *(nf2b+k) - *(ff2b+k);
+				}
+
+				J = 3*j;
+				J1 = J + 1;
+				J2 = J + 2;
+
+				correction_matrix[J + J*N] += results[0];
+				correction_matrix[J1 + J1*N] += results[1];
+				correction_matrix[J2 + J2*N] += results[2];
+				correction_matrix[J1 + J*N] += results[3];
+				correction_matrix[J + J1*N] += results[3];
+				correction_matrix[J2 + J*N] += results[4];
+				correction_matrix[J + J2*N] += results[4];
+				correction_matrix[J2 + J1*N] += results[5];
+				correction_matrix[J1 + J2*N] += results[5];
+
+				r = 6;
+				I = 3*i;
+				I1 = I + 1;
+				I2 = I + 2;
+
+				correction_matrix[I + I*N] += results[r];
+				correction_matrix[I1 + I1*N] += results[r + 1];
+				correction_matrix[I2 + I2*N] += results[r + 2];
+				correction_matrix[I1 + I*N] += results[r + 3];
+				correction_matrix[I + I1*N] += results[r + 3];
+				correction_matrix[I2 + I*N] += results[r + 4];
+				correction_matrix[I + I2*N] += results[r + 4];
+				correction_matrix[I2 + I1*N] += results[r + 5];
+				correction_matrix[I1 + I2*N] += results[r + 5];
+
+				r = 12;
+
+				correction_matrix[I + J*N] += results[r];
+				correction_matrix[J + I*N] += results[r];
+				correction_matrix[I1 + J1*N] += results[r + 1];
+				correction_matrix[J1 + I1*N] += results[r + 1];
+				correction_matrix[I2 + J2*N] += results[r + 2];
+				correction_matrix[J2 + I2*N] += results[r + 2];
+				correction_matrix[I1 + J*N] += results[r + 3];
+				correction_matrix[I + J1*N] += results[r + 3];
+				correction_matrix[J + I1*N] += results[r + 3];
+				correction_matrix[J1 + I*N] += results[r + 3];
+				correction_matrix[I2 + J*N] += results[r + 4];
+				correction_matrix[I + J2*N] += results[r + 4];
+				correction_matrix[J + I2*N] += results[r + 4];
+				correction_matrix[J2 + I*N] += results[r + 4];
+				correction_matrix[I2 + J1*N] += results[r + 5];
+				correction_matrix[I1 + J2*N] += results[r + 5];
+				correction_matrix[J1 + I2*N] += results[r + 5];
+				correction_matrix[J2 + I1*N] += results[r + 5];
+
+
+				free(nf2b);
+
+				free(ff2b);
+
+				free(temp_nf2b);
+
+				free(temp_ff2b);
+
 			}
-
-			JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_nf2b);
-
-			Cichocki_2B_R_correction(temp_nf2b, nf2b);
-
-			RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_ff2b);
-
-			Cichocki_2B_R_correction(temp_ff2b, ff2b);
-
-			for (k = 0; k < 18; k++)
-			{
-				*(results+k) = *(nf2b+k) - *(ff2b+k);
-			}
-
-			J = 3*j;
-			J1 = J + 1;
-			J2 = J + 2;
-
-			correction_matrix[J + J*N] += results[0];
-			correction_matrix[J1 + J1*N] += results[1];
-			correction_matrix[J2 + J2*N] += results[2];
-			correction_matrix[J1 + J*N] += results[3];
-			correction_matrix[J + J1*N] += results[3];
-			correction_matrix[J2 + J*N] += results[4];
-			correction_matrix[J + J2*N] += results[4];
-			correction_matrix[J2 + J1*N] += results[5];
-			correction_matrix[J1 + J2*N] += results[5];
-
-			r = 6;
-			I = 3*i;
-			I1 = I + 1;
-			I2 = I + 2;
-
-			correction_matrix[I + I*N] += results[r];
-			correction_matrix[I1 + I1*N] += results[r + 1];
-			correction_matrix[I2 + I2*N] += results[r + 2];
-			correction_matrix[I1 + I*N] += results[r + 3];
-			correction_matrix[I + I1*N] += results[r + 3];
-			correction_matrix[I2 + I*N] += results[r + 4];
-			correction_matrix[I + I2*N] += results[r + 4];
-			correction_matrix[I2 + I1*N] += results[r + 5];
-			correction_matrix[I1 + I2*N] += results[r + 5];
-
-			r = 12;
-
-			correction_matrix[I + J*N] += results[r];
-			correction_matrix[J + I*N] += results[r];
-			correction_matrix[I1 + J1*N] += results[r + 1];
-			correction_matrix[J1 + I1*N] += results[r + 1];
-			correction_matrix[I2 + J2*N] += results[r + 2];
-			correction_matrix[J2 + I2*N] += results[r + 2];
-			correction_matrix[I1 + J*N] += results[r + 3];
-			correction_matrix[I + J1*N] += results[r + 3];
-			correction_matrix[J + I1*N] += results[r + 3];
-			correction_matrix[J1 + I*N] += results[r + 3];
-			correction_matrix[I2 + J*N] += results[r + 4];
-			correction_matrix[I + J2*N] += results[r + 4];
-			correction_matrix[J + I2*N] += results[r + 4];
-			correction_matrix[J2 + I*N] += results[r + 4];
-			correction_matrix[I2 + J1*N] += results[r + 5];
-			correction_matrix[I1 + J2*N] += results[r + 5];
-			correction_matrix[J1 + I2*N] += results[r + 5];
-			correction_matrix[J2 + I1*N] += results[r + 5];
-
-
-			free(nf2b);
-
-			free(ff2b);
-
-			free(temp_nf2b);
-
-			free(temp_ff2b);
 		}
 	}
 
