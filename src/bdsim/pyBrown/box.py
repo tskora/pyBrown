@@ -44,6 +44,8 @@ class Box():
 		self.inp = input_data
 		self.box_length = self.inp["box_length"]
 
+		self.debug = self.inp["debug"]
+
 		self._initialize_pseudorandom_number_generation()
 
 		self._handle_bead_mobility()
@@ -126,6 +128,8 @@ class Box():
 		self._keep_beads_in_box()
 
 		if self.is_concentration: self._compute_concentration_in_region()
+
+		if self.debug: print('END STEP\n\n\n')
 
 	#-------------------------------------------------------------------------------
 
@@ -242,6 +246,8 @@ class Box():
 			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
 			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
 
+		if self.debug: print('translation vector: {}\n'.format(vector))
+
 	#-------------------------------------------------------------------------------
 
 	def _generate_random_vector(self):
@@ -249,6 +255,8 @@ class Box():
 		self.N = self.pseudorandom_number_generator.normal(0.0, 1.0, 3 * len(self.mobile_beads))
 
 		self.draw_count += 3 * len(self.mobile_beads)
+
+		if self.debug: print('random vector: {}\n'.format(self.N))
 
 	#-------------------------------------------------------------------------------
 
@@ -331,6 +339,8 @@ class Box():
 
 		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 
+		if self.debug: print('distance matrix: {}\n'.format(self.rij))
+
 	#-------------------------------------------------------------------------------
 
 	# @timing
@@ -364,6 +374,9 @@ class Box():
 
 			self.Rff = np.linalg.inv( self.Mff )
 
+			if self.debug: print('far field mobility matrix: {}\n'.format(self.Mff))
+			if self.debug: print('far field resistance matrix: {}\n'.format(self.Rff))
+
 	#-------------------------------------------------------------------------------
 
 	# @timing
@@ -372,6 +385,9 @@ class Box():
 		self.R = JO_R_lubrication_correction_matrix(self.mobile_beads, self.rij, self.lubrication_cutoff) * self.viscosity / 10**19 + self.Rff
 
 		self.D = self.kBT * np.linalg.inv(self.R)
+
+		if self.debug: print('resistance matrix: {}\n'.format(self.R))
+		if self.debug: print('diffusion matrix: {}\n'.format(self.D))
 
 	#-------------------------------------------------------------------------------
 
@@ -385,6 +401,8 @@ class Box():
 		else:
 
 			self.B = np.linalg.cholesky(self.D)
+
+			if self.debug: print('choleski matrix: {}\n'.format(self.B))
 
 	#-------------------------------------------------------------------------------
 
