@@ -14,8 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
 
+import ctypes
 import math
 import numpy as np
+
+from array import array
+from ctypes.util import find_library
+
+lib_name = "pyBrown"
+lib_path = find_library(lib_name)
+lib = ctypes.cdll.LoadLibrary( lib_path )
 
 #-------------------------------------------------------------------------------
 
@@ -187,6 +195,31 @@ def pointer_pbc(bead1, bead2, box_size):
 			r[i] += box_size
 
 	return r
+
+#-------------------------------------------------------------------------------
+
+def compute_pointer_pbc_matrix(beads, box_length):
+
+	c_double = ctypes.c_double
+
+	N = len(beads)
+	N_c = ctypes.c_int(N)
+
+	r_list = [ ri  for b in beads for ri in b.r]
+	v0 = array('d', r_list)
+	r = (c_double * len(v0)).from_buffer(v0)
+
+	p_list = [0.0 for j in range(N) for i in range(N) for k in range(3)]
+	v1 = array('d', p_list)
+	p = (c_double * len(v1)).from_buffer(v1)
+
+	box_length_c = ctypes.c_double(box_length)
+
+	lib.pointer_pbc_matrix(r, N_c, box_length_c, p)
+
+	rij = np.reshape(p, (N, N, 3))
+
+	return rij
 
 #-------------------------------------------------------------------------------
 

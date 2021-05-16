@@ -72,6 +72,78 @@ static inline int results_position(int i, int j, int N);
 
 // -------------------------------------------------------------------------------
 
+void pointer_pbc_matrix(double* positions, int number_of_beads, double box_length, double* pointers)
+{
+	register int i = 0;
+	register int j = 0;
+
+	double* shifted_pointers;
+
+	double* temp;
+
+	for (j = 0; j < number_of_beads; j++)
+	{
+		for (i = j + 1; i < number_of_beads; i++)
+		{
+			temp = calloc(3, sizeof(double));
+
+			*temp = *(positions+3*i) - *(positions+3*j);
+
+			while (*temp >= box_length/2.0)
+			{
+				*temp -= box_length;
+			}
+			while (*temp <= -box_length/2.0)
+			{
+				*temp += box_length;
+			}
+
+			*(temp+1) = *(positions+3*i+1) - *(positions+3*j+1);
+
+			while (*(temp+1) >= box_length/2.0)
+			{
+				*(temp+1) -= box_length;
+			}
+			while (*(temp+1) <= -box_length/2.0)
+			{
+				*(temp+1) += box_length;
+			}
+
+			*(temp+2) = *(positions+3*i+2) - *(positions+3*j+2);
+
+			while (*(temp+2) >= box_length/2.0)
+			{
+				*(temp+2) -= box_length;
+			}
+			while (*(temp+2) <= -box_length/2.0)
+			{
+				*(temp+2) += box_length;
+			}
+
+			shifted_pointers = pointers + 3*i + 3*j*number_of_beads;
+
+			*shifted_pointers = *temp;
+
+			*(shifted_pointers+1) = *(temp+1);
+
+			*(shifted_pointers+2) = *(temp+2);
+
+			shifted_pointers = pointers + 3*j + 3*i*number_of_beads;
+
+			*shifted_pointers = -*temp;
+
+			*(shifted_pointers+1) = -*(temp+1);
+
+			*(shifted_pointers+2) = -*(temp+2);
+
+			free(temp);
+
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------
+
 void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_matrix)
 {
 	register int i = 0;

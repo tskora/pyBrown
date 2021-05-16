@@ -22,7 +22,20 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc
+from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix
+
+#-------------------------------------------------------------------------------
+
+def compute_pointer_pbc_matrix_python(beads, box_length):
+
+	rij = np.zeros((len(beads), len(beads), 3))
+
+	for i in range(1, len(beads)):
+		for j in range(0, i):
+			rij[i][j] = pointer_pbc(beads[i], beads[j], box_length)
+			rij[j][i] = -rij[i][j]
+
+	return rij
 
 #-------------------------------------------------------------------------------
 
@@ -287,6 +300,22 @@ class TestBead(unittest.TestCase):
 		self.assertAlmostEqual( distance_pbc(self.b0, Bead([0.0, 10.0, -10.0], 1.0), 5.0), 0.0, places = 7 )
 		self.assertAlmostEqual( distance_pbc(self.b0, Bead([0.0, -10.0, 10.0], 1.0), 5.0), 0.0, places = 7 )
 		self.assertAlmostEqual( distance_pbc(self.b0, Bead([0.0, -10.0, -10.0], 1.0), 5.0), 0.0, places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_pointer_pbc_matrix(self):
+
+		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+
+		c_ish = compute_pointer_pbc_matrix(beads, 10.0)
+
+		python_ish = compute_pointer_pbc_matrix_python(beads, 10.0)
+
+		for i in range(len(beads)):
+			for j in range(len(beads)):
+				for k in range(3):
+
+					self.assertEqual(c_ish[i][j][k], python_ish[i][j][k])
 
 #-------------------------------------------------------------------------------
 

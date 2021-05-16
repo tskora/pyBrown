@@ -19,7 +19,7 @@ import numpy as np
 
 from scipy.constants import Boltzmann
 
-from pyBrown.bead import overlap_pbc, distance_pbc, pointer_pbc
+from pyBrown.bead import overlap_pbc, compute_pointer_pbc_matrix
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timing
@@ -329,12 +329,7 @@ class Box():
 	# @timing
 	def _compute_rij_matrix(self):
 
-		self.rij = np.zeros((len(self.mobile_beads), len(self.mobile_beads), 3))
-
-		for i in range(1, len(self.mobile_beads)):
-			for j in range(0, i):
-				self.rij[i][j] = pointer_pbc(self.mobile_beads[i], self.mobile_beads[j], self.box_length)
-				self.rij[j][i] = -self.rij[i][j]
+		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 
 	#-------------------------------------------------------------------------------
 
