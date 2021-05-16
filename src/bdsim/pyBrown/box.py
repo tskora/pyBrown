@@ -160,7 +160,11 @@ class Box():
 
 		D0 = np.copy(self.D)
 
+		assert (D0 == self.D).all()
+
 		B0 = np.copy(self.B)
+
+		assert (B0 == self.B).all()
 
 		while True:
 
