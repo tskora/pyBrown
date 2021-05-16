@@ -162,13 +162,25 @@ class Box():
 
 		B0 = np.copy(self.B)
 
-		while True:
+		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
 
-			self._deterministic_step(dt, mult = 1.0 / self.m_midpoint)
+			Mff0 = np.copy(self.Mff)
+
+			Rff0 = np.copy(self.Rff)
+
+		self._deterministic_step(dt, mult = 1.0 / self.m_midpoint)
+
+		while True:
 
 			self._generate_random_vector()
 
 			self._stochastic_step(dt, mult = 1.0 / self.m_midpoint)
+
+			if self.overlaps:
+
+				if self._check_overlaps():
+					self._stochastic_step(dt, mult = -1.0 / self.m_midpoint)
+					continue
 
 			self._compute_rij_matrix()
 
@@ -195,6 +207,12 @@ class Box():
 
 			self.B = B0
 
+			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+
+				self.Mff = Mff0
+
+				self.Rff = Rff0
+
 			self._deterministic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
 
 			self._stochastic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
@@ -204,7 +222,7 @@ class Box():
 			if self.overlaps:
 
 				if self._check_overlaps():
-					self._deterministic_step(dt, mult = -1)
+					self._deterministic_step(dt, mult = -(1.0 - 1.0 / self.m_midpoint))
 					self._stochastic_step(dt, mult = -1)
 					self._translate_beads(-drift)
 				else:
