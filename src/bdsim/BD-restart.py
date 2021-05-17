@@ -158,6 +158,9 @@ def main(restart_filename, json_filename):
 			xyz_file = stack.enter_context(open(xyz_filename, filemode, buffering = 1))
 
 			for j in tqdm( range(j0, n_steps), disable = disable_progress_bar ):
+
+				if input_data["debug"]: print('STEP {}\n'.format(j))
+
 				if j % n_write == 0:
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
 

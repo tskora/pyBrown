@@ -50,7 +50,8 @@ def main(input_filename):
 				"external_force": [0.0, 0.0, 0.0],
 				"lennard_jones_6": False, "lennard_jones_12": False,
 				"lennard_jones_alpha": 4.0, "energy_unit": "joule",
-				"custom_interactions": False}
+				"custom_interactions": False,
+				"overlap_treshold": 0.0}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
 				   [ "output_rst_filename", "rst_write_freq",
@@ -159,6 +160,9 @@ def main(input_filename):
 			xyz_file = stack.enter_context(open(xyz_filename, "w", buffering = 1))
 
 			for j in tqdm( range(n_steps), disable = disable_progress_bar ):
+
+				if i.input_data["debug"]: print('STEP {}\n'.format(j))
+
 				if j % n_write == 0:
 					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
 
