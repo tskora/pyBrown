@@ -263,7 +263,7 @@ def overlap(bead1, bead2):
 
 #-------------------------------------------------------------------------------
 
-def overlap_pbc(bead1, bead2, box_size):
+def overlap_pbc(bead1, bead2, box_size, epsilon = 0.0):
 	"""Checks if there is an overlap between `bead1` and `bead2` (its closest translational replica)
 	
 	:param bead1: bead
@@ -279,6 +279,6 @@ def overlap_pbc(bead1, bead2, box_size):
 
 	dist = distance_pbc(bead1, bead2, box_size)
 
-	return dist <= bead1.a + bead2.a
+	return dist <= bead1.a + bead2.a + epsilon
 
 #-------------------------------------------------------------------------------
