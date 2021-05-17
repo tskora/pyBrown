@@ -44,8 +44,6 @@ class Box():
 		self.inp = input_data
 		self.box_length = self.inp["box_length"]
 
-		self.debug = self.inp["debug"]
-
 		self._initialize_pseudorandom_number_generation()
 
 		self._handle_bead_mobility()
@@ -128,8 +126,6 @@ class Box():
 		self._keep_beads_in_box()
 
 		if self.is_concentration: self._compute_concentration_in_region()
-
-		if self.debug: print('END STEP\n\n\n')
 
 	#-------------------------------------------------------------------------------
 
@@ -221,6 +217,8 @@ class Box():
 
 			self._stochastic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
 
+			if self.inp["debug"]: print('DRIFT STEP\n')
+
 			self._translate_beads(drift)
 
 			if self.overlaps:
@@ -246,6 +244,8 @@ class Box():
 		else:
 			FX = dt / self.kBT * self.D * self.F * mult
 
+		if self.inp["debug"]: print('DETERMINISTIC STEP\n')
+
 		self._translate_beads(FX)
 
 	#-------------------------------------------------------------------------------
@@ -258,6 +258,8 @@ class Box():
 		else:
 			BX = self.B @ self.N * math.sqrt(2 * dt) * mult
 
+		if self.inp["debug"]: print('STOCHASTIC STEP\n')
+
 		self._translate_beads(BX)
 
 	#-------------------------------------------------------------------------------
@@ -268,7 +270,7 @@ class Box():
 			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
 			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
 
-		if self.debug: print('translation vector: {}\n'.format(vector))
+		if self.inp["debug"]: print('translation vector: {}\n'.format(vector.tolist()))
 
 	#-------------------------------------------------------------------------------
 
@@ -278,7 +280,7 @@ class Box():
 
 		self.draw_count += 3 * len(self.mobile_beads)
 
-		if self.debug: print('random vector: {}\n'.format(self.N))
+		if self.inp["debug"]: print('random vector: {}\n'.format(self.N.tolist()))
 
 	#-------------------------------------------------------------------------------
 
@@ -349,7 +351,7 @@ class Box():
 				elif ( pointer[2] > radii_sum and pointer[2] < radii_sum_pbc ) or ( pointer[2] < -radii_sum and pointer[2] > -radii_sum_pbc ):
 					continue
 				else:
-					if overlap_pbc(self.beads[i], self.beads[j], self.box_length):
+					if overlap_pbc(self.beads[i], self.beads[j], self.box_length, epsilon = self.inp["overlap_treshold"]):
 						return True
 
 		return overlaps
@@ -361,8 +363,6 @@ class Box():
 
 		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 
-		if self.debug: print('distance matrix: {}\n'.format(self.rij))
-
 	#-------------------------------------------------------------------------------
 
 	# @timing
@@ -372,11 +372,15 @@ class Box():
 
 			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
 
+			if self.inp["debug"]: print('far field diffusion matrix: {}\n'.format(self.D.tolist()))
+
 		elif self.hydrodynamics == "rpy":
 
 			self.D = RPY_M_matrix(self.mobile_beads, self.rij)
 
 			self.D *= self.kBT * 10**19 / self.viscosity
+
+			if self.inp["debug"]: print('far field diffusion matrix: {}\n'.format(self.D.tolist()))
 
 		elif self.hydrodynamics == "rpy_smith":
 
@@ -384,11 +388,17 @@ class Box():
 
 			self.D *= self.kBT * 10**19 / self.viscosity
 
+			if self.inp["debug"]: print('far field diffusion matrix: {}\n'.format(self.D.tolist()))
+
 		elif self.hydrodynamics == "rpy_lub":
 
 			self.Mff = RPY_M_matrix(self.mobile_beads, self.rij) * 10**19 / self.viscosity
 
 			self.Rff = np.linalg.inv( self.Mff )
+
+			if self.inp["debug"]: print('far field mobility matrix: {}\n'.format(self.Mff.tolist()))
+
+			if self.inp["debug"]: print('far field resistance matrix: {}\n'.format(self.Rff.tolist()))
 
 		elif self.hydrodynamics == "rpy_smith_lub":
 
@@ -396,8 +406,9 @@ class Box():
 
 			self.Rff = np.linalg.inv( self.Mff )
 
-			if self.debug: print('far field mobility matrix: {}\n'.format(self.Mff))
-			if self.debug: print('far field resistance matrix: {}\n'.format(self.Rff))
+			if self.inp["debug"]: print('far field mobility matrix: {}\n'.format(self.Mff.tolist()))
+
+			if self.inp["debug"]: print('far field resistance matrix: {}\n'.format(self.Rff.tolist()))
 
 	#-------------------------------------------------------------------------------
 
@@ -408,8 +419,9 @@ class Box():
 
 		self.D = self.kBT * np.linalg.inv(self.R)
 
-		if self.debug: print('resistance matrix: {}\n'.format(self.R))
-		if self.debug: print('diffusion matrix: {}\n'.format(self.D))
+		if self.inp["debug"]: print('total resistance matrix: {}\n'.format(self.R.tolist()))
+
+		if self.inp["debug"]: print('total diffusion matrix: {}\n'.format(self.D.tolist()))
 
 	#-------------------------------------------------------------------------------
 
@@ -424,7 +436,7 @@ class Box():
 
 			self.B = np.linalg.cholesky(self.D)
 
-			if self.debug: print('choleski matrix: {}\n'.format(self.B))
+			if self.inp["debug"]: print('decomposed diffusion matrix: {}\n'.format(self.B.tolist()))
 
 	#-------------------------------------------------------------------------------
 
