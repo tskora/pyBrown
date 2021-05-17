@@ -42,10 +42,7 @@ Only the ``sub`` string has to be identical in every bead-defining line. All the
 ``.json`` file
 ***************
 
-Simulation parameters are provided in a standard `JSON <https://www.json.org/json-en.html>`_ data format. It consists of multiple lines in a form of ``keyword: value`` pairs enclosed by a curly bracket. A few keywords are obligatory, but a majority is not -- for them either default values are loaded or those keywords are ignored.
-
-.. warning::
-    As for now there is no mechanism warning user that some keywords introduced in ``.json`` input file were not recognized by ``pyBrown``.
+Simulation parameters are provided in a standard `JSON <https://www.json.org/json-en.html>`_ data format. It consists of multiple lines in a form of ``keyword: value`` pairs enclosed by a curly bracket. Some keywords are obligatory, but a majority is not -- for them default values will be loaded, if needed. ``pyBrown`` will inform you if it does not recognize some keywords in input ``.json`` file.
 
 The complete list of keywords is provided below.
 
@@ -118,6 +115,12 @@ Propagation
 - ``"propagation_scheme": option`` -- propagation algorithm for the trajectory generation, options: ``"ermak"``, ``"midpoint"``, default: ``"ermak"``
 - ``"m_midpoint": int`` -- inverse of a fraction of the time step made in a prediction part of midpoint algorithm (setting to ``2`` means that half of a time step will be made in a prediction part), default: ``100``
 - ``"check_overlaps": boolean`` -- whether to check overlaps in every simulation step, default: ``true``
+- ``"overlap_treshold": float`` -- how small distance is treated as overlap, default: ``0.0``
+
+.. warning::
+
+    If you turn on lubrication interactions, ``"overlap_treshold"`` should be slightly larger than ``0.0`` because small separations will lead to very small eigenvalues of diffusion matrix, and consequently to breakdown of the Choleski decomposition.
+
 - ``"immobile_labels": [string, ..., string]`` -- label of beads which are to be immobile in simulation, default: ``[]``
 - ``"seed": int`` -- seed for pseudorandom number generation algorithm, default ``np.random.randint(2**32 - 1)``
 
