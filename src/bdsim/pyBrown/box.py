@@ -168,6 +168,8 @@ class Box():
 
 			Rff0 = np.copy(self.Rff)
 
+			R0 = np.copy(self.R)
+
 		self._deterministic_step(dt, mult = 1.0 / self.m_midpoint)
 
 		while True:
@@ -212,6 +214,8 @@ class Box():
 				self.Mff = Mff0
 
 				self.Rff = Rff0
+
+				self.R = R0
 
 			self._deterministic_step(dt, mult = 1.0 - 1.0 / self.m_midpoint)
 

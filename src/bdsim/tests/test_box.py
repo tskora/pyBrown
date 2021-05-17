@@ -42,7 +42,7 @@ class TestBox(unittest.TestCase):
 					  	   "immobile_labels": [], "propagation_scheme": "ermak",
 					  	   "check_overlaps": True, "lennard_jones_6": False,
 					  	   "lennard_jones_12": False, "energy_unit": "joule",
-					  	   "custom_interactions": False}
+					  	   "custom_interactions": False, "debug": False}
 
 		self.test_filename = 'test_box.txt'
 
