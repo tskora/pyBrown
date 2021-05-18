@@ -121,6 +121,7 @@ Propagation
 
     If you turn on lubrication interactions, ``"overlap_treshold"`` should be slightly larger than ``0.0`` because small separations will lead to very small eigenvalues of diffusion matrix, and consequently to breakdown of the Choleski decomposition.
 
+- ``"max_move_attempts": int`` -- maximal number of move attempts, if exceeded ``pyBrown`` will stop, default: ``1000000``
 - ``"immobile_labels": [string, ..., string]`` -- label of beads which are to be immobile in simulation, default: ``[]``
 - ``"seed": int`` -- seed for pseudorandom number generation algorithm, default ``np.random.randint(2**32 - 1)``
 
