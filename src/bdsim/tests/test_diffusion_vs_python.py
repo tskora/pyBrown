@@ -7,7 +7,7 @@ import unittest
 
 from scipy.special import erfc
 
-from pyBrown.bead import Bead, pointer_pbc
+from pyBrown.bead import Bead, compute_pointer_pbc_matrix
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 
 #-------------------------------------------------------------------------------
@@ -520,7 +520,7 @@ def R_jeffrey_python(ai, aj, pointer):
 
 #-------------------------------------------------------------------------------
 
-class TestDiffusion(unittest.TestCase):
+class TestDiffusionVsPython(unittest.TestCase):
 
 	def test_M_rpy_smith(self):
 
@@ -536,7 +536,7 @@ class TestDiffusion(unittest.TestCase):
 
 		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
 
-		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
+		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
 		c_ish = RPY_Smith_M_matrix(beads, pointers, box_length, alpha, m, n)
 
@@ -556,7 +556,7 @@ class TestDiffusion(unittest.TestCase):
 
 		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
 
-		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
+		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
 		c_ish = RPY_M_matrix(beads, pointers)
 
@@ -576,7 +576,7 @@ class TestDiffusion(unittest.TestCase):
 
 		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
 
-		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
+		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
 		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff)
 
@@ -596,7 +596,7 @@ class TestDiffusion(unittest.TestCase):
 
 		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
 
-		pointers = [ [ pointer_pbc(bi, bj, box_length) for bj in beads ] for bi in beads ]
+		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
 		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff)
 
@@ -605,50 +605,6 @@ class TestDiffusion(unittest.TestCase):
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):
 				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_R_symmetry(self):
-
-		box_length = 30.0
-
-		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
-		pointers_1 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_1 ] for bi in beads_1 ]
-
-		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
-		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
-
-		c_ish_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff = 1)
-		c_ish_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff = 1)
-
-		python_ish_1 = R_lub_corr_python(beads_1, pointers_1, lubrication_cutoff = 1)
-		python_ish_2 = R_lub_corr_python(beads_2, pointers_2, lubrication_cutoff = 1)
-
-		N = 3*len(beads_1)
-
-		for i in range(N):
-			for j in range(N):
-				self.assertAlmostEqual(c_ish_1[i][j], c_ish_2[(i+3)%N][(j+3)%N], places = 7)
-				self.assertAlmostEqual(python_ish_1[i][j], python_ish_2[(i+3)%N][(j+3)%N], places = 7)
-
-		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0), Bead([10.0, 0.0, 0.0], 3.0) ]
-		pointers_1 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_1 ] for bi in beads_1 ]
-
-		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
-		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
-
-		c_ish_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff = 1)
-		c_ish_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff = 1)
-
-		python_ish_1 = R_lub_corr_python(beads_1, pointers_1, lubrication_cutoff = 1)
-		python_ish_2 = R_lub_corr_python(beads_2, pointers_2, lubrication_cutoff = 1)
-
-		N = 3*len(beads_1)
-
-		for i in range(N):
-			for j in range(N):
-				self.assertAlmostEqual(c_ish_1[i][j], c_ish_2[(i+3)%N][(j+3)%N], places = 7)
-				self.assertAlmostEqual(python_ish_1[i][j], python_ish_2[(i+3)%N][(j+3)%N], places = 7)
 
 #-------------------------------------------------------------------------------
 

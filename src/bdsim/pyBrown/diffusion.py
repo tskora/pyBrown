@@ -37,7 +37,7 @@ def RPY_M_matrix(beads, pointers):
 	v0 = array('d', a_list)
 	a = (c_double * len(v0)).from_buffer(v0)
 
-	p_list = [pointers[i][j][k] for j in range(N) for i in range(j+1, N) for k in range(3)]
+	p_list = np.ravel( -pointers[np.triu_indices(n=N, k=1)] ).tolist()
 	v1 = array('d', p_list)
 	p = (c_double * len(v1)).from_buffer(v1)
 
@@ -67,7 +67,7 @@ def RPY_Smith_M_matrix(beads, pointers, box_length, alpha, m, n):
 	v0 = array('d', a_list)
 	a = (c_double * len(v0)).from_buffer(v0)
 
-	p_list = [pointers[i][j][k] for j in range(N) for i in range(j+1, N) for k in range(3)]
+	p_list = np.ravel( -pointers[np.triu_indices(n=N, k=1)] ).tolist()
 	v1 = array('d', p_list)
 	p = (c_double * len(v1)).from_buffer(v1)
 
@@ -105,7 +105,7 @@ def JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff):
 	v0 = array('d', a_list)
 	a = (c_double * len(v0)).from_buffer(v0)
 
-	p_list = [pointers[i][j][k] for j in range(N) for i in range(j+1, N) for k in range(3)]
+	p_list = np.ravel( -pointers[np.triu_indices(n=N, k=1)] ).tolist()
 	v1 = array('d', p_list)
 	p = (c_double * len(v1)).from_buffer(v1)
 

@@ -20,7 +20,7 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, pointer_pbc
+from pyBrown.bead import Bead, compute_pointer_pbc_matrix
 from pyBrown.diffusion import JO_R_lubrication_correction_matrix
 
 #-------------------------------------------------------------------------------
@@ -34,10 +34,10 @@ class TestDiffusion(unittest.TestCase):
 		lubrication_cutoff = 10.0
 
 		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
-		pointers_1 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_1 ] for bi in beads_1 ]
+		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
 
 		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
-		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
+		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
 		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff)
 		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff)
@@ -49,10 +49,10 @@ class TestDiffusion(unittest.TestCase):
 				self.assertAlmostEqual(R_1[i][j], R_2[(i+3)%N][(j+3)%N], places = 7)
 
 		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0), Bead([10.0, 0.0, 0.0], 3.0) ]
-		pointers_1 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_1 ] for bi in beads_1 ]
+		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
 
 		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
-		pointers_2 = [ [ pointer_pbc(bi, bj, box_length) for bj in beads_2 ] for bi in beads_2 ]
+		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
 		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff)
 		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff)

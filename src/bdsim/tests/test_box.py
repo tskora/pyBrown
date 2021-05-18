@@ -27,7 +27,7 @@ import unittest
 
 from scipy.constants import Boltzmann
 
-from pyBrown.bead import Bead, pointer_pbc
+from pyBrown.bead import Bead, compute_pointer_pbc_matrix
 from pyBrown.box import Box
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 
@@ -263,7 +263,9 @@ class TestBox(unittest.TestCase):
 
 		for iteration in range(Nit):
 
-			pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+			# pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+			pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
 
 			b.propagate(dt)
 
@@ -315,7 +317,9 @@ class TestBox(unittest.TestCase):
 
 		for iteration in range(Nit):
 
-			pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+			# pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+			pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
 
 			b.propagate(dt)
 
@@ -375,7 +379,9 @@ class TestBox(unittest.TestCase):
 
 			for iteration in range(Nit):
 
-				pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+				# pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+				pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
 
 				b.propagate(dt)
 
@@ -445,7 +451,9 @@ class TestBox(unittest.TestCase):
 
 				for iteration in range(Nit):
 
-					pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+					# pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+					pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
 
 					b.propagate(dt)
 
@@ -471,7 +479,9 @@ class TestBox(unittest.TestCase):
 
 						bead.translate( BX[3*i:3*(i+1)] / m )
 
-					pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+					# pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
+
+					pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
 
 					Mff_mid = RPY_Smith_M_matrix(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
 
