@@ -45,7 +45,7 @@ def RPY_M_matrix(beads, pointers):
 
 	len_my_list = 9*N*N
 
-	my_list = [0 for i in range(len_my_list)]
+	my_list = [0.0]*len_my_list
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
@@ -83,7 +83,7 @@ def RPY_Smith_M_matrix(beads, pointers, box_length, alpha, m, n):
 
 	len_my_list = 9*N*N
 
-	my_list = [0 for i in range(len_my_list)]
+	my_list = [0.0]*len_my_list
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
@@ -114,7 +114,7 @@ def JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff):
 
 	len_my_list = 9*N*N
 
-	my_list = [0 for i in range(len_my_list)]
+	my_list = [0.0]*len_my_list
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 

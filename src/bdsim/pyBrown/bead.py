@@ -209,7 +209,7 @@ def compute_pointer_pbc_matrix(beads, box_length):
 	v0 = array('d', r_list)
 	r = (c_double * len(v0)).from_buffer(v0)
 
-	p_list = [0.0 for j in range(N) for i in range(N) for k in range(3)]
+	p_list = [0.0]*N*N*3
 	v1 = array('d', p_list)
 	p = (c_double * len(v1)).from_buffer(v1)
 
@@ -282,3 +282,50 @@ def overlap_pbc(bead1, bead2, box_size, epsilon = 0.0):
 	return dist <= bead1.a + bead2.a + epsilon
 
 #-------------------------------------------------------------------------------
+
+def check_overlaps(beads, box_length, overlap_treshold):
+
+	c_double = ctypes.c_double
+
+	N = len(beads)
+	N_c = ctypes.c_int(N)
+
+	r_list = [ ri  for b in beads for ri in b.r]
+	v0 = array('d', r_list)
+	r = (c_double * len(v0)).from_buffer(v0)
+
+	a_list = [ b.a  for b in beads]
+	v1 = array('d', a_list)
+	a = (c_double * len(v1)).from_buffer(v1)
+
+	box_length_c = ctypes.c_double(box_length)
+
+	overlap_treshold_c = ctypes.c_double(overlap_treshold)
+
+	overlaps = lib.check_overlaps(r, a, N_c, box_length_c, overlap_treshold_c)
+
+	return overlaps == 1
+
+#-------------------------------------------------------------------------------
+
+def check_overlaps_python(beads, box_length, overlap_treshold):
+
+	overlaps = False
+
+	for i in range(len(beads)-1):
+		for j in range(i+1, len(beads)):
+			pointer = beads[i].r - beads[j].r
+			radii_sum = beads[i].a + beads[j].a
+			radii_sum_pbc = box_length - radii_sum
+
+			if ( pointer[0] > radii_sum and pointer[0] < radii_sum_pbc ) or ( pointer[0] < -radii_sum and pointer[0] > -radii_sum_pbc ):
+				continue
+			elif ( pointer[1] > radii_sum and pointer[1] < radii_sum_pbc ) or ( pointer[1] < -radii_sum and pointer[1] > -radii_sum_pbc ):
+				continue
+			elif ( pointer[2] > radii_sum and pointer[2] < radii_sum_pbc ) or ( pointer[2] < -radii_sum and pointer[2] > -radii_sum_pbc ):
+				continue
+			else:
+				if overlap_pbc(beads[i], beads[j], box_length, overlap_treshold):
+					return True
+
+	return overlaps

@@ -19,7 +19,7 @@ import numpy as np
 
 from scipy.constants import Boltzmann
 
-from pyBrown.bead import overlap_pbc, compute_pointer_pbc_matrix
+from pyBrown.bead import compute_pointer_pbc_matrix, check_overlaps
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timing
@@ -82,8 +82,14 @@ class Box():
 
 		self._set_concentration_measurement_parameters()
 
+		if self.inp["hydrodynamics"] != "nohi" or len(self.interactions) > 0 or len(self.reactions) > 0:
+			self.rij_is_needed = True
+		else:
+			self.rij_is_needed = False
+
 	#-------------------------------------------------------------------------------
 
+	# @timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True):
 		"""Single propagation of dynamics
 
@@ -102,7 +108,7 @@ class Box():
 		if self.is_concentration:
 			self.concentration = {label: 0 for label in self.mobile_labels}
 
-		self._compute_rij_matrix()
+		if self.rij_is_needed: self._compute_rij_matrix()
 
 		if self.hydrodynamics != "nohi":
 
@@ -133,7 +139,11 @@ class Box():
 
 		self._deterministic_step(dt)
 
+		count_move_attempts = 0
+
 		while True:
+
+			count_move_attempts += 1
 
 			self._generate_random_vector()
 
@@ -149,6 +159,8 @@ class Box():
 			else:
 
 				break
+
+			assert count_move_attempts < self.inp["max_move_attempts"], 'maximal number of move attepts exceeded'
 
 	#-------------------------------------------------------------------------------
 
@@ -168,7 +180,11 @@ class Box():
 
 		self._deterministic_step(dt, mult = 1.0 / self.m_midpoint)
 
+		count_move_attempts = 0
+
 		while True:
+
+			count_move_attempts += 1
 
 			self._generate_random_vector()
 
@@ -180,7 +196,7 @@ class Box():
 					self._stochastic_step(dt, mult = -1.0 / self.m_midpoint)
 					continue
 
-			self._compute_rij_matrix()
+			if self.rij_is_needed: self._compute_rij_matrix()
 
 			if self.hydrodynamics != "nohi":
 
@@ -233,6 +249,8 @@ class Box():
 			else:
 
 				break
+
+			assert count_move_attempts < self.inp["max_move_attempts"], 'maximal number of move attepts exceeded'
 
 	#-------------------------------------------------------------------------------
 
@@ -336,25 +354,7 @@ class Box():
 	# @timing
 	def _check_overlaps(self):
 
-		overlaps = False
-
-		for i in range(len(self.beads)-1):
-			for j in range(i+1, len(self.beads)):
-				pointer = self.beads[i].r - self.beads[j].r
-				radii_sum = self.beads[i].a + self.beads[j].a
-				radii_sum_pbc = self.box_length - radii_sum
-
-				if ( pointer[0] > radii_sum and pointer[0] < radii_sum_pbc ) or ( pointer[0] < -radii_sum and pointer[0] > -radii_sum_pbc ):
-					continue
-				elif ( pointer[1] > radii_sum and pointer[1] < radii_sum_pbc ) or ( pointer[1] < -radii_sum and pointer[1] > -radii_sum_pbc ):
-					continue
-				elif ( pointer[2] > radii_sum and pointer[2] < radii_sum_pbc ) or ( pointer[2] < -radii_sum and pointer[2] > -radii_sum_pbc ):
-					continue
-				else:
-					if overlap_pbc(self.beads[i], self.beads[j], self.box_length, epsilon = self.inp["overlap_treshold"]):
-						return True
-
-		return overlaps
+		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"])
 
 	#-------------------------------------------------------------------------------
 
