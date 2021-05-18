@@ -307,25 +307,3 @@ def check_overlaps(beads, box_length, overlap_treshold):
 	return overlaps == 1
 
 #-------------------------------------------------------------------------------
-
-def check_overlaps_python(beads, box_length, overlap_treshold):
-
-	overlaps = False
-
-	for i in range(len(beads)-1):
-		for j in range(i+1, len(beads)):
-			pointer = beads[i].r - beads[j].r
-			radii_sum = beads[i].a + beads[j].a
-			radii_sum_pbc = box_length - radii_sum
-
-			if ( pointer[0] > radii_sum and pointer[0] < radii_sum_pbc ) or ( pointer[0] < -radii_sum and pointer[0] > -radii_sum_pbc ):
-				continue
-			elif ( pointer[1] > radii_sum and pointer[1] < radii_sum_pbc ) or ( pointer[1] < -radii_sum and pointer[1] > -radii_sum_pbc ):
-				continue
-			elif ( pointer[2] > radii_sum and pointer[2] < radii_sum_pbc ) or ( pointer[2] < -radii_sum and pointer[2] > -radii_sum_pbc ):
-				continue
-			else:
-				if overlap_pbc(beads[i], beads[j], box_length, overlap_treshold):
-					return True
-
-	return overlaps

@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix
+from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix, check_overlaps
 
 #-------------------------------------------------------------------------------
 
@@ -36,6 +36,30 @@ def compute_pointer_pbc_matrix_python(beads, box_length):
 			rij[j][i] = -rij[i][j]
 
 	return rij
+
+#-------------------------------------------------------------------------------
+
+def check_overlaps_python(beads, box_length, overlap_treshold):
+
+	overlaps = False
+
+	for i in range(len(beads)-1):
+		for j in range(i+1, len(beads)):
+			pointer = beads[i].r - beads[j].r
+			radii_sum = beads[i].a + beads[j].a
+			radii_sum_pbc = box_length - radii_sum
+
+			if ( pointer[0] > radii_sum and pointer[0] < radii_sum_pbc ) or ( pointer[0] < -radii_sum and pointer[0] > -radii_sum_pbc ):
+				continue
+			elif ( pointer[1] > radii_sum and pointer[1] < radii_sum_pbc ) or ( pointer[1] < -radii_sum and pointer[1] > -radii_sum_pbc ):
+				continue
+			elif ( pointer[2] > radii_sum and pointer[2] < radii_sum_pbc ) or ( pointer[2] < -radii_sum and pointer[2] > -radii_sum_pbc ):
+				continue
+			else:
+				if overlap_pbc(beads[i], beads[j], box_length, overlap_treshold):
+					return True
+
+	return overlaps
 
 #-------------------------------------------------------------------------------
 
@@ -305,17 +329,41 @@ class TestBead(unittest.TestCase):
 
 	def test_pointer_pbc_matrix(self):
 
-		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+		np.random.seed(0)
 
-		c_ish = compute_pointer_pbc_matrix(beads, 10.0)
+		box_length = 10.0
 
-		python_ish = compute_pointer_pbc_matrix_python(beads, 10.0)
+		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(100) ]
+
+		c_ish = compute_pointer_pbc_matrix(beads, box_length)
+
+		python_ish = compute_pointer_pbc_matrix_python(beads, box_length)
 
 		for i in range(len(beads)):
 			for j in range(len(beads)):
 				for k in range(3):
 
 					self.assertEqual(c_ish[i][j][k], python_ish[i][j][k])
+
+	#---------------------------------------------------------------------------
+
+	def test_pointer_pbc_matrix(self):
+
+		np.random.seed(0)
+
+		box_length = 10.0
+
+		overlap_treshold = 0.0
+
+		for i in range(10000):
+
+			beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(10) ]
+
+			c_ish = check_overlaps(beads, box_length, overlap_treshold)
+
+			python_ish = check_overlaps_python(beads, box_length, overlap_treshold)
+
+			self.assertEqual(c_ish, python_ish)
 
 #-------------------------------------------------------------------------------
 
