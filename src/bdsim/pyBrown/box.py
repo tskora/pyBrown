@@ -254,7 +254,6 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	# @timing
 	def _deterministic_step(self, dt, mult = 1.0):
 
 		if self.hydrodynamics != "nohi":
@@ -268,7 +267,6 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	# @timing
 	def _stochastic_step(self, dt, mult = 1.0):
 
 		if self.hydrodynamics == "nohi":

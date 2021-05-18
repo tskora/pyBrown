@@ -81,9 +81,9 @@ void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_m
 
 	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
 
-	double* shifted_results;
+	int shift_results;
 
-	double* shifted_pointers;
+	int shift_pointers;
 
 	double rx, ry, rz, diag;
 
@@ -95,31 +95,31 @@ void RPY_M_matrix(double* as, double* pointers, int number_of_beads, double* M_m
 	{
 		diag = RPY_Mii_block(*(as+j));
 
-		shifted_results = results + 6*results_position(j,j,number_of_beads);
+		shift_results = 6*results_position(j,j,number_of_beads);
 
-		*shifted_results = diag;
-		*(shifted_results + 1) = diag;
-		*(shifted_results + 2) = diag;
+		*(results + shift_results) = diag;
+		*(results + shift_results + 1) = diag;
+		*(results + shift_results + 2) = diag;
 
 		for (i = j + 1; i < number_of_beads; i++)
 		{
 			Mij_values = calloc(6, sizeof(double));
 
-			shifted_results = results + 6*results_position(i,j,number_of_beads);
-			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
+			shift_results = 6*results_position(i,j,number_of_beads);
+			shift_pointers = 3*results_position(i-1,j,number_of_beads-1);
 
-			rx = *shifted_pointers;
-			ry = *(shifted_pointers + 1);
-			rz = *(shifted_pointers + 2);
+			rx = *(pointers + shift_pointers);
+			ry = *(pointers + shift_pointers + 1);
+			rz = *(pointers + shift_pointers + 2);
 
 			RPY_Mij_block(*(as+i), *(as+j), rx, ry, rz, Mij_values);
 
-			*shifted_results = *Mij_values;
-			*(shifted_results + 1) = *(Mij_values + 1);
-			*(shifted_results + 2) = *(Mij_values + 2);
-			*(shifted_results + 3) = *(Mij_values + 3);
-			*(shifted_results + 4) = *(Mij_values + 4);
-			*(shifted_results + 5) = *(Mij_values + 5);
+			*(results + shift_results) = *Mij_values;
+			*(results + shift_results + 1) = *(Mij_values + 1);
+			*(results + shift_results + 2) = *(Mij_values + 2);
+			*(results + shift_results + 3) = *(Mij_values + 3);
+			*(results + shift_results + 4) = *(Mij_values + 4);
+			*(results + shift_results + 5) = *(Mij_values + 5);
 
 			free(Mij_values);
 		}
@@ -174,56 +174,49 @@ void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double 
 	register int i = 0;
 	register int j = 0;
 
-	int I, J, J1, J2, I1, I2;
-
-	int r;
+	int I, J, J1, J2, I1, I2, r, shift_results, shift_pointers;
 
 	int N = 3*number_of_beads;
 
-	double* vector;
-
-	double* shifted_results;
-
-	double* shifted_pointers;
-
 	double rx, ry, rz;
+
+	double* vector;
 
 	double* results = calloc(3*(number_of_beads*number_of_beads+number_of_beads), sizeof(double));
 
+	#pragma omp parallel for private(i, vector, shift_results, shift_pointers, rx, ry, rz)
 	for (j = 0; j < number_of_beads; j++)
 	{
 		vector = calloc(6, sizeof(double));
 
 		RPY_Smith_Mii_block(*(as+j), box_length, alpha, m_max, n_max, vector);
 
-		shifted_results = results + 6*results_position(j,j,number_of_beads);
+		shift_results = 6*results_position(j,j,number_of_beads);
 
-		*(shifted_results) = *(vector);
-		*(shifted_results + 1) = *(vector + 1);
-		*(shifted_results + 2) = *(vector + 2);
-
-		free(vector);
+		*(results + shift_results) = *vector;
+		*(results + shift_results + 1) = *(vector + 1);
+		*(results + shift_results + 2) = *(vector + 2);
 
 		for (i = j + 1; i < number_of_beads; i++)
 		{
-			vector = calloc(6, sizeof(double));
+			shift_results = 6*results_position(i,j,number_of_beads);
+			shift_pointers = 3*results_position(i-1,j,number_of_beads-1);
 
-			shifted_results = results + 6*results_position(i,j,number_of_beads);
-			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
-
-			rx = *shifted_pointers;
-			ry = *(shifted_pointers + 1);
-			rz = *(shifted_pointers + 2);
+			rx = *(pointers + shift_pointers);
+			ry = *(pointers + shift_pointers + 1);
+			rz = *(pointers + shift_pointers + 2);
 
 			RPY_Smith_Mij_block(*(as+i), *(as+j), rx, ry, rz, box_length, alpha, m_max, n_max, vector);
 
-			*shifted_results = *vector;
-			*(shifted_results + 1) = *(vector + 1);
-			*(shifted_results + 2) = *(vector + 2);
-			*(shifted_results + 3) = *(vector + 3);
-			*(shifted_results + 4) = *(vector + 4);
-			*(shifted_results + 5) = *(vector + 5);
+			*(results + shift_results) = *vector;
+			*(results + shift_results + 1) = *(vector + 1);
+			*(results + shift_results + 2) = *(vector + 2);
+			*(results + shift_results + 3) = *(vector + 3);
+			*(results + shift_results + 4) = *(vector + 4);
+			*(results + shift_results + 5) = *(vector + 5);
 		}
+
+		free(vector);
 	}
 
 	for (j = 0; j < number_of_beads; j++)
@@ -300,7 +293,7 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 
 	int N = 3*number_of_beads;
 
-	double* shifted_pointers;
+	int shift_pointers;
 
 	double* results;
 
@@ -309,11 +302,11 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 		for (i = j + 1; i < number_of_beads; i++)
 		{
 
-			shifted_pointers = pointers + 3*results_position(i-1,j,number_of_beads-1);
+			shift_pointers = 3*results_position(i-1,j,number_of_beads-1);
 
-			rx = *(shifted_pointers);
-			ry = *(shifted_pointers+1);
-			rz = *(shifted_pointers+2);
+			rx = *(pointers + shift_pointers);
+			ry = *(pointers + shift_pointers + 1);
+			rz = *(pointers + shift_pointers + 2);
 
 			dist2 = rx*rx + ry*ry + rz*rz;
 			dist = sqrt(dist2);
