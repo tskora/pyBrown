@@ -43,7 +43,7 @@ class TestBox(unittest.TestCase):
 					  	   "check_overlaps": True, "lennard_jones_6": False,
 					  	   "lennard_jones_12": False, "energy_unit": "joule",
 					  	   "custom_interactions": False, "debug": False,
-					  	   "overlap_treshold": 0.0}
+					  	   "overlap_treshold": 0.0, "max_move_attempts": 1000000}
 
 		self.test_filename = 'test_box.txt'
 
