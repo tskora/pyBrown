@@ -47,7 +47,7 @@ class TestReactions(unittest.TestCase):
 
 	def test_reaction_string_parsing(self):
 
-		r = Reactions('A+B->C', 'A B <= 25.0')
+		r = Reactions('example_reaction', 'A+B->C', 'A B <= 25.0', 'end_simulation')
 
 		self.assertSequenceEqual(r.substrates, ['A', 'B'])
 
@@ -61,7 +61,7 @@ class TestReactions(unittest.TestCase):
 
 	def test_ntuples(self):
 
-		r = Reactions('A+B->C', 'A B <= 25.0')
+		r = Reactions('example_reaction', 'A+B->C', 'A B <= 25.0', 'end_simulation')
 
 		r.check_for_reactions(self.beads, self.rij)
 

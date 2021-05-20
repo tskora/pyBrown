@@ -22,13 +22,15 @@ from itertools import product
 
 class Reactions():
 
-	def __init__(self, reaction_string, condition_string, effect_string):
+	def __init__(self, reaction_name, reaction_string, condition_string, effect_string):
 
-		self._parse_reaction_string(reaction_string)
+		self.reaction_name = reaction_name.strip()
 
-		self._parse_condition_string(condition_string)
+		self._parse_reaction_string(reaction_string.strip())
 
-		self._parse_effect_string(effect_string)
+		self._parse_condition_string(condition_string.strip())
+
+		self._parse_effect_string(effect_string.strip())
 
 		self.reaction_count = 0
 
@@ -85,7 +87,7 @@ class Reactions():
 
 		for single_condition in condition_string.split(','):
 
-			label1, label2, sign, string_dist = single_condition.split(' ')
+			label1, label2, sign, string_dist = single_condition.strip().split(' ')
 
 			dist = float(string_dist)
 
@@ -97,9 +99,7 @@ class Reactions():
 
 	def _parse_effect_string(self, effect_string):
 
-		#TODO what reaction effects should be possible?
-
-		pass
+		self.effect_string = effect_string
 
 	#-------------------------------------------------------------------------------
 
@@ -122,6 +122,8 @@ class Reactions():
 				dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
 
 				dist = math.sqrt(dist2)
+
+				# print('dist={}\n'.format(dist))
 
 				assert bead_i.label+" "+bead_j.label in self.condition_dictionary.keys(), 'error in reactions -- unrecognized condition label'
 
@@ -159,6 +161,10 @@ class Reactions():
 
 		self.reaction_count += 1
 
+		if self.effect_string == "end_simulation":
+
+			self.end_simulation = True
+
 	#-------------------------------------------------------------------------------
 
 	def _unique_ntuples(self, indices):
@@ -189,7 +195,7 @@ class Reactions():
 
 		string_template = 'Reaction: {}'
 
-		return string_template.format(self.reaction_string)
+		return string_template.format(self.reaction_name + self.reaction_string)
 
 	#-------------------------------------------------------------------------------
 
@@ -202,6 +208,16 @@ class Reactions():
 def set_reactions(input_data):
 
 	reactions_for_simulation = []
+
+	if "reaction_configuration_strings" in input_data.keys():
+
+		for reaction_configuration_string in input_data["reaction_configuration_strings"]:
+
+			assert len( reaction_configuration_string.split('|') ) == 4, 'incorrect reaction configuration string'
+
+			reaction_name, reaction_string, condition_string, effect_string = reaction_configuration_string.split('|')
+
+			reactions_for_simulation.append( Reactions(reaction_name, reaction_string, condition_string, effect_string) )
 
 	return reactions_for_simulation
 
