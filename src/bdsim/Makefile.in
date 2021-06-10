@@ -342,7 +342,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = clib tests
-dist_bin_SCRIPTS = BD.py  BD-restart.py
+dist_bin_SCRIPTS = BD.py  BD-restart.py BD-NAM.py
 PYTHON_LIB_DIR = pyBrown
 PYTHON_LIB = $(PYTHON_LIB_DIR)/bead.py\
 	$(PYTHON_LIB_DIR)/box.py\
