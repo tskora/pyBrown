@@ -1107,9 +1107,9 @@ static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz
 
 	double ya11linv = l * JO_YA11_term(s, 1/l);
 
-	double xa12l = 0.5 * ( l + 1.0 ) * JO_XA12_term(s, l);
+	double xa12l = JO_XA12_term(s, l);
 
-	double ya12l = 0.5 * ( l + 1.0 ) * JO_YA12_term(s, l);
+	double ya12l = JO_YA12_term(s, l);
 
 	double mult = 6 * M_PI * ai;
 
@@ -1297,7 +1297,7 @@ static double JO_XA12_term(double s, double l)
 
 	int m, m1;
 
-	double mult, divisor;
+	double mult;
 
 	XA12_value += 2.0/s*JO_Xg_polynomial(l, 1)/s2;
 
@@ -1331,9 +1331,7 @@ static double JO_XA12_term(double s, double l)
 
 	}
 
-	divisor = -(1.0 + l)/2;
-
-	return XA12_value / divisor;
+	return -XA12_value;
 }
 
 // -------------------------------------------------------------------------------
@@ -1348,7 +1346,7 @@ static double JO_YA12_term(double s, double l)
 
 	int m, m1;
 
-	double mult, divisor;
+	double mult;
 
 	YA12_value += JO_Yg_polynomial(l, 2)*logs;
 
@@ -1381,9 +1379,7 @@ static double JO_YA12_term(double s, double l)
 		}
 	}
 
-	divisor = -(1.0 + l)/2;
-
-	return YA12_value / divisor;
+	return -YA12_value;
 }
 
 // -------------------------------------------------------------------------------
