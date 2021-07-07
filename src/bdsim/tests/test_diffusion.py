@@ -21,17 +21,18 @@ sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..'
 import unittest
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import JO_R_lubrication_correction_matrix
+from pyBrown.diffusion import RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 
 #-------------------------------------------------------------------------------
 
 class TestDiffusion(unittest.TestCase):
 
-	def test_R_lub_corr_symmetry(self):
+	def test_R_lub_corr_symmetry_cichocki(self):
 
 		box_length = 30.0
 
 		lubrication_cutoff = 10.0
+		cichocki_correction = True
 
 		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
 		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
@@ -39,8 +40,8 @@ class TestDiffusion(unittest.TestCase):
 		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
 		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff)
+		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
 
 		N = 3*len(beads_1)
 
@@ -54,14 +55,92 @@ class TestDiffusion(unittest.TestCase):
 		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
 		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff)
+		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
 
 		N = 3*len(beads_1)
 
 		for i in range(N):
 			for j in range(N):
 				self.assertAlmostEqual(R_1[i][j], R_2[(i+3)%N][(j+3)%N], places = 7)
+
+	#-------------------------------------------------------------------------------
+
+	def test_R_lub_corr_symmetry_no_cichocki(self):
+
+		box_length = 30.0
+
+		lubrication_cutoff = 10.0
+		cichocki_correction = False
+
+		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
+
+		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
+		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
+
+		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
+
+		N = 3*len(beads_1)
+
+		for i in range(N):
+			for j in range(N):
+				self.assertAlmostEqual(R_1[i][j], R_2[(i+3)%N][(j+3)%N], places = 7)
+
+		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0), Bead([10.0, 0.0, 0.0], 3.0) ]
+		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
+
+		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
+
+		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
+
+		N = 3*len(beads_1)
+
+		for i in range(N):
+			for j in range(N):
+				self.assertAlmostEqual(R_1[i][j], R_2[(i+3)%N][(j+3)%N], places = 7)
+
+	#-------------------------------------------------------------------------------
+
+	def test_M_RPY_Smith_symmetry(self):
+
+		box_length = 30.0
+		alpha = np.sqrt(np.pi)
+		m = 2
+		n = 2
+
+		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
+
+		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
+		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
+
+		M_1 = RPY_Smith_M_matrix(beads_1, pointers_1, box_length, alpha, m, n)
+		M_2 = RPY_Smith_M_matrix(beads_2, pointers_2, box_length, alpha, m, n)
+
+		N = 3*len(beads_1)
+
+		for i in range(N):
+			for j in range(N):
+				self.assertAlmostEqual(M_1[i][j], M_2[(i+3)%N][(j+3)%N], places = 7)
+
+		beads_1 = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0), Bead([10.0, 0.0, 0.0], 3.0) ]
+		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
+
+		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
+		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
+
+		M_1 = RPY_Smith_M_matrix(beads_1, pointers_1, box_length, alpha, m, n)
+		M_2 = RPY_Smith_M_matrix(beads_2, pointers_2, box_length, alpha, m, n)
+
+		N = 3*len(beads_1)
+
+		for i in range(N):
+			for j in range(N):
+				self.assertAlmostEqual(M_1[i][j], M_2[(i+3)%N][(j+3)%N], places = 7)		
 
 #-------------------------------------------------------------------------------
 

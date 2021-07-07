@@ -50,11 +50,11 @@ def M_rpy_smith_python(beads, pointers, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-def R_lub_corr_python(beads, pointers, lubrication_cutoff):
+def R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction):
 
 	corr = [ [ np.zeros((3,3)) for j in range( len(beads) ) ] for i in range( len(beads) ) ]
 
-	q = 0.5 * np.block( [ [np.identity(3), -np.identity(3)], [-np.identity(3), np.identity(3)] ] )
+	if cichocki_correction: q = 0.5 * np.block( [ [np.identity(3), -np.identity(3)], [-np.identity(3), np.identity(3)] ] )
 
 	for i, bi in enumerate(beads):
 
@@ -67,9 +67,19 @@ def R_lub_corr_python(beads, pointers, lubrication_cutoff):
 			if ( dist - bi.a - bj.a ) / ( bi.a + bj.a ) > lubrication_cutoff:
 				continue 
 
-			nf2b = np.transpose(q) @ R_jeffrey_python( bi.a, bj.a, pointers[i][j] ) @ q
+			R = R_jeffrey_python( bi.a, bj.a, pointers[i][j] )
 
-			ff2b = np.transpose(q) @ np.linalg.inv( M_rpy_python( [bi, bj], np.array([[pointers[i][i], pointers[i][j]], [pointers[j][i], pointers[j][j]]]) ) ) @ q
+			if cichocki_correction:
+
+				nf2b = np.transpose(q) @ R @ q
+
+				ff2b = np.transpose(q) @ np.linalg.inv( M_rpy_python( [bi, bj], np.array([[pointers[i][i], pointers[i][j]], [pointers[j][i], pointers[j][j]]]) ) ) @ q
+
+			else:
+
+				nf2b = R
+
+				ff2b = np.linalg.inv( M_rpy_python( [bi, bj], np.array([[pointers[i][i], pointers[i][j]], [pointers[j][i], pointers[j][j]]]) ) )
 
 			lub_corr = nf2b - ff2b
 
@@ -508,15 +518,17 @@ def R_jeffrey_python(ai, aj, pointer):
 
 	R = [ [ None , None ], [ None, None ] ]
 
+	const = 6 * np.pi * ai
+
 	R[0][0] = XA11_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA11_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
 
-	R[1][1] = XA11_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA11_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+	R[1][1] = l * ( XA11_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA11_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
-	R[0][1] = XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+	R[0][1] = 0.5 * ( l + 1.0 ) * ( XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
-	R[1][0] = XA12_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+	R[1][0] = 0.5 * ( l + 1.0 ) * ( XA12_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
-	return 3 * np.pi * ( ai + aj ) * np.block(R)
+	return const * np.block(R)
 
 #-------------------------------------------------------------------------------
 
@@ -568,7 +580,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	def test_R_lub_corr_large_cutoff(self):
+	def test_R_lub_corr_large_cutoff_cichocki(self):
 
 		box_length = 20.0
 
@@ -578,9 +590,9 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff)
+		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
-		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff)
+		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):
@@ -588,7 +600,27 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	def test_R_lub_corr_small_cutoff(self):
+	def test_R_lub_corr_large_cutoff_no_cichocki(self):
+
+		box_length = 20.0
+
+		lubrication_cutoff = 10.0
+
+		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+
+		pointers = compute_pointer_pbc_matrix(beads, box_length)
+
+		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+
+		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+
+		for i in range(3*len(beads)):
+			for j in range(3*len(beads)):
+				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_R_lub_corr_small_cutoff_cichocki(self):
 
 		box_length = 20.0
 
@@ -598,9 +630,29 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff)
+		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
-		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff)
+		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+
+		for i in range(3*len(beads)):
+			for j in range(3*len(beads)):
+				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_R_lub_corr_small_cutoff_no_cichocki(self):
+
+		box_length = 20.0
+
+		lubrication_cutoff = 1.0
+
+		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+
+		pointers = compute_pointer_pbc_matrix(beads, box_length)
+
+		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+
+		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):

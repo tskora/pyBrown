@@ -43,7 +43,8 @@ class TestBox(unittest.TestCase):
 					  	   "check_overlaps": True, "lennard_jones_6": False,
 					  	   "lennard_jones_12": False, "energy_unit": "joule",
 					  	   "custom_interactions": False, "debug": False,
-					  	   "overlap_treshold": 0.0, "max_move_attempts": 1000000}
+					  	   "overlap_treshold": 0.0, "max_move_attempts": 1000000,
+					  	   "cichocki_correction": True}
 
 		self.test_filename = 'test_box.txt'
 
@@ -461,7 +462,7 @@ class TestBox(unittest.TestCase):
 
 					Rff = np.linalg.inv(Mff)
 
-					Rlc = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff, cichocki_correction = self.mock_input["cichocki_correction"]) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot = Rlc + Rff
 
@@ -487,7 +488,7 @@ class TestBox(unittest.TestCase):
 
 					Rff_mid = np.linalg.inv(Mff_mid)
 
-					Rlc_mid = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc_mid = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff, cichocki_correction = self.mock_input["cichocki_correction"]) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot_mid = Rlc_mid + Rff_mid
 

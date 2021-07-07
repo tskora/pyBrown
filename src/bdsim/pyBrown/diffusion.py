@@ -95,7 +95,7 @@ def RPY_Smith_M_matrix(beads, pointers, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-def JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff):
+def JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction):
 
 	c_double = ctypes.c_double
 
@@ -118,7 +118,10 @@ def JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff):
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
-	lib.JO_R_lubrication_correction_matrix(a, p, N_c, lubrication_cutoff_c, my_arr)
+	if cichocki_correction: cichocki = ctypes.c_int(1)
+	else: cichocki = ctypes.c_int(0)
+
+	lib.JO_R_lubrication_correction_matrix(a, p, N_c, lubrication_cutoff_c, cichocki, my_arr)
 
 	M = np.reshape(my_arr, (3*N, 3*N))
 

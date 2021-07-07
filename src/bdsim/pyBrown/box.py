@@ -61,6 +61,7 @@ class Box():
 
 		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
 			self.lubrication_cutoff = self.inp["lubrication_cutoff"]
+			self.cichocki_correction = self.inp["cichocki_correction"]
 
 		self.propagation_scheme = self.inp["propagation_scheme"]
 		if self.propagation_scheme == "midpoint":
@@ -413,7 +414,7 @@ class Box():
 	# @timing
 	def _compute_Dtot_matrix(self):
 
-		self.R = JO_R_lubrication_correction_matrix(self.mobile_beads, self.rij, self.lubrication_cutoff) * self.viscosity / 10**19 + self.Rff
+		self.R = JO_R_lubrication_correction_matrix(self.mobile_beads, self.rij, self.lubrication_cutoff, self.cichocki_correction) * self.viscosity / 10**19 + self.Rff
 
 		self.D = self.kBT * np.linalg.inv(self.R)
 

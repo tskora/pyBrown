@@ -269,7 +269,7 @@ void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double 
 
 // -------------------------------------------------------------------------------
 
-void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double cutoff_distance, double* correction_matrix)
+void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double cutoff_distance, int cichocki_correction, double* correction_matrix)
 {
 	register int i = 0;
 
@@ -317,17 +317,24 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 
 				ff2b = calloc(18, sizeof(double));
 
-				temp_nf2b = calloc(18, sizeof(double));
+				if (cichocki_correction)
+				{
+					temp_nf2b = calloc(18, sizeof(double));
+					temp_ff2b = calloc(18, sizeof(double));
 
-				temp_ff2b = calloc(18, sizeof(double));
+					JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_nf2b);
+					Cichocki_2B_R_correction(temp_nf2b, nf2b);
+					RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_ff2b);
+					Cichocki_2B_R_correction(temp_ff2b, ff2b);
 
-				JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_nf2b);
-
-				Cichocki_2B_R_correction(temp_nf2b, nf2b);
-
-				RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_ff2b);
-
-				Cichocki_2B_R_correction(temp_ff2b, ff2b);
+					free(temp_nf2b);
+					free(temp_ff2b);
+				}
+				else
+				{
+					JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, nf2b);
+					RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, ff2b);
+				}
 
 				results = calloc(18, sizeof(double));
 
@@ -390,10 +397,6 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 				free(nf2b);
 
 				free(ff2b);
-
-				free(temp_nf2b);
-
-				free(temp_ff2b);
 
 				free(results);
 			}
@@ -1100,15 +1103,15 @@ static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz
 
 	double ya11l = JO_YA11_term(s, l);
 
-	double xa11linv = JO_XA11_term(s, 1/l);
+	double xa11linv = l * JO_XA11_term(s, 1/l);
 
-	double ya11linv = JO_YA11_term(s, 1/l);
+	double ya11linv = l * JO_YA11_term(s, 1/l);
 
-	double xa12linv = JO_XA12_term(s, 1/l);
+	double xa12l = 0.5 * ( l + 1.0 ) * JO_XA12_term(s, l);
 
-	double ya12linv = JO_YA12_term(s, 1/l);
+	double ya12l = 0.5 * ( l + 1.0 ) * JO_YA12_term(s, l);
 
-	double mult = 3 * M_PI * ( ai + aj );
+	double mult = 6 * M_PI * ai;
 
 	int i;
 
@@ -1142,17 +1145,17 @@ static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz
 
 	// block 10
 
-	*(R_matrix+12) = xa12linv*rx*rx/dist2 + ya12linv*(1 - rx*rx/dist2); // 30
+	*(R_matrix+12) = xa12l*rx*rx/dist2 + ya12l*(1 - rx*rx/dist2); // 30
 
-	*(R_matrix+13) = xa12linv*ry*ry/dist2 + ya12linv*(1 - ry*ry/dist2); // 41
+	*(R_matrix+13) = xa12l*ry*ry/dist2 + ya12l*(1 - ry*ry/dist2); // 41
 
-	*(R_matrix+14) = xa12linv*rz*rz/dist2 + ya12linv*(1 - rz*rz/dist2); // 52
+	*(R_matrix+14) = xa12l*rz*rz/dist2 + ya12l*(1 - rz*rz/dist2); // 52
 
-	*(R_matrix+15) = (xa12linv - ya12linv)*rx*ry/dist2; // 40
+	*(R_matrix+15) = (xa12l - ya12l)*rx*ry/dist2; // 40
 
-	*(R_matrix+16) = (xa12linv - ya12linv)*rx*rz/dist2; // 50
+	*(R_matrix+16) = (xa12l - ya12l)*rx*rz/dist2; // 50
 
-	*(R_matrix+17) = (xa12linv - ya12linv)*ry*rz/dist2; // 51
+	*(R_matrix+17) = (xa12l - ya12l)*ry*rz/dist2; // 51
 
 	for (i = 0; i < 18; i++)
 	{
