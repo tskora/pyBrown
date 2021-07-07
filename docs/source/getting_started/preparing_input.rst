@@ -139,6 +139,8 @@ Hydrodynamic interactions
 
     Setting ``"lubrication_cutoff"`` to ``2`` means that lubrication correction won't be calculated for beads with surfaces separated by a distance equal to double of the sum of their hydrodynamic radii.
 
+- ``"cichocki_correction": bool`` -- switching on/off the operation of removing collective movements of bead pairs from the lubrication correction, default: ''true''
+
 
 Physical conditions
 ^^^^^^^^^^^^^^^^^^^^
