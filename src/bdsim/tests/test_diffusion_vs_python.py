@@ -8,7 +8,7 @@ import unittest
 from scipy.special import erfc
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
+from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_2B_R_matrix, JO_R_lubrication_correction_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -577,6 +577,26 @@ class TestDiffusionVsPython(unittest.TestCase):
 		for i in range(3*N_beads):
 			for j in range(3*N_beads):
 				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_R_2B(self):
+
+		np.random.seed(0)
+
+		beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
+
+		for i in range( len(beads)-1 ):
+
+			for j in range( i+1, len(beads) ):
+
+				c_ish = JO_2B_R_matrix(beads[i], beads[j])
+
+				python_ish = R_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+				for ii in range(6):
+					for jj in range(6):
+						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
 
 	#---------------------------------------------------------------------------
 

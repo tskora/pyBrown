@@ -46,8 +46,6 @@ static void RPY_Q_function(double rx, double ry, double rz, double* matrix);
 
 static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix);
 
-static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix);
-
 static void Cichocki_2B_R_correction(double* temp_2b, double* result_2b);
 
 static double JO_XA11_term(double s, double l);
@@ -265,6 +263,82 @@ void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double 
 	}
 
 	free(results);
+}
+
+// -------------------------------------------------------------------------------
+
+void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
+{
+	double dist2 = rx*rx + ry*ry + rz*rz;
+
+	double dist = sqrt(dist2);
+
+	double s = 2*dist/(ai + aj);
+
+	double l = aj/ai;
+
+	double xa11l = JO_XA11_term(s, l);
+
+	double ya11l = JO_YA11_term(s, l);
+
+	double xa11linv = l * JO_XA11_term(s, 1/l);
+
+	double ya11linv = l * JO_YA11_term(s, 1/l);
+
+	double xa12l = JO_XA12_term(s, l);
+
+	double ya12l = JO_YA12_term(s, l);
+
+	double mult = 6 * M_PI * ai;
+
+	int i;
+
+	// block 00
+
+	*R_matrix = xa11l*rx*rx/dist2 + ya11l*(1 - rx*rx/dist2); // 00
+
+	*(R_matrix+1) = xa11l*ry*ry/dist2 + ya11l*(1 - ry*ry/dist2); // 11
+
+	*(R_matrix+2) = xa11l*rz*rz/dist2 + ya11l*(1 - rz*rz/dist2); // 22
+
+	*(R_matrix+3) = (xa11l - ya11l)*rx*ry/dist2; // 10
+
+	*(R_matrix+4) = (xa11l - ya11l)*rx*rz/dist2; // 20
+
+	*(R_matrix+5) = (xa11l - ya11l)*ry*rz/dist2; // 21
+
+	// block 11
+
+	*(R_matrix+6) = xa11linv*rx*rx/dist2 + ya11linv*(1 - rx*rx/dist2); // 33
+
+	*(R_matrix+7) = xa11linv*ry*ry/dist2 + ya11linv*(1 - ry*ry/dist2); // 44
+
+	*(R_matrix+8) = xa11linv*rz*rz/dist2 + ya11linv*(1 - rz*rz/dist2); // 55
+
+	*(R_matrix+9) = (xa11linv - ya11linv)*rx*ry/dist2; // 43
+
+	*(R_matrix+10) = (xa11linv - ya11linv)*rx*rz/dist2; // 53
+
+	*(R_matrix+11) = (xa11linv - ya11linv)*ry*rz/dist2; // 54
+
+	// block 10
+
+	*(R_matrix+12) = xa12l*rx*rx/dist2 + ya12l*(1 - rx*rx/dist2); // 30
+
+	*(R_matrix+13) = xa12l*ry*ry/dist2 + ya12l*(1 - ry*ry/dist2); // 41
+
+	*(R_matrix+14) = xa12l*rz*rz/dist2 + ya12l*(1 - rz*rz/dist2); // 52
+
+	*(R_matrix+15) = (xa12l - ya12l)*rx*ry/dist2; // 40
+
+	*(R_matrix+16) = (xa12l - ya12l)*rx*rz/dist2; // 50
+
+	*(R_matrix+17) = (xa12l - ya12l)*ry*rz/dist2; // 51
+
+	for (i = 0; i < 18; i++)
+	{
+		*(R_matrix+i) *= mult;
+	}
 }
 
 // -------------------------------------------------------------------------------
@@ -1085,82 +1159,6 @@ static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double r
 	free(Mij);
 
 	free(matrix);
-}
-
-// -------------------------------------------------------------------------------
-
-static void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
-{
-	double dist2 = rx*rx + ry*ry + rz*rz;
-
-	double dist = sqrt(dist2);
-
-	double s = 2*dist/(ai + aj);
-
-	double l = aj/ai;
-
-	double xa11l = JO_XA11_term(s, l);
-
-	double ya11l = JO_YA11_term(s, l);
-
-	double xa11linv = l * JO_XA11_term(s, 1/l);
-
-	double ya11linv = l * JO_YA11_term(s, 1/l);
-
-	double xa12l = JO_XA12_term(s, l);
-
-	double ya12l = JO_YA12_term(s, l);
-
-	double mult = 6 * M_PI * ai;
-
-	int i;
-
-	// block 00
-
-	*R_matrix = xa11l*rx*rx/dist2 + ya11l*(1 - rx*rx/dist2); // 00
-
-	*(R_matrix+1) = xa11l*ry*ry/dist2 + ya11l*(1 - ry*ry/dist2); // 11
-
-	*(R_matrix+2) = xa11l*rz*rz/dist2 + ya11l*(1 - rz*rz/dist2); // 22
-
-	*(R_matrix+3) = (xa11l - ya11l)*rx*ry/dist2; // 10
-
-	*(R_matrix+4) = (xa11l - ya11l)*rx*rz/dist2; // 20
-
-	*(R_matrix+5) = (xa11l - ya11l)*ry*rz/dist2; // 21
-
-	// block 11
-
-	*(R_matrix+6) = xa11linv*rx*rx/dist2 + ya11linv*(1 - rx*rx/dist2); // 33
-
-	*(R_matrix+7) = xa11linv*ry*ry/dist2 + ya11linv*(1 - ry*ry/dist2); // 44
-
-	*(R_matrix+8) = xa11linv*rz*rz/dist2 + ya11linv*(1 - rz*rz/dist2); // 55
-
-	*(R_matrix+9) = (xa11linv - ya11linv)*rx*ry/dist2; // 43
-
-	*(R_matrix+10) = (xa11linv - ya11linv)*rx*rz/dist2; // 53
-
-	*(R_matrix+11) = (xa11linv - ya11linv)*ry*rz/dist2; // 54
-
-	// block 10
-
-	*(R_matrix+12) = xa12l*rx*rx/dist2 + ya12l*(1 - rx*rx/dist2); // 30
-
-	*(R_matrix+13) = xa12l*ry*ry/dist2 + ya12l*(1 - ry*ry/dist2); // 41
-
-	*(R_matrix+14) = xa12l*rz*rz/dist2 + ya12l*(1 - rz*rz/dist2); // 52
-
-	*(R_matrix+15) = (xa12l - ya12l)*rx*ry/dist2; // 40
-
-	*(R_matrix+16) = (xa12l - ya12l)*rx*rz/dist2; // 50
-
-	*(R_matrix+17) = (xa12l - ya12l)*ry*rz/dist2; // 51
-
-	for (i = 0; i < 18; i++)
-	{
-		*(R_matrix+i) *= mult;
-	}
 }
 
 // -------------------------------------------------------------------------------

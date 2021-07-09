@@ -216,6 +216,8 @@ class Box():
 
 			stochastic_drift = self.m_midpoint / 2 * math.sqrt(2 * dt) * ( self.B - B0 ) @ self.N
 
+			if self.inp["debug"]: print('stochastic drift: {}'.format(stochastic_drift))
+
 			drift = stochastic_drift + deterministic_drift
 
 			self.D = D0
