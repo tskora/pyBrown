@@ -88,6 +88,8 @@ class Box():
 		else:
 			self.rij_is_needed = False
 
+		print("divergence included")
+
 	#-------------------------------------------------------------------------------
 
 	# @timing
@@ -126,7 +128,12 @@ class Box():
 
 		self._compute_forces()
 
-		if self.propagation_scheme == "ermak": self._ermak_step(dt)
+		if self.propagation_scheme == "ermak":
+			self._ermak_step(dt)
+			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+				if build_Dff:
+					self._compute_divergence_of_D_matrix()
+					self._translate_beads(self.divergence*dt)
 
 		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
 
@@ -438,6 +445,56 @@ class Box():
 			self.B = np.linalg.cholesky(self.D)
 
 			if self.inp["debug"]: print('decomposed diffusion matrix: {}\n'.format(self.B.tolist()))
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_divergence_of_D_matrix(self):
+
+		eps = 0.00001
+
+		self.divergence = np.zeros(3*len(self.mobile_beads))
+
+		for i, bead in enumerate( self.mobile_beads ):
+
+			for j, vector in enumerate( [ [eps, 0.0, 0.0], [0.0, eps, 0.0], [0.0, 0.0, eps] ] ):
+
+				vector = np.array(vector)
+
+				bead.translate(vector)
+
+				self._compute_rij_matrix()
+
+				if self.hydrodynamics == "rpy" or self.hydrodynamics == "rpy_smith":
+					self._compute_Dff_matrix()
+				if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+					self._compute_Dff_matrix()
+					self._compute_Dtot_matrix()
+
+				self.divergence += self.D[:][3*i + j]
+
+				# print(self.divergence)
+
+				bead.translate(-2*vector)
+
+				self._compute_rij_matrix()
+
+				if self.hydrodynamics == "rpy" or self.hydrodynamics == "rpy_smith":
+					self._compute_Dff_matrix()
+				if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+					self._compute_Dff_matrix()
+					self._compute_Dtot_matrix()
+
+				self.divergence -= self.D[:][3*i + j]
+
+				# print(self.divergence)
+
+				bead.translate(vector)
+
+				self._compute_rij_matrix()
+
+				# print()
+
+		self.divergence /= 2.0 * eps
 
 	#-------------------------------------------------------------------------------
 
