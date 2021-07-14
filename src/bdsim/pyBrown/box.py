@@ -88,8 +88,6 @@ class Box():
 		else:
 			self.rij_is_needed = False
 
-		print("divergence included")
-
 	#-------------------------------------------------------------------------------
 
 	# @timing
@@ -131,9 +129,8 @@ class Box():
 		if self.propagation_scheme == "ermak":
 			self._ermak_step(dt)
 			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-				if build_Dff:
-					self._compute_divergence_of_D_matrix()
-					self._translate_beads(self.divergence*dt)
+				self._compute_divergence_of_D_matrix()
+				self._translate_beads(self.divergence*dt)
 
 		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
 
@@ -448,11 +445,21 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	def _compute_divergence_of_D_matrix(self):
+	def _compute_divergence_of_D_matrix(self, build_Dff, build_Dnf):
 
-		eps = 0.00001
+		eps = 0.0000001
 
-		self.divergence = np.zeros(3*len(self.mobile_beads))
+		D0 = np.copy(self.D)
+
+		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+
+			Mff0 = np.copy(self.Mff)
+
+			Rff0 = np.copy(self.Rff)
+
+			R0 = np.copy(self.R)
+
+		self.divergence = -np.sum( self.D, axis = 1 )
 
 		for i, bead in enumerate( self.mobile_beads ):
 
@@ -464,37 +471,31 @@ class Box():
 
 				self._compute_rij_matrix()
 
-				if self.hydrodynamics == "rpy" or self.hydrodynamics == "rpy_smith":
-					self._compute_Dff_matrix()
-				if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-					self._compute_Dff_matrix()
-					self._compute_Dtot_matrix()
+				if self.hydrodynamics != "nohi":
+
+					if build_Dff:
+						self._compute_Dff_matrix()
+
+					if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+
+						if build_Dnf:
+							self._compute_Dtot_matrix()
 
 				self.divergence += self.D[:][3*i + j]
 
-				# print(self.divergence)
+				bead.translate(-vector)
 
-				bead.translate(-2*vector)
+		self.D = D0
 
-				self._compute_rij_matrix()
+		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
 
-				if self.hydrodynamics == "rpy" or self.hydrodynamics == "rpy_smith":
-					self._compute_Dff_matrix()
-				if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-					self._compute_Dff_matrix()
-					self._compute_Dtot_matrix()
+			self.Mff = Mff0
 
-				self.divergence -= self.D[:][3*i + j]
+			self.Rff = Rff0
 
-				# print(self.divergence)
+			self.R = R0
 
-				bead.translate(vector)
-
-				self._compute_rij_matrix()
-
-				# print()
-
-		self.divergence /= 2.0 * eps
+		self.divergence /= eps
 
 	#-------------------------------------------------------------------------------
 
