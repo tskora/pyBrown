@@ -129,7 +129,7 @@ class Box():
 		if self.propagation_scheme == "ermak":
 			self._ermak_step(dt)
 			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-				self._compute_divergence_of_D_matrix()
+				self._compute_divergence_of_D_matrix(build_Dff, build_Dnf)
 				self._translate_beads(self.divergence*dt)
 
 		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
