@@ -480,8 +480,6 @@ class TestBox(unittest.TestCase):
 
 						bead.translate( BX[3*i:3*(i+1)] / m )
 
-					# pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
-
 					pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
 
 					Mff_mid = RPY_Smith_M_matrix(beads_copy, pointers, self.mock_input["box_length"], self.mock_input["ewald_alpha"], n, n) * 10**19 / self.mock_input["viscosity"]
@@ -500,7 +498,7 @@ class TestBox(unittest.TestCase):
 
 					Btot_mid = np.linalg.cholesky(Dtot_mid)
 
-					BX_mid = Btot_mid @ Ni * math.sqrt(2*dt)
+					BX_mid = Dtot_mid @ np.linalg.inv( np.transpose(Btot) ) @ Ni * math.sqrt(2*dt)
 
 					BX_drift = ( BX_mid - BX ) * m / 2
 
