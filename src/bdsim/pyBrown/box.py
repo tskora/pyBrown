@@ -126,11 +126,7 @@ class Box():
 
 		self._compute_forces()
 
-		if self.propagation_scheme == "ermak":
-			self._ermak_step(dt)
-			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
-				self._compute_divergence_of_D_matrix(build_Dff, build_Dnf)
-				self._translate_beads(self.divergence*dt)
+		if self.propagation_scheme == "ermak": self._ermak_step(dt, build_Dff, build_Dnf)
 
 		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
 
@@ -140,9 +136,15 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	def _ermak_step(self, dt):
+	def _ermak_step(self, dt, build_Dff, build_Dnf):
 
 		self._deterministic_step(dt)
+
+		if self.inp["divergence_term"]:
+
+			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+				self._compute_divergence_of_D_matrix(build_Dff, build_Dnf)
+				self._translate_beads(self.divergence_term*dt)
 
 		count_move_attempts = 0
 
@@ -459,7 +461,7 @@ class Box():
 
 			R0 = np.copy(self.R)
 
-		self.divergence = -np.sum( self.D, axis = 1 )
+		self.divergence_term = -np.sum( self.D, axis = 1 )
 
 		for i, bead in enumerate( self.mobile_beads ):
 
@@ -481,7 +483,7 @@ class Box():
 						if build_Dnf:
 							self._compute_Dtot_matrix()
 
-				self.divergence += self.D[:][3*i + j]
+				self.divergence_term += self.D[:][3*i + j]
 
 				bead.translate(-vector)
 
@@ -495,7 +497,7 @@ class Box():
 
 			self.R = R0
 
-		self.divergence /= eps
+		self.divergence_term /= eps
 
 	#-------------------------------------------------------------------------------
 

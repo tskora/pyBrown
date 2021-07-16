@@ -44,7 +44,7 @@ class TestBox(unittest.TestCase):
 					  	   "lennard_jones_12": False, "energy_unit": "joule",
 					  	   "custom_interactions": False, "debug": False,
 					  	   "overlap_treshold": 0.0, "max_move_attempts": 1000000,
-					  	   "cichocki_correction": True}
+					  	   "cichocki_correction": True, "divergence_term": False}
 
 		self.test_filename = 'test_box.txt'
 
@@ -263,8 +263,6 @@ class TestBox(unittest.TestCase):
 		b = Box(beads, self.mock_input)
 
 		for iteration in range(Nit):
-
-			# pointers = [ [ pointer_pbc(beads_copy[i], beads_copy[j], self.mock_input["box_length"]) for i in range(len(beads)) ] for j in range(len(beads)) ]
 
 			pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
 

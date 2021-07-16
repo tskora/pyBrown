@@ -46,6 +46,7 @@ def main(input_filename):
 				"progress_bar": False,
 				"seed": None, "immobile_labels": [],
 				"propagation_scheme": "ermak", "m_midpoint": 100,
+				"divergence_term": False,
 				"check_overlaps": True,
 				"external_force": [0.0, 0.0, 0.0],
 				"lennard_jones_6": False, "lennard_jones_12": False,
