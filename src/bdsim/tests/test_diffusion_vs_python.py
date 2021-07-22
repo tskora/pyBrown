@@ -66,7 +66,7 @@ def M_rpy_smith_python(beads, pointers, box_length, alpha, m, n):
 
 #-------------------------------------------------------------------------------
 
-def R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction):
+def R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction):
 
 	corr = [ [ np.zeros((3,3)) for j in range( len(beads) ) ] for i in range( len(beads) ) ]
 
@@ -83,7 +83,7 @@ def R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction):
 			if ( dist - bi.a - bj.a ) / ( bi.a + bj.a ) > lubrication_cutoff:
 				continue 
 
-			R = R_jeffrey_python( bi.a, bj.a, pointers[i][j] )
+			R = RA_jeffrey_python( bi.a, bj.a, pointers[i][j] )
 
 			if cichocki_correction:
 
@@ -365,7 +365,7 @@ def results_position(i, j, N):
 
 #-------------------------------------------------------------------------------
 
-def X_f_poly_python(l, rank):
+def XA_f_poly_python(l, rank):
 
 	if rank == 0: return 1
 	if rank == 1: return 3 * l
@@ -383,7 +383,7 @@ def X_f_poly_python(l, rank):
 
 #-------------------------------------------------------------------------------
 
-def Y_f_poly_python(l, rank):
+def YA_f_poly_python(l, rank):
 
 	if rank == 0: return 1
 	if rank == 1: return 3 / 2 * l
@@ -401,7 +401,7 @@ def Y_f_poly_python(l, rank):
 
 #-------------------------------------------------------------------------------
 
-def X_g_poly_python(l, rank):
+def XA_g_poly_python(l, rank):
 
 	if rank == 1: return 2 * l**2 * ( 1 + l )**(-3)
 	if rank == 2: return 1 / 5 * l * ( 1 + 7 * l + l**2 ) * ( 1 + l )**(-3)
@@ -410,10 +410,78 @@ def X_g_poly_python(l, rank):
 
 #-------------------------------------------------------------------------------
 
-def Y_g_poly_python(l, rank):
+def YA_g_poly_python(l, rank):
 
 	if rank == 2: return 4 / 15 * l * ( 2 + l + 2 * l**2 ) * ( 1 + l )**(-3)
 	if rank == 3: return 2 / 375 * ( 16 - 45 * l + 58 * l**2 - 45 * l**3 + 16 * l**4 ) * ( 1 + l )**(-3)
+	else: return None
+
+#-------------------------------------------------------------------------------
+
+def YB_f_poly_python(l, rank):
+
+	if rank == 0 or rank == 1: return 0.0
+	if rank == 2: return -6.0*l
+	if rank == 3: return -9.0*l
+	if rank == 4: return -27.0 / 2.0 * l**2
+	if rank == 5: return -12.0*l - 81.0/4.0*l**2 - 36.0*l**3
+	if rank == 6: return -108.0*l**2 - 243.0/8.0*l**3 - 72.0*l**4
+	if rank == 7: return -189.0*l**2 - 8409.0/16.0*l**3 - 243.0*l**4 - 144.0*l**5
+	if rank == 8: return -432.0*l**2 - 486.0*l**3 - 77451.0/32.0*l**4 - 405*l**5 - 288.0*l**6
+	if rank == 9: return -864.0*l**2 - 3159.0/4.0*l**3 - 283041.0/64.0*l**4 - 30525.0/4.0*l**5 - 1620.0*l**6 - 576*l**7
+	if rank == 10: return -1728.0*l**2 - 3888.0*l**3 - 59553.0/4.0*l**4 - 1125603.0/128.0*l**5 - 22002.0*l**6 - 2916*l**7 - 1152.0*l**8
+	if rank == 11: return -3456.0*l**2 - 6804.0*l**3 - 614481.0/16.0*l**4 - 4579497.0/256.0*l**5 - 536679.0/16.0*l**6 - 73989.0*l**7 - 9072.0*l**8 - 2304.0*l**9
+	else: return None
+
+#-------------------------------------------------------------------------------
+
+def YB_g_poly_python(l, rank):
+
+	if rank == 2: return -1.0 / 5.0 * l * (4.0 + l) / (1 + l)**2
+	if rank == 3: return -1.0 / 250.0 * ( 32.0 - 33.0*l + 83.0*l**2 + 43.0*l**3 ) / (1 + l)**2
+	else: return None
+
+#-------------------------------------------------------------------------------
+
+def XC_f_poly_python(l, rank):
+
+	if rank == 0: return 1.0
+	if rank == 1 or rank == 2: return 0.0
+	if rank == 3: return 8.0*l**3
+	if rank == 4 or rank == 5: return 0.0
+	if rank == 6: return 64.0*l**3
+	if rank == 7: return 0.0
+	if rank == 8: return 768.0*l**5
+	if rank == 9: return 512.0*l**6
+	if rank == 10: return 6144*l**7
+	if rank == 11: return 6144.0*(l**6 + l**8)
+	else: return None
+
+#-------------------------------------------------------------------------------
+
+def YC_f_poly_python(l, rank):
+
+	if rank == 0: return 1.0
+	if rank == 1 or rank == 2: return 0.0
+	if rank == 3: return 4.0*l**3
+	if rank == 4: return 12.0*l
+	if rank == 5: return 18.0*l**4
+	if rank == 6: return 27.0*l**2 + 256.0*l**3
+	if rank == 7: return 72.0*l**4 + 40.5*l**5 + 72.0*l**6
+	if rank == 8: return 216.0*l**2 + 243.0/4.0*l**3 + 216.0*l**4 + 2496.0*l**5
+	if rank == 9: return 288.0*l**4 + 486.0*l**5 - 6439.0/8.0*l**6 + 486.0*l**7 + 288.0*l**8
+	if rank == 10: return 864*l**2 + 972*l**3 + 151179.0/16.0*l**4 + 972.0*l**5 + 1296.0*l**6 + 18432.0*l**7
+	if rank == 11: return 1152.0*l**4 + 3240.0*l**5 - 10947.0/2.0*l**6 + 518049.0/32.0*l**7 - 10947.0/2.0*l**8 + 3240.0*l**9 + 1152.0*l**10
+	else: return None
+
+#-------------------------------------------------------------------------------
+
+def YC_g_poly_python(l, rank):
+
+	if rank == 2: return 2.0 * l / 5.0 / (1.0 + l)
+	if rank == 3: return 1.0 / 125.0 * ( 8.0 + 6.0*l + 33.0*l**2 ) / (1.0 + l)
+	if rank == 4: return 4.0 / 5.0 * l**2 / (1.0 + l)**4
+	if rank == 5: return 4.0 / 125.0 * l ( 43.0 - 24.0 * l + 43.0 * l**2 ) / (1.0 + l)**4
 	else: return None
 
 #-------------------------------------------------------------------------------
@@ -422,13 +490,13 @@ def XA11_python(s, l):
 
 	answer = 0.0
 
-	answer += X_g_poly_python(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
+	answer += XA_g_poly_python(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
 
-	answer -= X_g_poly_python(l, 2) * np.log( 1 - 4 * s**(-2) )
+	answer -= XA_g_poly_python(l, 2) * np.log( 1 - 4 * s**(-2) )
 
-	answer -= X_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
+	answer -= XA_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
 
-	answer += X_f_poly_python(l, 0) - X_g_poly_python(l, 1)
+	answer += XA_f_poly_python(l, 0) - XA_g_poly_python(l, 1)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 0 ) ]:
 
@@ -437,9 +505,9 @@ def XA11_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * X_f_poly_python(l, m) - X_g_poly_python(l, 1) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * XA_f_poly_python(l, m) - XA_g_poly_python(l, 1) )
 
-		answer += mult * ( 4 * m**(-1) * m1**(-1) * X_g_poly_python(l, 3) - 2 * m**(-1) * X_g_poly_python(l, 2) )
+		answer += mult * ( 4 * m**(-1) * m1**(-1) * XA_g_poly_python(l, 3) - 2 * m**(-1) * XA_g_poly_python(l, 2) )
 
 	return answer
 
@@ -449,11 +517,11 @@ def YA11_python(s, l):
 
 	answer = 0.0
 
-	answer -= Y_g_poly_python(l, 2) * np.log( 1 - 4 * s**(-2) )
+	answer -= YA_g_poly_python(l, 2) * np.log( 1 - 4 * s**(-2) )
 
-	answer -= Y_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
+	answer -= YA_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( 1 - 4 * s**(-2) )
 
-	answer += Y_f_poly_python(l, 0)
+	answer += YA_f_poly_python(l, 0)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 0 ) ]:
 
@@ -462,9 +530,9 @@ def YA11_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * Y_f_poly_python(l, m) - 2 * m**(-1) * Y_g_poly_python(l, 2) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * YA_f_poly_python(l, m) - 2 * m**(-1) * YA_g_poly_python(l, 2) )
 
-		answer += mult * 4 * m**(-1) * m1**(-1) * Y_g_poly_python(l, 3)
+		answer += mult * 4 * m**(-1) * m1**(-1) * YA_g_poly_python(l, 3)
 
 	return answer
 
@@ -474,11 +542,11 @@ def XA12_python(s, l):
 
 	answer = 0.0
 
-	answer += 2 * s**(-1) * X_g_poly_python(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
+	answer += 2 * s**(-1) * XA_g_poly_python(l, 1) * ( 1 - 4 * s**(-2) )**(-1)
 
-	answer += X_g_poly_python(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
+	answer += XA_g_poly_python(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
 
-	answer += X_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) ) + 4 * X_g_poly_python(l, 3) * s**(-1)
+	answer += XA_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) ) + 4 * XA_g_poly_python(l, 3) * s**(-1)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 1 ) ]:
 
@@ -487,9 +555,9 @@ def XA12_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * X_f_poly_python(l, m) - X_g_poly_python(l, 1) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * XA_f_poly_python(l, m) - XA_g_poly_python(l, 1) )
 
-		answer += mult * ( 4 * m**(-1) * m1**(-1) * X_g_poly_python(l, 3) - 2 * m**(-1) * X_g_poly_python(l, 2) )
+		answer += mult * ( 4 * m**(-1) * m1**(-1) * XA_g_poly_python(l, 3) - 2 * m**(-1) * XA_g_poly_python(l, 2) )
 
 	divisor = -1 / 2 * ( 1 + l )
 
@@ -501,11 +569,11 @@ def YA12_python(s, l):
 
 	answer = 0.0
 
-	answer += Y_g_poly_python(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
+	answer += YA_g_poly_python(l, 2) * np.log( ( s + 2 ) / ( s - 2 ) )
 
-	answer += Y_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) )
+	answer += YA_g_poly_python(l, 3) * ( 1 - 4 * s**(-2) ) * np.log( ( s + 2 ) / ( s - 2 ) )
 
-	answer += 4 * Y_g_poly_python(l, 3) * s**(-1)
+	answer += 4 * YA_g_poly_python(l, 3) * s**(-1)
 
 	for m in [ mi for mi in range(1, 12) if ( mi%2 == 1 ) ]:
 
@@ -514,9 +582,9 @@ def YA12_python(s, l):
 
 		mult = ( 2 / s )**m
 
-		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * Y_f_poly_python(l, m) - 2 * m**(-1) * Y_g_poly_python(l, 2) )
+		answer += mult * ( 2**(-m) * ( 1 + l )**(-m) * YA_f_poly_python(l, m) - 2 * m**(-1) * YA_g_poly_python(l, 2) )
 
-		answer += mult * ( 4 * m**(-1) * m1**(-1) * Y_g_poly_python(l, 3) )
+		answer += mult * ( 4 * m**(-1) * m1**(-1) * YA_g_poly_python(l, 3) )
 
 	divisor = -1 / 2 * ( 1 + l )
 
@@ -524,7 +592,128 @@ def YA12_python(s, l):
 
 #-------------------------------------------------------------------------------
 
-def R_jeffrey_python(ai, aj, pointer):
+def YB11_python(s, l):
+
+	answer = 0.0
+
+	answer += YB_g_poly_python(l, 2) * np.log( (s+2)/(s-2) )
+
+	answer += YB_g_poly_python(l, 3) * (1.0 - 4*s**(-2)) * np.log( (s+2)/(s-2) )
+
+	answer += 4*YB_g_poly_python(l, 3)/s
+
+	for m in [1, 3, 5, 7, 9, 11]:
+
+		if m == 2: m1 = -2
+		else: m1 = m - 2
+
+		answer += ( 2**(-m) * (1.0+l)**(-m) * YB_f_poly_python(l, m) - 2.0 / m * YB_g_poly_python(l, 2) + 4.0 / m / m1 * YB_g_poly_python(l, 3) ) * (2.0/s)**m
+
+	return answer
+
+#-------------------------------------------------------------------------------
+
+def YB12_python(s, l):
+
+	divisor = -1.0 / 4.0 * (1+l)**2
+
+	answer = 0.0
+
+	answer -= YB_g_poly_python(l, 2) * np.log(1 - 4.0*s**(-2))
+
+	answer -= YB_g_poly_python(l, 3) * (1 - 4.0*s**(-2)) * np.log(1 - 4.0*s**(-2))
+
+	for m in [2, 4, 6, 8, 10]:
+
+		if m == 2: m1 = -2
+		else: m1 = m - 2
+
+		answer += ( 2**(-m) * (1+l)**(-m) * YB_f_poly_python(l, m) - 2.0 / m * YB_g_poly_python(l, 2) + 4.0 / m / m1 * YB_g_poly_python(l, 3) ) * (2.0/s)**m
+
+	return answer / divisor
+
+#-------------------------------------------------------------------------------
+
+def XC11_python(s, l):
+
+	answer = 1.0
+
+	lconst = l**2 / (1+l)
+
+	answer += lconst/2 * np.log( 1.0 - 4.0*s**(-2) )
+
+	answer += lconst / s * np.log( (s+2.0) / (s-2.0) )
+
+	for k in range(1, 6):
+
+		answer += (1+l)**(-2*k) * XC_f_poly_python(l, 2*k) - 2**(2*k+1) / k / (2*k-1) * lconst / 4 * s**(-2*k)
+
+	return answer
+
+#-------------------------------------------------------------------------------
+
+def YC11_python(s, l):
+
+	answer = YC_f_poly_python(l, 0)
+
+	answer -= YC_g_poly_python(l, 2) * np.log(1.0 - 4.0*s**(-2))
+
+	answer -= YC_g_poly_python(l, 3) * (1.0 - 4.0*s**(-2)) * np.log(1.0 - 4.0*s**(-2))
+
+	for m in [2, 4, 6, 8, 10]:
+
+		if m == 2: m1 = -2
+		else: m1 = m - 2
+
+		answer += ( 2.0**(-m) * (1.0+l)**(-m) * YC_f_poly_python(l, m) - 2 / m * YC_g_poly_python(l, 2) + 4.0 / m / m1 * YC_g_poly_python(l, 3) ) * (2.0/s)**m
+
+	return answer
+
+#-------------------------------------------------------------------------------
+
+def XC12_python(s, l):
+
+	answer = 0.0
+
+	lconst = l**2 / (1+l)
+	lconst2 = 1 / (1+l)**3
+
+	answer += 4*lconst*lconst2 * np.log( (s+2) / (s-2) )
+
+	answer += 8*lconst*lconst2 / s * np.log(1.0 - 4*s**(-2))
+
+	for k in range(1, 6):
+
+		answer -= 8*lconst2 * ( (1.0+l)**(-2*k-1) * XC_f_poly_python(l, 2*k+1) - 2**(2*k+2) / k / (2*k+1) * lconst ) * s**(-2*k-1)
+
+	return answer
+
+#-------------------------------------------------------------------------------
+
+def YC12_python(s, l):
+
+	divisor = 1.0 / 8.0 * (1.0 + l)**3
+
+	answer = 0.0
+
+	answer += YC_g_poly_python(l, 4) * np.log((s+2)/(s-2))
+
+	answer += YC_g_poly_python(l, 5) * (1.0 - 4.0*s**(-2)) * np.log((s+2)/(s-2))
+
+	answer += 4.0 * YC_g_poly_python(l, 5) / s
+
+	for m in [1, 3, 5, 7, 9]:
+
+		if m == 2: m1 = -2
+		else: m1 = m - 2
+
+		answer += ( 2.0**(-m)*(1.0+l)**(-m)*YC_f_poly_python(l, m) - 2.0/m*YC_g_poly_python(l, 4) + 4/m/m1*YC_g_poly_python(l, 5) ) * (2.0/s)**m
+
+	return answer / divisor
+
+#-------------------------------------------------------------------------------
+
+def RA_jeffrey_python(ai, aj, pointer):
 
 	dist = math.sqrt( pointer[0]**2 + pointer[1]**2 + pointer[2]**2 )
 
@@ -545,6 +734,58 @@ def R_jeffrey_python(ai, aj, pointer):
 	R[1][0] = 0.5 * ( l + 1.0 ) * ( XA12_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
 	return const * np.block(R)
+
+#-------------------------------------------------------------------------------
+
+def RB_jeffrey_python(ai, aj, pointer):
+
+	dist = math.sqrt( pointer[0]**2 + pointer[1]**2 + pointer[2]**2 )
+
+	s = 2 * dist / ( ai + aj )
+
+	l = aj / ai
+
+	R = [ [ None , None ], [ None, None ] ]
+
+	const = 4 * np.pi * ai**2
+
+	scaffold = np.array([ [0.0, pointer[3]/dist, -pointer[2]/dist], [pointer[3]/dist, 0.0, pointer[1]/dist], [-pointer[2]/dist, pointer[1]/dist, 0.0] ])
+
+	R[0][0] = YB11_python(s, l) * scaffold
+
+	R[1][1] = l**2 * YB11_python(s, l) * scaffold
+
+	R[0][1] = 0.25 * ( l + 1.0 )**2 * YB12_python(s, l) * scaffold
+
+	R[1][0] = 0.25 * ( l + 1.0 )**2 * YB12_python(s, l) * scaffold
+
+	return const * np.block(R)
+
+#-------------------------------------------------------------------------------
+
+def RC_jeffrey_python(ai, aj, pointer):
+
+	dist = math.sqrt( pointer[0]**2 + pointer[1]**2 + pointer[2]**2 )
+
+	s = 2 * dist / ( ai + aj )
+
+	l = aj / ai
+
+	R = [ [ None , None ], [ None, None ] ]
+
+	const = 8 * np.pi * ai**3
+
+	R[0][0] = XC11_python(s, l) * np.outer(pointer/dist, pointer/dist) + YC11_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
+
+	R[1][1] = l**3 * ( XC11_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YC11_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
+
+	R[0][1] = 0.125 * ( l + 1.0 )**3 * ( XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
+
+	R[1][0] = 0.125 * ( l + 1.0 )**3 * ( XA12_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
+
+	return const * np.block(R)
+
+#-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 
@@ -608,7 +849,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 				c_ish = JO_2B_R_matrix(beads[i], beads[j])
 
-				python_ish = R_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+				python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
 
 				for ii in range(6):
 					for jj in range(6):
@@ -628,7 +869,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
-		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):
@@ -648,7 +889,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
-		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):
@@ -668,7 +909,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
-		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):
@@ -688,7 +929,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
-		python_ish = R_lub_corr_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
 		for i in range(3*len(beads)):
 			for j in range(3*len(beads)):
