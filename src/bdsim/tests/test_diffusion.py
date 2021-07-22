@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..'
 import unittest
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
+from pyBrown.diffusion import RPY_Smith_M_matrix, JO_R_lubrication_correction_F_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -40,8 +40,8 @@ class TestDiffusion(unittest.TestCase):
 		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
 		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
+		R_1 = JO_R_lubrication_correction_F_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_F_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
 
 		N = 3*len(beads_1)
 
@@ -55,8 +55,8 @@ class TestDiffusion(unittest.TestCase):
 		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
 		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
+		R_1 = JO_R_lubrication_correction_F_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_F_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
 
 		N = 3*len(beads_1)
 
@@ -79,8 +79,8 @@ class TestDiffusion(unittest.TestCase):
 		beads_2 = [ Bead([4.0, 0.0, 0.0], 2.0), Bead([0.0, 0.0, 0.0], 1.0) ]
 		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
+		R_1 = JO_R_lubrication_correction_F_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_F_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
 
 		N = 3*len(beads_1)
 
@@ -94,8 +94,8 @@ class TestDiffusion(unittest.TestCase):
 		beads_2 = [ Bead([10.0, 0.0, 0.0], 3.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([4.0, 0.0, 0.0], 2.0) ]
 		pointers_2 = compute_pointer_pbc_matrix(beads_2, box_length)
 
-		R_1 = JO_R_lubrication_correction_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
-		R_2 = JO_R_lubrication_correction_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
+		R_1 = JO_R_lubrication_correction_F_matrix(beads_1, pointers_1, lubrication_cutoff, cichocki_correction)
+		R_2 = JO_R_lubrication_correction_F_matrix(beads_2, pointers_2, lubrication_cutoff, cichocki_correction)
 
 		N = 3*len(beads_1)
 

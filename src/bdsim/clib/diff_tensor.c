@@ -44,7 +44,7 @@ static void RPY_O_function(double rx, double ry, double rz, double* matrix);
 
 static void RPY_Q_function(double rx, double ry, double rz, double* matrix);
 
-static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix);
+static void RPY_2B_RA_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix);
 
 static void Cichocki_2B_R_correction(double* temp_2b, double* result_2b);
 
@@ -56,13 +56,13 @@ static double JO_XA12_term(double s, double l);
 
 static double JO_YA12_term(double s, double l);
 
-static double JO_Xf_polynomial(double l, int degree);
+static double JO_XAf_polynomial(double l, int degree);
 
-static double JO_Yf_polynomial(double l, int degree);
+static double JO_YAf_polynomial(double l, int degree);
 
-static double JO_Xg_polynomial(double l, int degree);
+static double JO_XAg_polynomial(double l, int degree);
 
-static double JO_Yg_polynomial(double l, int degree);
+static double JO_YAg_polynomial(double l, int degree);
 
 static void inverse(double* matrix, int matrix_dimension);
 
@@ -267,7 +267,7 @@ void RPY_Smith_M_matrix(double* as, double* pointers, double box_length, double 
 
 // -------------------------------------------------------------------------------
 
-void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
+void JO_2B_RA_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
 {
 	double dist2 = rx*rx + ry*ry + rz*rz;
 
@@ -343,7 +343,7 @@ void JO_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, doubl
 
 // -------------------------------------------------------------------------------
 
-void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number_of_beads, double cutoff_distance, int cichocki_correction, double* correction_matrix)
+void JO_R_lubrication_correction_F_matrix(double* as, double* pointers, int number_of_beads, double cutoff_distance, int cichocki_correction, double* correction_matrix)
 {
 	register int i = 0;
 
@@ -396,9 +396,9 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 					temp_nf2b = calloc(18, sizeof(double));
 					temp_ff2b = calloc(18, sizeof(double));
 
-					JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_nf2b);
+					JO_2B_RA_matrix(*(as+j), *(as+i), rx, ry, rz, temp_nf2b);
 					Cichocki_2B_R_correction(temp_nf2b, nf2b);
-					RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, temp_ff2b);
+					RPY_2B_RA_matrix(*(as+j), *(as+i), rx, ry, rz, temp_ff2b);
 					Cichocki_2B_R_correction(temp_ff2b, ff2b);
 
 					free(temp_nf2b);
@@ -406,8 +406,8 @@ void JO_R_lubrication_correction_matrix(double* as, double* pointers, int number
 				}
 				else
 				{
-					JO_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, nf2b);
-					RPY_2B_R_matrix(*(as+j), *(as+i), rx, ry, rz, ff2b);
+					JO_2B_RA_matrix(*(as+j), *(as+i), rx, ry, rz, nf2b);
+					RPY_2B_RA_matrix(*(as+j), *(as+i), rx, ry, rz, ff2b);
 				}
 
 				results = calloc(18, sizeof(double));
@@ -1088,7 +1088,7 @@ static void RPY_Q_function(double rx, double ry, double rz, double* matrix)
 
 // -------------------------------------------------------------------------------
 
-static void RPY_2B_R_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
+static void RPY_2B_RA_matrix(double ai, double aj, double rx, double ry, double rz, double* R_matrix)
 {
 	double Mi = RPY_Mii_block(ai);
 
@@ -1199,13 +1199,13 @@ static double JO_XA11_term(double s, double l)
 
 	double mult;
 
-	XA11_value += JO_Xg_polynomial(l, 1)/s2;
+	XA11_value += JO_XAg_polynomial(l, 1)/s2;
 
-	XA11_value -= JO_Xg_polynomial(l, 2)*logs2;
+	XA11_value -= JO_XAg_polynomial(l, 2)*logs2;
 
-	XA11_value -= JO_Xg_polynomial(l, 3)*s2*logs2;
+	XA11_value -= JO_XAg_polynomial(l, 3)*s2*logs2;
 
-	XA11_value += JO_Xf_polynomial(l, 0) - JO_Xg_polynomial(l, 1);
+	XA11_value += JO_XAf_polynomial(l, 0) - JO_XAg_polynomial(l, 1);
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1226,9 +1226,9 @@ static double JO_XA11_term(double s, double l)
 			
 			mult = pow(2/s, m);
 
-			XA11_value += mult * ( pow(2, -m) * pow(1+l, -m) * JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
+			XA11_value += mult * ( pow(2, -m) * pow(1+l, -m) * JO_XAf_polynomial(l, m) - JO_XAg_polynomial(l, 1) );
 
-			XA11_value += mult * ( 4.0 / ( m * m1 ) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
+			XA11_value += mult * ( 4.0 / ( m * m1 ) * JO_XAg_polynomial(l, 3) - 2.0 / m * JO_XAg_polynomial(l, 2) );
 		}
 	}
 
@@ -1249,11 +1249,11 @@ static double JO_YA11_term(double s, double l)
 
 	double mult;
 
-	YA11_value -= JO_Yg_polynomial(l, 2)*logs2;
+	YA11_value -= JO_YAg_polynomial(l, 2)*logs2;
 
-	YA11_value -= JO_Yg_polynomial(l, 3)*s2*logs2;
+	YA11_value -= JO_YAg_polynomial(l, 3)*s2*logs2;
 
-	YA11_value += JO_Yf_polynomial(l, 0);
+	YA11_value += JO_YAf_polynomial(l, 0);
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1274,9 +1274,9 @@ static double JO_YA11_term(double s, double l)
 
 			mult = pow(2/s, m);
 
-			YA11_value += mult * ( pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2) );
+			YA11_value += mult * ( pow(2, -m)*pow(1+l, -m)*JO_YAf_polynomial(l, m) - 2.0/m*JO_YAg_polynomial(l, 2) );
 
-			YA11_value += mult*4.0/(m*m1)*JO_Yg_polynomial(l, 3);
+			YA11_value += mult*4.0/(m*m1)*JO_YAg_polynomial(l, 3);
 		}
 	}
 
@@ -1297,11 +1297,11 @@ static double JO_XA12_term(double s, double l)
 
 	double mult;
 
-	XA12_value += 2.0/s*JO_Xg_polynomial(l, 1)/s2;
+	XA12_value += 2.0/s*JO_XAg_polynomial(l, 1)/s2;
 
-	XA12_value += JO_Xg_polynomial(l, 2)*logs;
+	XA12_value += JO_XAg_polynomial(l, 2)*logs;
 
-	XA12_value += JO_Xg_polynomial(l, 3)*s2*logs + 4*JO_Xg_polynomial(l, 3)/s;
+	XA12_value += JO_XAg_polynomial(l, 3)*s2*logs + 4*JO_XAg_polynomial(l, 3)/s;
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1322,9 +1322,9 @@ static double JO_XA12_term(double s, double l)
 
 			mult = pow(2/s, m);
 
-			XA12_value += mult * ( pow(2, -m)*pow(1 + l, -m)*JO_Xf_polynomial(l, m) - JO_Xg_polynomial(l, 1) );
+			XA12_value += mult * ( pow(2, -m)*pow(1 + l, -m)*JO_XAf_polynomial(l, m) - JO_XAg_polynomial(l, 1) );
 
-			XA12_value += mult * ( 4.0/(m*m1) * JO_Xg_polynomial(l, 3) - 2.0 / m * JO_Xg_polynomial(l, 2) );
+			XA12_value += mult * ( 4.0/(m*m1) * JO_XAg_polynomial(l, 3) - 2.0 / m * JO_XAg_polynomial(l, 2) );
 		}
 
 	}
@@ -1346,11 +1346,11 @@ static double JO_YA12_term(double s, double l)
 
 	double mult;
 
-	YA12_value += JO_Yg_polynomial(l, 2)*logs;
+	YA12_value += JO_YAg_polynomial(l, 2)*logs;
 
-	YA12_value += JO_Yg_polynomial(l, 3)*s2*logs;
+	YA12_value += JO_YAg_polynomial(l, 3)*s2*logs;
 
-	YA12_value += 4*JO_Yg_polynomial(l, 3)/s;
+	YA12_value += 4*JO_YAg_polynomial(l, 3)/s;
 
 	for (m = 1; m < 12; m++)
 	{
@@ -1371,9 +1371,9 @@ static double JO_YA12_term(double s, double l)
 
 			mult = pow(2/s, m);
 
-			YA12_value += mult*(pow(2, -m)*pow(1+l, -m)*JO_Yf_polynomial(l, m) - 2.0/m*JO_Yg_polynomial(l, 2));
+			YA12_value += mult*(pow(2, -m)*pow(1+l, -m)*JO_YAf_polynomial(l, m) - 2.0/m*JO_YAg_polynomial(l, 2));
 
-			YA12_value += mult*(4.0/(m*m1)*JO_Yg_polynomial(l, 3));
+			YA12_value += mult*(4.0/(m*m1)*JO_YAg_polynomial(l, 3));
 		}
 	}
 
@@ -1382,7 +1382,7 @@ static double JO_YA12_term(double s, double l)
 
 // -------------------------------------------------------------------------------
 
-static double JO_Xf_polynomial(double l, int degree)
+static double JO_XAf_polynomial(double l, int degree)
 {
 	double Xf_value;
 	double l2, l3, l4, l5, l6, l7, l8, l9, l10;
@@ -1478,7 +1478,7 @@ static double JO_Xf_polynomial(double l, int degree)
 
 // -------------------------------------------------------------------------------
 
-static double JO_Yf_polynomial(double l, int degree)
+static double JO_YAf_polynomial(double l, int degree)
 {
 	double Yf_value;
 	double l2, l3, l4, l5, l6, l7, l8, l9, l10;
@@ -1574,7 +1574,7 @@ static double JO_Yf_polynomial(double l, int degree)
 
 // -------------------------------------------------------------------------------
 
-static double JO_Xg_polynomial(double l, int degree)
+static double JO_XAg_polynomial(double l, int degree)
 {
 	double Xg_value;
 	double l2 = l*l;
@@ -1602,7 +1602,7 @@ static double JO_Xg_polynomial(double l, int degree)
 
 // -------------------------------------------------------------------------------
 
-static double JO_Yg_polynomial(double l, int degree)
+static double JO_YAg_polynomial(double l, int degree)
 {
 	double Yg_value;
 	double l2 = l*l;

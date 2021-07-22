@@ -24,7 +24,7 @@ import unittest
 from scipy.special import erfc
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_2B_R_matrix, JO_R_lubrication_correction_matrix
+from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_2B_RA_matrix, JO_R_lubrication_correction_F_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -847,7 +847,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 			for j in range( i+1, len(beads) ):
 
-				c_ish = JO_2B_R_matrix(beads[i], beads[j])
+				c_ish = JO_2B_RA_matrix(beads[i], beads[j])
 
 				python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
 
@@ -867,7 +867,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
 		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
@@ -887,7 +887,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
 		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
@@ -907,7 +907,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
 		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
 
@@ -927,7 +927,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 
 		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
 

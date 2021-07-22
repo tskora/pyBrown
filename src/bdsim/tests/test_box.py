@@ -29,7 +29,7 @@ from scipy.constants import Boltzmann
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
 from pyBrown.box import Box
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
+from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_F_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -460,7 +460,7 @@ class TestBox(unittest.TestCase):
 
 					Rff = np.linalg.inv(Mff)
 
-					Rlc = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff, cichocki_correction = self.mock_input["cichocki_correction"]) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff, cichocki_correction = self.mock_input["cichocki_correction"]) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot = Rlc + Rff
 
@@ -484,7 +484,7 @@ class TestBox(unittest.TestCase):
 
 					Rff_mid = np.linalg.inv(Mff_mid)
 
-					Rlc_mid = JO_R_lubrication_correction_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff, cichocki_correction = self.mock_input["cichocki_correction"]) * self.mock_input["viscosity"] * 10**(-19)
+					Rlc_mid = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = lubrication_cutoff, cichocki_correction = self.mock_input["cichocki_correction"]) * self.mock_input["viscosity"] * 10**(-19)
 
 					Rtot_mid = Rlc_mid + Rff_mid
 
