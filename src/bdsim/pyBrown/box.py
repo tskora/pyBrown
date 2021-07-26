@@ -224,7 +224,7 @@ class Box():
 
 			if self.inp["debug"]: print('stochastic drift: {}'.format(stochastic_drift))
 
-			drift = stochastic_drift + deterministic_drift
+			self.drift = stochastic_drift + deterministic_drift
 
 			self.D = D0
 
@@ -244,14 +244,14 @@ class Box():
 
 			if self.inp["debug"]: print('DRIFT STEP\n')
 
-			self._translate_beads(drift)
+			self._translate_beads(self.drift)
 
 			if self.overlaps:
 
 				if self._check_overlaps():
 					self._deterministic_step(dt, mult = -(1.0 - 1.0 / self.m_midpoint))
 					self._stochastic_step(dt, mult = -1)
-					self._translate_beads(-drift)
+					self._translate_beads(-self.drift)
 				else:
 					break
 

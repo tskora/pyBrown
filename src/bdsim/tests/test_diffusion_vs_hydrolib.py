@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..'
 import unittest
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import JO_2B_RA_matrix, RPY_M_matrix, JO_R_lubrication_correction_F_matrix
+from pyBrown.diffusion import JO_2B_RA_matrix, JO_2B_RB_matrix, JO_2B_RC_matrix, RPY_M_matrix, JO_R_lubrication_correction_F_matrix
 
 #-------------------------------------------------------------------------------
 
