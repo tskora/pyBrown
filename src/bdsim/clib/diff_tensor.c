@@ -383,31 +383,34 @@ void JO_2B_RB_matrix(double ai, double aj, double rx, double ry, double rz, doub
 
 	double mult = 4 * M_PI * ai * ai;
 
+	// printf("XB11 C: %lf'n", yb11l);
+	// printf("XB12 C: %lf'n", yb12l);
+
 	int i;
 
 	// block 00
 
-	*(R_matrix) = -yb11l*rz/dist; // 10
+	*(R_matrix) = yb11l*rz/dist; // 01
 
-	*(R_matrix+1) = yb11l*ry/dist; // 20
+	*(R_matrix+1) = -yb11l*ry/dist; // 02
 
-	*(R_matrix+2) = -yb11l*rx/dist; // 21
+	*(R_matrix+2) = yb11l*rx/dist; // 12
 
 	// block 11
 
-	*(R_matrix+3) = -yb11linv*rz/dist; // 43
+	*(R_matrix+3) = yb11linv*rz/dist; // 34
 
-	*(R_matrix+4) = yb11linv*ry/dist; // 53
+	*(R_matrix+4) = -yb11linv*ry/dist; // 35
 
-	*(R_matrix+5) = -yb11linv*rx/dist; // 54
+	*(R_matrix+5) = yb11linv*rx/dist; // 45
 
 	// block 10
 
-	*(R_matrix+6) = -yb12l*rz/dist; // 40
+	*(R_matrix+6) = yb12l*rz/dist; // 04
 
-	*(R_matrix+7) = yb12l*ry/dist; // 50
+	*(R_matrix+7) = -yb12l*ry/dist; // 05
 
-	*(R_matrix+8) = -yb12l*rx/dist; // 51
+	*(R_matrix+8) = yb12l*rx/dist; // 15
 
 	for (i = 0; i < 9; i++)
 	{
@@ -429,7 +432,11 @@ void JO_2B_RC_matrix(double ai, double aj, double rx, double ry, double rz, doub
 
 	double xc11l = JO_XC11_term(s, l);
 
+	// printf("XC11 C: %lf'n", xc11l);
+
 	double yc11l = JO_YC11_term(s, l);
+
+	// printf("YC11 C: %lf'n", yc11l);
 
 	double xc11linv = l * l * l * JO_XC11_term(s, 1/l);
 
@@ -438,6 +445,9 @@ void JO_2B_RC_matrix(double ai, double aj, double rx, double ry, double rz, doub
 	double xc12l = JO_XC12_term(s, l);
 
 	double yc12l = JO_YC12_term(s, l);
+
+	// printf("XC12 C: %lf'n", xc12l);
+	// printf("YC12 C: %lf'n", yc12l);
 
 	double mult = 8 * M_PI * ai * ai * ai;
 
@@ -1598,6 +1608,8 @@ static double JO_YB12_term(double s, double l)
 
 	YB12_value -= JO_YBg_polynomial(l, 3)*s2*logs2;
 
+	// printf("partial efore summation C: %lf", YB12_value);
+
 	for (m = 2; m < 12; m++)
 	{
 		if (m % 2 == 1)
@@ -1608,20 +1620,22 @@ static double JO_YB12_term(double s, double l)
 		{
 			if (m == 2)
 			{
-				m1 = -1;
+				m1 = -2;
 			}
 			else
 			{
 				m1 = m - 2;
 			}
 
-			mult = pow(2/s, m);
+			mult = pow(2.0/s, m);
 
 			YB12_value += mult*(pow(2, -m)*pow(1+l, -m)*JO_YBf_polynomial(l, m) - 2.0/m*JO_YBg_polynomial(l, 2));
 
-			YB12_value -= mult*(4.0/(m*m1)*JO_YBg_polynomial(l, 3));
+			YB12_value += mult*(4.0/(m*m1)*JO_YBg_polynomial(l, 3));
 		}
 	}
+
+	// printf("partial after summation C: %lf", YB12_value);
 
 	return -YB12_value;
 }
@@ -1644,7 +1658,11 @@ static double JO_XC11_term(double s, double l)
 
 	XC11_value += l2 / 2 * logs2;
 
-	XC11_value += l2 / s * log((s+2)/(s-2));
+	// printf("C: %lf'n", XC11_value);
+
+	XC11_value += l2 / s * log((s+2.0)/(s-2.0));
+
+	// printf("C: %lf'n", XC11_value);
 
 	for (k = 1; k < 6; k++)
 	{
@@ -1654,6 +1672,8 @@ static double JO_XC11_term(double s, double l)
 
 		XC11_value -= mult * ( pow(2, 2*k+1) / k / (2 * k - 1) * l2 / 4 );
 	}
+
+	// printf("C: %lf'n", XC11_value);
 
 	return XC11_value;
 }
@@ -1670,11 +1690,11 @@ static double JO_YC11_term(double s, double l)
 
 	double mult;
 
-	YC11_value += JO_YCg_polynomial(l, 4) * log((s+2)/(s-2));
+	YC11_value -= JO_YCg_polynomial(l, 2) * log(s2);
 
-	YC11_value += JO_YCg_polynomial(l, 5) * s2 * log((s+2)/(s-2));
+	YC11_value -= JO_YCg_polynomial(l, 3) * s2 * log(s2);
 
-	YC11_value += JO_YCg_polynomial(l, 0);
+	YC11_value += JO_YCf_polynomial(l, 0);
 
 	for (m = 2; m < 12; m++)
 	{
@@ -1686,18 +1706,22 @@ static double JO_YC11_term(double s, double l)
 		{
 			if (m == 2)
 			{
-				m1 = -1;
+				m1 = -2;
 			}
 			else
 			{
 				m1 = m - 2;
 			}
 
-			mult = pow(2/s, m);
+			mult = pow(2.0/s, m);
 
-			YC11_value += mult*(pow(2, -m)*pow(1+l, -m)*JO_YCf_polynomial(l, m) - 2.0/m*JO_YCg_polynomial(l, 2));
+			// printf("fm C: %lf\ng2 C: %lf\ng3 C: %lf\n", JO_YCf_polynomial(l, m), JO_YCg_polynomial(l, 2), JO_YCg_polynomial(l, 3));
+
+			YC11_value += mult*(pow(2.0, -m)*pow(1+l, -m)*JO_YCf_polynomial(l, m) - 2.0/m*JO_YCg_polynomial(l, 2));
 
 			YC11_value += mult*(4.0/(m*m1)*JO_YCg_polynomial(l, 3));
+
+			// printf("partial YC11 C: %lf\n", YC11_value);
 		}
 	}
 
@@ -1722,9 +1746,12 @@ static double JO_XC12_term(double s, double l)
 
 	double mult;
 
-	XC12_value += 4.0 * l2 * l3 *log((s+2)/(s-2));
+	XC12_value += 4.0 * l2 * l3 *log((s+2.0)/(s-2.0));
 
 	XC12_value += 8.0 * l2 * l3 / s * logs2;
+
+	// errata
+	XC12_value -= 16.0 * l2 * l3 / s;
 
 	for (k = 1; k < 6; k++)
 	{
@@ -1732,10 +1759,11 @@ static double JO_XC12_term(double s, double l)
 
 		XC12_value -= mult * ( pow(1+l, -2*k - 1) * JO_XCf_polynomial(l, 2*k + 1) );
 
-		XC12_value += mult * ( pow(2, 2*k+2) / k / (2 * k + 1) * l2 );
+		// errata
+		XC12_value += mult * ( pow(2, 2*k+2) / k / (2 * k + 1) * l2 / 4 );
 	}
 
-	return XC12_value;
+	return 1.0 / 8.0 * pow(1+l, 3) * XC12_value;
 }
 
 // -------------------------------------------------------------------------------
@@ -1750,9 +1778,9 @@ static double JO_YC12_term(double s, double l)
 
 	double mult;
 
-	YC12_value += JO_YCg_polynomial(l, 4) * log((s+2)/(s-2));
+	YC12_value += JO_YCg_polynomial(l, 4) * log((s+2.0)/(s-2.0));
 
-	YC12_value += JO_YCg_polynomial(l, 5) * s2 * log((s+2)/(s-2));
+	YC12_value += JO_YCg_polynomial(l, 5) * s2 * log((s+2.0)/(s-2.0));
 
 	YC12_value += 4.0 * JO_YCg_polynomial(l, 5) / s;
 
@@ -2324,8 +2352,9 @@ static double JO_YCg_polynomial(double l, int degree)
 			Yg_value = 4.0/5.0*l2/plus2/plus2;
 			break;
 		case 5:
+			// errata
 			l2 = l*l;
-			Yg_value = 4.0/125.0*l*( 43.0 - 24.0*l + 43.0*l2 )/plus2/plus2;
+			Yg_value = 1.0/125.0*l*( 43.0 - 24.0*l + 43.0*l2 )/(plus2*plus2);
 			break;
 	}
 

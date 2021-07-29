@@ -156,7 +156,7 @@ def JO_2B_RB_matrix(beadi, beadj):
 
 	rz = ctypes.c_double(beadj.r[2] - beadi.r[2])
 
-	my_list = [0.0]*()
+	my_list = [0.0]*9
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
@@ -166,15 +166,24 @@ def JO_2B_RB_matrix(beadi, beadj):
 
 	R = np.zeros((6,6))
 
-	R[0][1] = R[1][0] = my_arr[0]
-	R[0][2] = R[2][0] = my_arr[1]
-	R[1][2] = R[2][1] = my_arr[2]
-	R[3][4] = R[4][3] = my_arr[3]
-	R[3][5] = R[5][3] = my_arr[4]
-	R[4][5] = R[5][4] = my_arr[5]
-	R[4][0] = R[0][4] = R[3][1] = R[1][3] = my_arr[6]
-	R[5][0] = R[0][5] = R[3][2] = R[2][3] = my_arr[7]
-	R[5][1] = R[1][5] = R[4][2] = R[2][4] = my_arr[8]
+	R[0][1] = my_arr[0]
+	R[1][0] = -my_arr[0]
+	R[0][2] = my_arr[1]
+	R[2][0] = -my_arr[1]
+	R[1][2] = my_arr[2]
+	R[2][1] = -my_arr[2]
+	R[3][4] = -my_arr[3]
+	R[4][3] = my_arr[3]
+	R[3][5] = -my_arr[4]
+	R[5][3] = my_arr[4]
+	R[4][5] = -my_arr[5]
+	R[5][4] = my_arr[5]
+	R[0][4] = R[4][0] = my_arr[6]
+	R[1][3] = R[3][1] = -my_arr[6]
+	R[0][5] = R[5][0] = my_arr[7]
+	R[2][3] = R[3][2] = -my_arr[7]
+	R[1][5] = R[5][1] = my_arr[8]
+	R[2][4] = R[4][2] = -my_arr[8]
 
 	return R
 

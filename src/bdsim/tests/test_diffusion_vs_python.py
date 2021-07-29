@@ -24,7 +24,7 @@ import unittest
 from scipy.special import erfc
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_2B_RA_matrix, JO_R_lubrication_correction_F_matrix
+from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_2B_RA_matrix, JO_2B_RB_matrix, JO_2B_RC_matrix, JO_R_lubrication_correction_F_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -481,7 +481,7 @@ def YC_g_poly_python(l, rank):
 	if rank == 2: return 2.0 * l / 5.0 / (1.0 + l)
 	if rank == 3: return 1.0 / 125.0 * ( 8.0 + 6.0*l + 33.0*l**2 ) / (1.0 + l)
 	if rank == 4: return 4.0 / 5.0 * l**2 / (1.0 + l)**4
-	if rank == 5: return 4.0 / 125.0 * l ( 43.0 - 24.0 * l + 43.0 * l**2 ) / (1.0 + l)**4
+	if rank == 5: return 1.0 / 125.0 * l * ( 43.0 - 24.0 * l + 43.0 * l**2 ) / (1.0 + l)**4 # errata
 	else: return None
 
 #-------------------------------------------------------------------------------
@@ -559,9 +559,7 @@ def XA12_python(s, l):
 
 		answer += mult * ( 4 * m**(-1) * m1**(-1) * XA_g_poly_python(l, 3) - 2 * m**(-1) * XA_g_poly_python(l, 2) )
 
-	divisor = -1 / 2 * ( 1 + l )
-
-	return answer / divisor
+	return -answer
 
 #-------------------------------------------------------------------------------
 
@@ -586,9 +584,7 @@ def YA12_python(s, l):
 
 		answer += mult * ( 4 * m**(-1) * m1**(-1) * YA_g_poly_python(l, 3) )
 
-	divisor = -1 / 2 * ( 1 + l )
-
-	return answer / divisor
+	return -answer
 
 #-------------------------------------------------------------------------------
 
@@ -615,8 +611,6 @@ def YB11_python(s, l):
 
 def YB12_python(s, l):
 
-	divisor = -1.0 / 4.0 * (1+l)**2
-
 	answer = 0.0
 
 	answer -= YB_g_poly_python(l, 2) * np.log(1 - 4.0*s**(-2))
@@ -630,7 +624,7 @@ def YB12_python(s, l):
 
 		answer += ( 2**(-m) * (1+l)**(-m) * YB_f_poly_python(l, m) - 2.0 / m * YB_g_poly_python(l, 2) + 4.0 / m / m1 * YB_g_poly_python(l, 3) ) * (2.0/s)**m
 
-	return answer / divisor
+	return -answer
 
 #-------------------------------------------------------------------------------
 
@@ -646,7 +640,7 @@ def XC11_python(s, l):
 
 	for k in range(1, 6):
 
-		answer += (1+l)**(-2*k) * XC_f_poly_python(l, 2*k) - 2**(2*k+1) / k / (2*k-1) * lconst / 4 * s**(-2*k)
+		answer += ( (1+l)**(-2*k) * XC_f_poly_python(l, 2*k) - 2**(2*k+1) / k / (2*k-1) * lconst / 4 ) * s**(-2*k)
 
 	return answer
 
@@ -665,7 +659,7 @@ def YC11_python(s, l):
 		if m == 2: m1 = -2
 		else: m1 = m - 2
 
-		answer += ( 2.0**(-m) * (1.0+l)**(-m) * YC_f_poly_python(l, m) - 2 / m * YC_g_poly_python(l, 2) + 4.0 / m / m1 * YC_g_poly_python(l, 3) ) * (2.0/s)**m
+		answer += ( 2.0**(-m) * (1.0+l)**(-m) * YC_f_poly_python(l, m) - 2.0 / m * YC_g_poly_python(l, 2) + 4.0 / m / m1 * YC_g_poly_python(l, 3) ) * (2.0/s)**m
 
 	return answer
 
@@ -682,17 +676,19 @@ def XC12_python(s, l):
 
 	answer += 8*lconst*lconst2 / s * np.log(1.0 - 4*s**(-2))
 
+	# errata
+	answer -= 16.0 * lconst * lconst2 / s
+
 	for k in range(1, 6):
 
-		answer -= 8*lconst2 * ( (1.0+l)**(-2*k-1) * XC_f_poly_python(l, 2*k+1) - 2**(2*k+2) / k / (2*k+1) * lconst ) * s**(-2*k-1)
+		# errata
+		answer -= 8*lconst2 * ( (1.0+l)**(-2*k-1) * XC_f_poly_python(l, 2*k+1) - 2**(2*k+2) / k / (2*k+1) * lconst / 4 ) * s**(-2*k-1)
 
-	return answer
+	return 1.0 / 8.0 * (1+l)**3 * answer
 
 #-------------------------------------------------------------------------------
 
 def YC12_python(s, l):
-
-	divisor = 1.0 / 8.0 * (1.0 + l)**3
 
 	answer = 0.0
 
@@ -702,14 +698,14 @@ def YC12_python(s, l):
 
 	answer += 4.0 * YC_g_poly_python(l, 5) / s
 
-	for m in [1, 3, 5, 7, 9]:
+	for m in [1, 3, 5, 7, 9, 11]:
 
 		if m == 2: m1 = -2
 		else: m1 = m - 2
 
 		answer += ( 2.0**(-m)*(1.0+l)**(-m)*YC_f_poly_python(l, m) - 2.0/m*YC_g_poly_python(l, 4) + 4/m/m1*YC_g_poly_python(l, 5) ) * (2.0/s)**m
 
-	return answer / divisor
+	return answer
 
 #-------------------------------------------------------------------------------
 
@@ -729,9 +725,9 @@ def RA_jeffrey_python(ai, aj, pointer):
 
 	R[1][1] = l * ( XA11_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA11_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
-	R[0][1] = 0.5 * ( l + 1.0 ) * ( XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
+	R[0][1] = XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
 
-	R[1][0] = 0.5 * ( l + 1.0 ) * ( XA12_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
+	R[1][0] = XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) )
 
 	return const * np.block(R)
 
@@ -749,15 +745,15 @@ def RB_jeffrey_python(ai, aj, pointer):
 
 	const = 4 * np.pi * ai**2
 
-	scaffold = np.array([ [0.0, pointer[3]/dist, -pointer[2]/dist], [pointer[3]/dist, 0.0, pointer[1]/dist], [-pointer[2]/dist, pointer[1]/dist, 0.0] ])
+	scaffold = np.array([ [0.0, pointer[2]/dist, -pointer[1]/dist], [-pointer[2]/dist, 0.0, pointer[0]/dist], [pointer[1]/dist, -pointer[0]/dist, 0.0] ])
 
 	R[0][0] = YB11_python(s, l) * scaffold
 
-	R[1][1] = l**2 * YB11_python(s, l) * scaffold
+	R[1][1] = l**2 * YB11_python(s, 1/l) * np.transpose(scaffold)
 
-	R[0][1] = 0.25 * ( l + 1.0 )**2 * YB12_python(s, l) * scaffold
+	R[0][1] = YB12_python(s, l) * scaffold
 
-	R[1][0] = 0.25 * ( l + 1.0 )**2 * YB12_python(s, l) * scaffold
+	R[1][0] = YB12_python(s, l) * np.transpose(scaffold)
 
 	return const * np.block(R)
 
@@ -779,9 +775,9 @@ def RC_jeffrey_python(ai, aj, pointer):
 
 	R[1][1] = l**3 * ( XC11_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YC11_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
-	R[0][1] = 0.125 * ( l + 1.0 )**3 * ( XA12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
+	R[0][1] = ( XC12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YC12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
-	R[1][0] = 0.125 * ( l + 1.0 )**3 * ( XA12_python(s, 1/l) * np.outer(pointer/dist, pointer/dist) + YA12_python(s, 1/l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
+	R[1][0] = ( XC12_python(s, l) * np.outer(pointer/dist, pointer/dist) + YC12_python(s, l) * ( np.identity(3) - np.outer(pointer/dist, pointer/dist) ) )
 
 	return const * np.block(R)
 
@@ -837,7 +833,7 @@ class TestDiffusionVsPython(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	def test_R_2B(self):
+	def test_RA_2B(self):
 
 		np.random.seed(0)
 
@@ -850,6 +846,106 @@ class TestDiffusionVsPython(unittest.TestCase):
 				c_ish = JO_2B_RA_matrix(beads[i], beads[j])
 
 				python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+				for ii in range(6):
+					for jj in range(6):
+						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_RA_2B_2(self):
+
+		np.random.seed(1)
+
+		beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
+
+		for i in range( len(beads)-1 ):
+
+			for j in range( i+1, len(beads) ):
+
+				c_ish = JO_2B_RA_matrix(beads[i], beads[j])
+
+				python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+				for ii in range(6):
+					for jj in range(6):
+						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_RB_2B(self):
+
+		np.random.seed(2)
+
+		beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
+
+		for i in range( len(beads)-1 ):
+
+			for j in range( i+1, len(beads) ):
+
+				c_ish = JO_2B_RB_matrix(beads[i], beads[j])
+
+				python_ish = RB_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+				for ii in range(6):
+					for jj in range(6):
+						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_RB_2B_2(self):
+
+		np.random.seed(3)
+
+		beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
+
+		for i in range( len(beads)-1 ):
+
+			for j in range( i+1, len(beads) ):
+
+				c_ish = JO_2B_RB_matrix(beads[i], beads[j])
+
+				python_ish = RB_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+				for ii in range(6):
+					for jj in range(6):
+						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_RC_2B(self):
+
+		np.random.seed(4)
+
+		beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
+
+		for i in range( len(beads)-1 ):
+
+			for j in range( i+1, len(beads) ):
+
+				c_ish = JO_2B_RC_matrix(beads[i], beads[j])
+
+				python_ish = RC_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+				for ii in range(6):
+					for jj in range(6):
+						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_RC_2B_2(self):
+
+		np.random.seed(5)
+
+		beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
+
+		for i in range( len(beads)-1 ):
+
+			for j in range( i+1, len(beads) ):
+
+				c_ish = JO_2B_RC_matrix(beads[i], beads[j])
+
+				python_ish = RC_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
 
 				for ii in range(6):
 					for jj in range(6):
