@@ -20,7 +20,7 @@ import numpy as np
 from scipy.constants import Boltzmann
 
 from pyBrown.bead import compute_pointer_pbc_matrix, check_overlaps
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_F_matrix
+from pyBrown.diffusion import RPY_M_tt_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_F_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timing
 from pyBrown.reactions import set_reactions
@@ -383,7 +383,7 @@ class Box():
 
 		elif self.hydrodynamics == "rpy":
 
-			self.D = RPY_M_matrix(self.mobile_beads, self.rij)
+			self.D = RPY_M_tt_matrix(self.mobile_beads, self.rij)
 
 			self.D *= self.kBT * 10**19 / self.viscosity
 
@@ -399,7 +399,7 @@ class Box():
 
 		elif self.hydrodynamics == "rpy_lub":
 
-			self.Mff = RPY_M_matrix(self.mobile_beads, self.rij) * 10**19 / self.viscosity
+			self.Mff = RPY_M_tt_matrix(self.mobile_beads, self.rij) * 10**19 / self.viscosity
 
 			self.Rff = np.linalg.inv( self.Mff )
 

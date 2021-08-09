@@ -47,6 +47,49 @@ def M_rpy_python(beads, pointers):
 
 #-------------------------------------------------------------------------------
 
+def M_rpy_FT_python(beads, pointers):
+
+	N = len(beads)
+
+	M = [ [ None for j in range( 2*N ) ] for i in range( 2*N ) ]
+
+	for i, bi in enumerate(beads):
+
+		M[i][i] = Mii_rpy_python(bi.a)
+		M[i+N][i+N] = Mii_rpy_rot_python(bi.a)
+		M[i][i+N] = Mii_rpy_transrot_python(bi.a)
+		M[i+N][i] = Mii_rpy_transrot_python(bi.a)
+
+		for j in range(i):
+
+			bj = beads[j]
+
+			M[i][j] = Mij_rpy_python(bi.a, bj.a, pointers[i][j])
+			M[j][i] = np.transpose( M[i][j] )
+			M[i+N][j+N] = Mij_rpy_rot_python(bi.a, bj.a, pointers[i][j])
+			M[j+N][i+N] = np.transpose( M[i+N][j+N] )
+			M[i+N][j] = Mij_rpy_transrot_python(bi.a, bj.a, pointers[i][j])
+			M[j+N][i] = np.transpose(Mij_rpy_transrot_python(bj.a, bi.a, pointers[j][i]))
+			M[i][j+N] = np.transpose(M[i+N][j])
+			M[j][i+N] = M[j+N][i]
+
+			# print('{} {}'.format(i, j))
+			# print('{} {}'.format(j, i))
+			# print('{} {}'.format(i+N, j+N))
+			# print('{} {}'.format(j+N, i+N))
+			# print('{} {}'.format(i+N, j))
+			# print('{} {}'.format(j+N, i))
+			# print('{} {}'.format(i, j+N))
+			# print('{} {}'.format(j, i+N))
+			# print()
+
+	# print(M)
+	# 1/0
+
+	return np.block(M)
+
+#-------------------------------------------------------------------------------
+
 def M_rpy_smith_python(beads, pointers, box_length, alpha, m, n):
 
 	M = [ [ None for j in range( len(beads) ) ] for i in range( len(beads) ) ]
@@ -118,6 +161,18 @@ def Mii_rpy_python(a):
 
 #-------------------------------------------------------------------------------
 
+def Mii_rpy_rot_python(a):
+
+	return np.identity(3) / ( 8 * np.pi * a**3 )
+
+#-------------------------------------------------------------------------------
+
+def Mii_rpy_transrot_python(a):
+
+	return np.zeros((3,3))
+
+#-------------------------------------------------------------------------------
+
 def Mij_rpy_python(ai, aj, pointer):
 
 	Rh_larger = max( ai, aj )
@@ -162,6 +217,71 @@ def Mij_rpy_python(ai, aj, pointer):
 		answer *= coef_1
         
 		return answer
+
+#-------------------------------------------------------------------------------
+
+def Mij_rpy_rot_python(ai, aj, pointer):
+
+	Rh_larger = max( ai, aj )
+	Rh_smaller = min( ai, aj )
+
+	dist2 = pointer[0]**2 + pointer[1]**2 + pointer[2]**2
+	dist = math.sqrt( dist2 )
+	dist3 = dist * dist2
+	outer = np.outer(pointer, pointer)/dist2
+
+	aij2 = ai**2 + aj**2
+
+	if dist > ( ai + aj ):
+	
+		return 1.0 / ( 16.0 * np.pi * dist3 ) * ( 3 * outer - np.identity(3) )
+        
+	elif dist <= ( Rh_larger - Rh_smaller ):
+
+		A = ( 5.0 * dist**6 - 27.0 * dist**4 * (ai**2 + aj**2) + 32.0 * dist**3 * (ai**3 + aj**3) - 9.0 * dist**2 * (ai**2 - aj**2)**2 - (ai - aj)**4 * (ai**2 + 4*ai*aj + aj**2) ) / ( 64.0 * dist**3 )
+
+		B = 3.0 * ( (ai - aj)**2 - dist**2 )**2 * (ai**2 + 4*ai*aj + aj**2 - dist**2) / ( 64.0 * dist**3 )
+
+		return 1.0 / ( 8.0 * np.pi * ai**3 * aj**3 ) * ( const1 * np.identity(3) + const2 * outer )
+
+	else:
+
+		return Mii_rpy_rot_python(Rh_larger)
+
+#-------------------------------------------------------------------------------
+
+def Mij_rpy_transrot_python(ai, aj, pointer):
+
+	Rh_larger = max( ai, aj )
+	Rh_smaller = min( ai, aj )
+
+	dist2 = pointer[0]**2 + pointer[1]**2 + pointer[2]**2
+	dist = math.sqrt( dist2 )
+	outer = np.outer(pointer, pointer)/dist2
+
+	aij2 = ai**2 + aj**2
+
+	if dist > ( ai + aj ):
+
+		scaffold = np.array([ [0.0, pointer[2]/dist, -pointer[1]/dist], [-pointer[2]/dist, 0.0, pointer[0]/dist], [pointer[1]/dist, -pointer[0]/dist, 0.0] ])
+	
+		return 1.0 / ( 8.0 * np.pi * dist2 ) * scaffold
+        
+	elif dist <= ( Rh_larger - Rh_smaller ):
+
+		return 1.0 / ( 16.0 * np.pi * ai**3 * aj ) * ( (ai - aj + dist)**2 * (aj**2 + 2*aj*(ai+dist) - 3*(ai - dist)**2) ) / (8.0*dist2)
+
+	else:
+
+		scaffold = np.array([ [0.0, pointer[2]/dist, -pointer[1]/dist], [-pointer[2]/dist, 0.0, pointer[0]/dist], [pointer[1]/dist, -pointer[0]/dist, 0.0] ])
+
+		if ai >= aj:
+
+			return 1.0 / (8 * np.pi * dist**2) * scaffold
+
+		else:
+
+			return np.zeros((3,3))
 
 #-------------------------------------------------------------------------------
 
@@ -787,249 +907,294 @@ def RC_jeffrey_python(ai, aj, pointer):
 
 class TestDiffusionVsPython(unittest.TestCase):
 
-	def test_M_rpy_smith(self):
+	# def test_M_rpy_smith(self):
 
-		N_beads = 100
+	# 	N_beads = 100
 
-		box_length = 20.0
+	# 	box_length = 20.0
 
-		alpha = np.sqrt(np.pi)
+	# 	alpha = np.sqrt(np.pi)
 
-		m = 3
+	# 	m = 3
 
-		n = 3
+	# 	n = 3
 
-		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
+	# 	beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
 
-		pointers = compute_pointer_pbc_matrix(beads, box_length)
+	# 	pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = RPY_Smith_M_matrix(beads, pointers, box_length, alpha, m, n)
+	# 	c_ish = RPY_Smith_M_matrix(beads, pointers, box_length, alpha, m, n)
 
-		python_ish = M_rpy_smith_python(beads, pointers, box_length, alpha, m, n)
+	# 	python_ish = M_rpy_smith_python(beads, pointers, box_length, alpha, m, n)
 
-		for i in range(3*N_beads):
-			for j in range(3*N_beads):
-				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+	# 	for i in range(3*N_beads):
+	# 		for j in range(3*N_beads):
+	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
 
 	#---------------------------------------------------------------------------
 
-	def test_M_rpy(self):
+	# def test_M_rpy(self):
 
-		N_beads = 100
+	# 	N_beads = 100
+
+	# 	box_length = 20.0
+
+	# 	beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
+
+	# 	pointers = compute_pointer_pbc_matrix(beads, box_length)
+
+	# 	c_ish = RPY_M_matrix(beads, pointers)
+
+	# 	python_ish = M_rpy_python(beads, pointers)
+
+	# 	for i in range(3*N_beads):
+	# 		for j in range(3*N_beads):
+	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	def test_M_rpy_single_particle(self):
 
 		box_length = 20.0
 
-		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(N_beads) ]
+		beads = [ Bead([0.0, 0.0, 0.0], 1.0) ]
+
+		N_beads = len(beads)
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
 		c_ish = RPY_M_matrix(beads, pointers)
+		# 1/0
 
-		python_ish = M_rpy_python(beads, pointers)
+		python_ish = M_rpy_FT_python(beads, pointers)
 
-		for i in range(3*N_beads):
-			for j in range(3*N_beads):
+		for i in range(6*N_beads):
+			for j in range(6*N_beads):
+				# print( '{} {}: {} vs {}'.format(i, j, c_ish[i][j], python_ish[i][j]) )
 				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
 
-	#---------------------------------------------------------------------------
+		# 1/0
 
-	def test_RA_2B(self):
-
-		np.random.seed(0)
-
-		beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
-
-		for i in range( len(beads)-1 ):
-
-			for j in range( i+1, len(beads) ):
-
-				c_ish = JO_2B_RA_matrix(beads[i], beads[j])
-
-				python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
-
-				for ii in range(6):
-					for jj in range(6):
-						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_RA_2B_2(self):
-
-		np.random.seed(1)
-
-		beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
-
-		for i in range( len(beads)-1 ):
-
-			for j in range( i+1, len(beads) ):
-
-				c_ish = JO_2B_RA_matrix(beads[i], beads[j])
-
-				python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
-
-				for ii in range(6):
-					for jj in range(6):
-						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_RB_2B(self):
-
-		np.random.seed(2)
-
-		beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
-
-		for i in range( len(beads)-1 ):
-
-			for j in range( i+1, len(beads) ):
-
-				c_ish = JO_2B_RB_matrix(beads[i], beads[j])
-
-				python_ish = RB_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
-
-				for ii in range(6):
-					for jj in range(6):
-						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_RB_2B_2(self):
-
-		np.random.seed(3)
-
-		beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
-
-		for i in range( len(beads)-1 ):
-
-			for j in range( i+1, len(beads) ):
-
-				c_ish = JO_2B_RB_matrix(beads[i], beads[j])
-
-				python_ish = RB_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
-
-				for ii in range(6):
-					for jj in range(6):
-						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_RC_2B(self):
-
-		np.random.seed(4)
-
-		beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
-
-		for i in range( len(beads)-1 ):
-
-			for j in range( i+1, len(beads) ):
-
-				c_ish = JO_2B_RC_matrix(beads[i], beads[j])
-
-				python_ish = RC_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
-
-				for ii in range(6):
-					for jj in range(6):
-						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_RC_2B_2(self):
-
-		np.random.seed(5)
-
-		beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
-
-		for i in range( len(beads)-1 ):
-
-			for j in range( i+1, len(beads) ):
-
-				c_ish = JO_2B_RC_matrix(beads[i], beads[j])
-
-				python_ish = RC_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
-
-				for ii in range(6):
-					for jj in range(6):
-						self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_R_lub_corr_large_cutoff_cichocki(self):
+	def test_M_rpy_two_particles(self):
 
 		box_length = 20.0
 
-		lubrication_cutoff = 10.0
+		# beads = [ Bead([0.0, 0.0, 0.0], 1.0) ]
+		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([3.0, 3.0, 3.0], 1.0) ]
 
-		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+		N_beads = len(beads)
 
 		pointers = compute_pointer_pbc_matrix(beads, box_length)
 
-		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+		c_ish = RPY_M_matrix(beads, pointers)
+		# 1/0
 
-		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+		python_ish = M_rpy_FT_python(beads, pointers)
 
-		for i in range(3*len(beads)):
-			for j in range(3*len(beads)):
-				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+		for i in range(6*N_beads):
+			for j in range(6*N_beads):
+				print( '{} {}: {} vs {}'.format(i, j, c_ish[i][j], python_ish[i][j]) )
+				# self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+		# 1/0
 
 	#---------------------------------------------------------------------------
 
-	def test_R_lub_corr_large_cutoff_no_cichocki(self):
+	# def test_RA_2B(self):
 
-		box_length = 20.0
+	# 	np.random.seed(0)
 
-		lubrication_cutoff = 10.0
+	# 	beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
 
-		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+	# 	for i in range( len(beads)-1 ):
 
-		pointers = compute_pointer_pbc_matrix(beads, box_length)
+	# 		for j in range( i+1, len(beads) ):
 
-		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+	# 			c_ish = JO_2B_RA_matrix(beads[i], beads[j])
 
-		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+	# 			python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
 
-		for i in range(3*len(beads)):
-			for j in range(3*len(beads)):
-				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
-
-	#---------------------------------------------------------------------------
-
-	def test_R_lub_corr_small_cutoff_cichocki(self):
-
-		box_length = 20.0
-
-		lubrication_cutoff = 1.0
-
-		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
-
-		pointers = compute_pointer_pbc_matrix(beads, box_length)
-
-		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
-
-		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
-
-		for i in range(3*len(beads)):
-			for j in range(3*len(beads)):
-				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+	# 			for ii in range(6):
+	# 				for jj in range(6):
+	# 					self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
 
 	#---------------------------------------------------------------------------
 
-	def test_R_lub_corr_small_cutoff_no_cichocki(self):
+	# def test_RA_2B_2(self):
 
-		box_length = 20.0
+	# 	np.random.seed(1)
 
-		lubrication_cutoff = 1.0
+	# 	beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
 
-		beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+	# 	for i in range( len(beads)-1 ):
 
-		pointers = compute_pointer_pbc_matrix(beads, box_length)
+	# 		for j in range( i+1, len(beads) ):
 
-		c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+	# 			c_ish = JO_2B_RA_matrix(beads[i], beads[j])
 
-		python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+	# 			python_ish = RA_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
 
-		for i in range(3*len(beads)):
-			for j in range(3*len(beads)):
-				self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+	# 			for ii in range(6):
+	# 				for jj in range(6):
+	# 					self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_RB_2B(self):
+
+	# 	np.random.seed(2)
+
+	# 	beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
+
+	# 	for i in range( len(beads)-1 ):
+
+	# 		for j in range( i+1, len(beads) ):
+
+	# 			c_ish = JO_2B_RB_matrix(beads[i], beads[j])
+
+	# 			python_ish = RB_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+	# 			for ii in range(6):
+	# 				for jj in range(6):
+	# 					self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_RB_2B_2(self):
+
+	# 	np.random.seed(3)
+
+	# 	beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
+
+	# 	for i in range( len(beads)-1 ):
+
+	# 		for j in range( i+1, len(beads) ):
+
+	# 			c_ish = JO_2B_RB_matrix(beads[i], beads[j])
+
+	# 			python_ish = RB_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+	# 			for ii in range(6):
+	# 				for jj in range(6):
+	# 					self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_RC_2B(self):
+
+	# 	np.random.seed(4)
+
+	# 	beads = [ Bead([x, y, z], np.random.choice([1.0, 0.5])) for x in [0,3] for y in [0,3] for z in [0,3] ]
+
+	# 	for i in range( len(beads)-1 ):
+
+	# 		for j in range( i+1, len(beads) ):
+
+	# 			c_ish = JO_2B_RC_matrix(beads[i], beads[j])
+
+	# 			python_ish = RC_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+	# 			for ii in range(6):
+	# 				for jj in range(6):
+	# 					self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_RC_2B_2(self):
+
+	# 	np.random.seed(5)
+
+	# 	beads = [ Bead([x, y, z], np.random.choice([2.0, 1.0, 0.5])) for x in [-5,0,5] for y in [-5,0,5] for z in [-5,0,5] ]
+
+	# 	for i in range( len(beads)-1 ):
+
+	# 		for j in range( i+1, len(beads) ):
+
+	# 			c_ish = JO_2B_RC_matrix(beads[i], beads[j])
+
+	# 			python_ish = RC_jeffrey_python(beads[i].a, beads[j].a, beads[j].r - beads[i].r)
+
+	# 			for ii in range(6):
+	# 				for jj in range(6):
+	# 					self.assertAlmostEqual(c_ish[ii][jj], python_ish[ii][jj], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_R_lub_corr_large_cutoff_cichocki(self):
+
+	# 	box_length = 20.0
+
+	# 	lubrication_cutoff = 10.0
+
+	# 	beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+
+	# 	pointers = compute_pointer_pbc_matrix(beads, box_length)
+
+	# 	c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+
+	# 	python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+
+	# 	for i in range(3*len(beads)):
+	# 		for j in range(3*len(beads)):
+	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_R_lub_corr_large_cutoff_no_cichocki(self):
+
+	# 	box_length = 20.0
+
+	# 	lubrication_cutoff = 10.0
+
+	# 	beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+
+	# 	pointers = compute_pointer_pbc_matrix(beads, box_length)
+
+	# 	c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+
+	# 	python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+
+	# 	for i in range(3*len(beads)):
+	# 		for j in range(3*len(beads)):
+	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_R_lub_corr_small_cutoff_cichocki(self):
+
+	# 	box_length = 20.0
+
+	# 	lubrication_cutoff = 1.0
+
+	# 	beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+
+	# 	pointers = compute_pointer_pbc_matrix(beads, box_length)
+
+	# 	c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+
+	# 	python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = True)
+
+	# 	for i in range(3*len(beads)):
+	# 		for j in range(3*len(beads)):
+	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
+
+	#---------------------------------------------------------------------------
+
+	# def test_R_lub_corr_small_cutoff_no_cichocki(self):
+
+	# 	box_length = 20.0
+
+	# 	lubrication_cutoff = 1.0
+
+	# 	beads = [ Bead([x, y, z], 1.0) for x in [0,3,6] for y in [0,3,6] for z in [0,3,6] ]
+
+	# 	pointers = compute_pointer_pbc_matrix(beads, box_length)
+
+	# 	c_ish = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+
+	# 	python_ish = R_lub_corr_F_python(beads, pointers, lubrication_cutoff, cichocki_correction = False)
+
+	# 	for i in range(3*len(beads)):
+	# 		for j in range(3*len(beads)):
+	# 			self.assertAlmostEqual(c_ish[i][j], python_ish[i][j], places = 7)
 
 #-------------------------------------------------------------------------------
 

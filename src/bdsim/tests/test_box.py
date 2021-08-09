@@ -29,7 +29,7 @@ from scipy.constants import Boltzmann
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
 from pyBrown.box import Box
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_F_matrix
+from pyBrown.diffusion import RPY_M_tt_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_F_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -322,7 +322,7 @@ class TestBox(unittest.TestCase):
 
 			b.propagate(dt)
 
-			D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * RPY_M_matrix(beads_copy, pointers)
+			D = Boltzmann * self.mock_input["T"] * 10**19 / self.mock_input["viscosity"] * RPY_M_tt_matrix(beads_copy, pointers)
 
 			B = np.linalg.cholesky( D )
 

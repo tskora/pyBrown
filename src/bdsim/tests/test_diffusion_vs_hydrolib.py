@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..'
 import unittest
 
 from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import JO_2B_RA_matrix, JO_2B_RB_matrix, JO_2B_RC_matrix, RPY_M_matrix, JO_R_lubrication_correction_F_matrix
+from pyBrown.diffusion import JO_2B_RA_matrix, JO_2B_RB_matrix, JO_2B_RC_matrix, RPY_M_matrix, RPY_M_tt_matrix, JO_R_lubrication_correction_F_matrix
 
 #-------------------------------------------------------------------------------
 
@@ -68,9 +68,67 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beadi = Bead([0.0, 0.0, 0.0], 1.0)
 		beadj = Bead([3000.0, 0.0, 0.0], 1.0)
 		beads = [ beadi, beadj ]
-		self.R_pybrown_infty = np.linalg.inv( RPY_M_matrix(beads, compute_pointer_pbc_matrix(beads, 1000000.0)) )[1][1]
+		self.R_pybrown_infty = np.linalg.inv( RPY_M_tt_matrix(beads, compute_pointer_pbc_matrix(beads, 1000000.0)) )[1][1]
 
 	#-------------------------------------------------------------------------------
+
+	def test_M2B_RPY_30_x(self):
+
+		beadi = Bead([0.0, 0.0, 0.0], 1.0)
+		beadj = Bead([30.0, 0.0, 0.0], 1.0)
+		beads = [beadi, beadj]
+		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
+
+		M_pybrown = RPY_M_matrix(beads, pointers) * self.R_pybrown_infty
+
+		R_hydrolib_30 = ' 2.7347471478716909        2.4352166866579602E-028   7.9087010340333803E-028 -0.13663670435230121       -1.8295113726604273E-029  -5.9415897423372083E-029   3.6090117876379694E-062   1.2358138809632959E-028  -3.8052704555408787E-029   7.3039258636896780E-061   5.3226470977149127E-030  -1.6389289774779383E-030\n\
+						 2.4352166866579643E-028   2.7296188060751558       -3.2026319898266459E-028  -1.8295113726604301E-029  -6.8291082030187175E-002   1.5931292607055097E-029   3.0578415974419965E-032  -5.0154165982362738E-029   7.5935552404821928E-005   7.6616409959031656E-034  -8.8379571652031751E-031   3.0329112165814950E-003\n\
+						 7.9087010340333794E-028  -3.2026319898266450E-028   2.7296188060748161       -5.9415897423372060E-029   1.5931292607055103E-029  -6.8291082023369712E-002  -9.4155879559704855E-033  -7.5935552397230399E-005   5.0154165969933753E-029  -2.3591429567418663E-034  -3.0329112165811156E-003   8.8379571598443242E-031\n\
+						-0.13663670435230119       -1.8295113726604273E-029  -5.9415897423372128E-029   2.7347471478716914        2.4352166866579594E-028   7.9087010340333776E-028  -7.3039386164768886E-061  -5.3226470977149127E-030   1.6389289774779397E-030  -3.6090150221108696E-062  -1.2358138809632956E-028   3.8052704555408787E-029\n\
+						-1.8295113726604273E-029  -6.8291082030187120E-002   1.5931292607055103E-029   2.4352166866579602E-028   2.7296188060751576       -3.2026319898266450E-028  -7.6616409959031691E-034   8.8379571652031751E-031  -3.0329112165814955E-003  -3.0578415974419965E-032   5.0154165982362761E-029  -7.5935552404821928E-005\n\
+						-5.9415897423372094E-029   1.5931292607055097E-029  -6.8291082023369712E-002   7.9087010340333794E-028  -3.2026319898266459E-028   2.7296188060748148        2.3591429567418637E-034   3.0329112165811164E-003  -8.8379571598443225E-031   9.4155879559704923E-033   7.5935552397230372E-005  -5.0154165969933765E-029\n\
+						 3.6089748047321625E-062   3.0578415974419954E-032  -9.4155879559704937E-033  -7.3039264566234963E-061  -7.6616409959031597E-034   2.3591429567418620E-034   3.6372103156261013        8.3667803086218031E-034   2.7172269303644510E-033  -1.3471149317869285E-004   1.0562908720747689E-035   3.4304497849074784E-035\n\
+						 1.2358138809632956E-028  -5.0154165982362761E-029  -7.5935552397230358E-005  -5.3226470977149092E-030   8.8379571652031751E-031   3.0329112165811151E-003   8.3667803086218014E-034   3.6372137005344847        7.8455010385333081E-030   1.0562908720747701E-035   6.7440181159940298E-005  -1.1430338584746855E-031\n\
+						-3.8052704555408804E-029   7.5935552404821928E-005   5.0154165969933804E-029   1.6389289774779435E-030  -3.0329112165814968E-003  -8.8379571598443312E-031   2.7172269303644531E-033   7.8455010385333053E-030   3.6372137005344847        3.4304497849074800E-035  -1.1430338584746860E-031   6.7440181180155478E-005\n\
+						 7.3039552937325851E-061   7.6616409959031639E-034  -2.3591429567418658E-034  -3.6090203922430682E-062  -3.0578415974419965E-032   9.4155879559704896E-033  -1.3471149317869282E-004   1.0562908720747700E-035   3.4304497849074800E-035   3.6372103156261031        8.3667803086218151E-034   2.7172269303644521E-033\n\
+						 5.3226470977149148E-030  -8.8379571652031751E-031  -3.0329112165811160E-003  -1.2358138809632959E-028   5.0154165982362761E-029   7.5935552397230372E-005   1.0562908720747692E-035   6.7440181159940298E-005  -1.1430338584746866E-031   8.3667803086218151E-034   3.6372137005344847        7.8455010385333081E-030\n\
+						-1.6389289774779397E-030   3.0329112165814959E-003   8.8379571598443225E-031   3.8052704555408787E-029  -7.5935552404821915E-005  -5.0154165969933742E-029   3.4304497849074800E-035  -1.1430338584746858E-031   6.7440181180155492E-005   2.7172269303644521E-033   7.8455010385333067E-030   3.6372137005344847'
+
+		M_hydrolib_30 = np.linalg.inv( array_from_string(R_hydrolib_30) / self.R_hydrolib_infty )
+
+		for i in range(12):
+			for j in range(12):
+				print('{} {}: {} vs {}'.format(i, j, M_pybrown[i][j], M_hydrolib_30[i][j]))
+				# self.assertAlmostEqual(R_pybrown[i][j], R_hydrolib_3[i][j], delta = 0.001)
+
+	def test_M2B_RPY_3_x(self):
+
+		beadi = Bead([0.0, 0.0, 0.0], 1.0)
+		beadj = Bead([3.0, 0.0, 0.0], 1.0)
+		beads = [beadi, beadj]
+		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
+
+		M_pybrown = RPY_M_matrix(beads, pointers) * self.R_pybrown_infty
+
+		R_hydrolib_3 = ' 3.7312230406281288        8.1818075001896837E-021   2.6571545604586888E-020  -1.8263361553120150       -5.5101655768470018E-021  -1.7895021091042259E-020  -2.8721266524330804E-046   1.2958249978218280E-019  -3.9900543734308393E-020  -9.9313075326356304E-047   8.4625253399550357E-020  -2.6057481732652061E-020\n\
+						 8.1818075001896401E-021   2.9791344182689072        8.7710573618203703E-022  -5.5101655768469664E-021 -0.81066685570688679       -4.1603153750548035E-021   3.4573292220937879E-021  -2.0917520878551856E-020  0.10324379907285719        1.1492327735050385E-021   4.2178891121868336E-021  0.33711916792899110\n\
+						 2.6571545604586906E-020   8.7710573618203665E-022   2.9791344182348460       -1.7895021091042250E-020  -4.1603153750548057E-021 -0.81066685563897056       -1.0645674845139696E-021 -0.10324379906350838        2.0917520867246497E-020  -3.5386732407342644E-022 -0.33711916792455121       -4.2178891511747846E-021\n\
+						-1.8263361553120159       -5.5101655768469724E-021  -1.7895021091042250E-020   3.7312230406281275        8.1818075001897003E-021   2.6571545604586888E-020   9.9314122315008697E-047  -8.4625253399550321E-020   2.6057481732651853E-020   2.8721200149696123E-046  -1.2958249978218280E-019   3.9900543734308610E-020\n\
+						-5.5101655768470093E-021 -0.81066685570688635       -4.1603153750548050E-021   8.1818075001897018E-021   2.9791344182689063        8.7710573618203665E-022  -1.1492327735050389E-021  -4.2178891121868328E-021 -0.33711916792899133       -3.4573292220937864E-021   2.0917520878551862E-020 -0.10324379907285718\n\
+						-1.7895021091042268E-020  -4.1603153750548020E-021 -0.81066685563897056        2.6571545604586900E-020   8.7710573618203684E-022   2.9791344182348469        3.5386732407342512E-022  0.33711916792455116        4.2178891511747914E-021   1.0645674845139715E-021  0.10324379906350839       -2.0917520867246500E-020\n\
+						-2.8721272668392284E-046   3.4573292220937879E-021  -1.0645674845139707E-021   9.9314595427429764E-047  -1.1492327735050387E-021   3.5386732407342719E-022   3.6443224432345169        8.6138544226473758E-022   2.7974676442991439E-021 -0.13510313275522509        2.8638388937059396E-022   9.3007104440177321E-022\n\
+						 1.2958249978218285E-019  -2.0917520878551850E-020 -0.10324379906350840       -8.4625253399550309E-020  -4.2178891121868328E-021  0.33711916792455121        8.6138544226473495E-022   3.7023768394705110        8.5625745508729922E-020   2.8638388937059321E-022   7.8927695064651027E-002  -3.8003584109372303E-020\n\
+						-3.9900543734308291E-020  0.10324379907285713        2.0917520867246494E-020   2.6057481732651856E-020 -0.33711916792899121        4.2178891511747899E-021   2.7974676442991417E-021   8.5625745508729874E-020   3.7023768394722127        9.3007104440177245E-022  -3.8003584109372303E-020   7.8927695084717170E-002\n\
+						-9.9313629945699554E-047   1.1492327735050387E-021  -3.5386732407342658E-022   2.8721228892113252E-046  -3.4573292220937879E-021   1.0645674845139718E-021 -0.13510313275522512        2.8638388937059326E-022   9.3007104440177264E-022   3.6443224432345160        8.6138544226473796E-022   2.7974676442991413E-021\n\
+						 8.4625253399550357E-020   4.2178891121868351E-021 -0.33711916792455138       -1.2958249978218283E-019   2.0917520878551868E-020  0.10324379906350839        2.8638388937059312E-022   7.8927695064651027E-002  -3.8003584109372309E-020   8.6138544226473777E-022   3.7023768394705110        8.5625745508729886E-020\n\
+						-2.6057481732652094E-020  0.33711916792899127       -4.2178891511747906E-021   3.9900543734308610E-020 -0.10324379907285719       -2.0917520867246500E-020   9.3007104440177283E-022  -3.8003584109372291E-020   7.8927695084717184E-002   2.7974676442991424E-021   8.5625745508729886E-020   3.7023768394722127'
+
+		M_hydrolib_3 = np.linalg.inv( array_from_string(R_hydrolib_3) / self.R_hydrolib_infty )
+
+		for i in range(12):
+			for j in range(12):
+				print('{} {}: {} vs {}'.format(i, j, M_pybrown[i][j], M_hydrolib_3[i][j]))
+				# self.assertAlmostEqual(R_pybrown[i][j], R_hydrolib_3[i][j], delta = 0.001)
 
 	def test_JO_RA2B_3_x(self):
 
@@ -102,7 +160,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -142,7 +200,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -182,7 +240,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -222,7 +280,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -500,7 +558,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -538,7 +596,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -576,7 +634,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -614,7 +672,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -876,7 +934,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -914,7 +972,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -952,7 +1010,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -990,7 +1048,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1252,7 +1310,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1290,7 +1348,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1328,7 +1386,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1366,7 +1424,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1635,7 +1693,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1673,7 +1731,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1711,7 +1769,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1749,7 +1807,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 		beads = [beadi, beadj]
 		pointers = compute_pointer_pbc_matrix(beads, 1000000.0)
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = 1000000.0, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -1990,7 +2048,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([3000.0, 0.0, 0.0], 1.0), Bead([6000.0, 0.0, 0.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -2021,7 +2079,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 3.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_rpy = np.linalg.inv(M_pybrown_rpy)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + R_pybrown_rpy ) / self.R_pybrown_infty
@@ -2056,7 +2114,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 6.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_rpy = np.linalg.inv(M_pybrown_rpy)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + R_pybrown_rpy ) / self.R_pybrown_infty
@@ -2091,7 +2149,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 3.0], 1.0), Bead([0.0, 0.0, 6.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_rpy = np.linalg.inv(M_pybrown_rpy)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + R_pybrown_rpy ) / self.R_pybrown_infty
@@ -2157,7 +2215,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 2.1], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_rpy = np.linalg.inv(M_pybrown_rpy)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + R_pybrown_rpy ) / self.R_pybrown_infty
@@ -2192,7 +2250,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 4.2], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_rpy = np.linalg.inv(M_pybrown_rpy)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + R_pybrown_rpy ) / self.R_pybrown_infty
@@ -2227,7 +2285,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 2.1], 1.0), Bead([0.0, 0.0, 4.2], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		R_pybrown_rpy = np.linalg.inv(M_pybrown_rpy)
 		R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 		R_pybrown_tot = ( R_pybrown_lub_corr + R_pybrown_rpy ) / self.R_pybrown_infty
@@ -2291,7 +2349,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([-5.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([7.0, 0.0, 0.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 
 		M_infinity_pecnut = np.array( [ [ 0.05305169, 0.0, 0.0, 0.01549108, 0.0, 0.0, 0.00660075, 0.0, 0.0 ],
 										[ 0.0, 0.05305169, 0.0, 0.0, 0.00816995, 0.0, 0.0, 0.00333108,  0.0 ],
@@ -2318,7 +2376,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 3.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 
 		M_infinity_pecnut_string = '[[ 0.05305169  0.          0.          0.01424535  0.          0.          0.          0.          0.          0.         -0.00442097  0.        ]\n\
 									[ 0.          0.05305169  0.          0.          0.01424535  0.          0.          0.          0.          0.00442097  0.          0.        ]\n\
@@ -2425,7 +2483,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 6.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 
 		M_infinity_pecnut_doubledist_string = '[[  5.30516925e-02   0.00000000e+00   0.00000000e+00   6.75426070e-03   0.00000000e+00   0.00000000e+00   0.00000000e+00   0.00000000e+00   0.00000000e+00   0.00000000e+00  -1.10524266e-03   0.00000000e+00]\n\
 											   [  0.00000000e+00   5.30516925e-02   0.00000000e+00   0.00000000e+00   6.75426070e-03   0.00000000e+00   0.00000000e+00   0.00000000e+00   0.00000000e+00   1.10524266e-03   0.00000000e+00   0.00000000e+00]\n\
@@ -2511,7 +2569,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 3.0], 1.0), Bead([0.0, 0.0, 6.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 
 		M_infinity_pecnut_composed_string = '[[ 0.05305169  0.          0.          0.01424535  0.          0.          0.00675426  0.          0.          0.          0.          0.        ]\n\
 											 [ 0.          0.05305169  0.          0.          0.01424535  0.          0.          0.00675426  0.          0.          0.          0.        ]\n\
@@ -2676,7 +2734,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 2.1], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 
 		M_infinity_pecnut_string = '[[ 0.05305169  0.          0.          0.02181127  0.          0.          0.          0.          0.          0.         -0.00902239  0.        ]\n\
 									[ 0.          0.05305169  0.          0.          0.02181127  0.          0.          0.          0.          0.00902239  0.          0.        ]\n\
@@ -2784,7 +2842,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 4.2], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 
 		M_infinity_pecnut_doubledist_string = '[[ 0.05305169  0.          0.          0.00983154  0.          0.          0.          0.          0.          0.         -0.0022556   0.        ]\n\
 											   [ 0.          0.05305169  0.          0.          0.00983154  0.          0.          0.          0.          0.0022556   0.          0.        ]\n\
@@ -2896,7 +2954,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([-3.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([3.0, 0.0, 0.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 
 		M_infinity_pecnut = np.array( [ [ 0.05305169, 0.0, 0.0, 0.02456095, 0.0, 0.0, 0.0130173, 0.0, 0.0 ],
 										[ 0.0, 0.05305169, 0.0, 0.0, 0.01424535, 0.0, 0.0, 0.00675426, 0.0 ],
@@ -2921,7 +2979,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		beads = [ Bead([-3.0, 0.0, 0.0], 1.0), Bead([0.0, 0.0, 0.0], 1.0), Bead([3.0, 0.0, 0.0], 1.0) ]
 		pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		M_infinity_pecnut_string = '[[ 0.05305169  0.          0.          0.02456095  0.          0.          0.0130173   0.          0.          0.          0.          0.        ]\n\
 									[ 0.          0.05305169  0.          0.          0.01424535  0.          0.          0.00675426  0.          0.          0.          0.        ]\n\
 									[ 0.          0.          0.05305169  0.          0.          0.01424535  0.          0.          0.00675426  0.          0.          0.        ]\n\
@@ -3063,7 +3121,7 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 	# 	beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([3.0, 0.0, 0.0], 1.0), Bead([6.0, 0.0, 0.0], 1.0) ]
 	# 	pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-	# 	M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+	# 	M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 	# 	R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = False)
 	# 	R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty
 
@@ -3079,9 +3137,9 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 
 	# 	R_hydrolib_3inline_3 /= self.R_hydrolib_infty
 
-	# 	dR12 = ( JO_2B_RA_matrix(beads[0], beads[1]) - np.linalg.inv( RPY_M_matrix([beads[0], beads[1]], compute_pointer_pbc_matrix([beads[0], beads[1]], 1000000.0)) ) ) / self.R_pybrown_infty
-	# 	dR13 = ( JO_2B_RA_matrix(beads[0], beads[2]) - np.linalg.inv( RPY_M_matrix([beads[0], beads[2]], compute_pointer_pbc_matrix([beads[0], beads[2]], 1000000.0)) ) ) / self.R_pybrown_infty
-	# 	dR23 = ( JO_2B_RA_matrix(beads[1], beads[2]) - np.linalg.inv( RPY_M_matrix([beads[1], beads[2]], compute_pointer_pbc_matrix([beads[1], beads[2]], 1000000.0)) ) ) / self.R_pybrown_infty
+	# 	dR12 = ( JO_2B_RA_matrix(beads[0], beads[1]) - np.linalg.inv( RPY_M_tt_matrix([beads[0], beads[1]], compute_pointer_pbc_matrix([beads[0], beads[1]], 1000000.0)) ) ) / self.R_pybrown_infty
+	# 	dR13 = ( JO_2B_RA_matrix(beads[0], beads[2]) - np.linalg.inv( RPY_M_tt_matrix([beads[0], beads[2]], compute_pointer_pbc_matrix([beads[0], beads[2]], 1000000.0)) ) ) / self.R_pybrown_infty
+	# 	dR23 = ( JO_2B_RA_matrix(beads[1], beads[2]) - np.linalg.inv( RPY_M_tt_matrix([beads[1], beads[2]], compute_pointer_pbc_matrix([beads[1], beads[2]], 1000000.0)) ) ) / self.R_pybrown_infty
 	# 	# print(dR12)
 	# 	# print(dR13)
 	# 	# print(dR23)
@@ -3103,10 +3161,10 @@ class TestDiffusionVsHydrolib(unittest.TestCase):
 		# beads = [ Bead([0.0, 0.0, 0.0], 1.0), Bead([2.1, 0.0, 0.0], 1.0), Bead([4.2, 0.0, 0.0], 1.0) ]
 		# pointers = compute_pointer_pbc_matrix(beads, insanely_large_box_size)
 
-		# M_pybrown_rpy = RPY_M_matrix(beads, pointers)
+		# M_pybrown_rpy = RPY_M_tt_matrix(beads, pointers)
 		# print( np.linalg.inv(M_pybrown_rpy) / self.R_pybrown_infty )
 		# print( JO_2B_RA_matrix(beads[0], beads[2]) / self.R_pybrown_infty )
-		# print( np.linalg.inv(RPY_M_matrix([ beads[0], beads[2] ], compute_pointer_pbc_matrix([ beads[0], beads[2] ], insanely_large_box_size))) / self.R_pybrown_infty )
+		# print( np.linalg.inv(RPY_M_tt_matrix([ beads[0], beads[2] ], compute_pointer_pbc_matrix([ beads[0], beads[2] ], insanely_large_box_size))) / self.R_pybrown_infty )
 		# 1/0
 		# R_pybrown_lub_corr = JO_R_lubrication_correction_F_matrix(beads, pointers, lubrication_cutoff = insanely_large_box_size, cichocki_correction = True)
 		# R_pybrown_tot = ( R_pybrown_lub_corr + np.linalg.inv(M_pybrown_rpy) ) / self.R_pybrown_infty

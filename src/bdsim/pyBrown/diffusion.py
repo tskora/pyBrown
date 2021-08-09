@@ -27,7 +27,7 @@ lib = ctypes.cdll.LoadLibrary( lib_path )
 
 #-------------------------------------------------------------------------------
 
-def RPY_M_matrix(beads, pointers):
+def RPY_M_tt_matrix(beads, pointers):
 
 	c_double = ctypes.c_double
 
@@ -49,9 +49,39 @@ def RPY_M_matrix(beads, pointers):
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
-	lib.RPY_M_matrix(a, p, N_c, my_arr)
+	lib.RPY_M_tt_matrix(a, p, N_c, my_arr)
 
 	M = np.reshape(my_arr, (3*N, 3*N))
+
+	return M
+
+#-------------------------------------------------------------------------------
+
+def RPY_M_matrix(beads, pointers):
+
+	c_double = ctypes.c_double
+
+	N = len(beads);
+
+	a_list = [b.a for b in beads]
+	v0 = array('d', a_list)
+	a = (c_double * len(v0)).from_buffer(v0)
+
+	p_list = np.ravel( -pointers[np.triu_indices(n=N, k=1)] ).tolist()
+	v1 = array('d', p_list)
+	p = (c_double * len(v1)).from_buffer(v1)
+
+	N_c = ctypes.c_int(N)
+
+	len_my_list = 36*N*N
+
+	my_list = [0.0]*len_my_list
+	v2 = array('d', my_list)
+	my_arr = (c_double * len(v2)).from_buffer(v2)
+
+	lib.RPY_M_matrix(a, p, N_c, my_arr)
+
+	M = np.reshape(my_arr, (6*N, 6*N))
 
 	return M
 
@@ -87,7 +117,7 @@ def RPY_Smith_M_matrix(beads, pointers, box_length, alpha, m, n):
 	v2 = array('d', my_list)
 	my_arr = (c_double * len(v2)).from_buffer(v2)
 
-	lib.RPY_Smith_M_matrix(a, p, box_length_c, alpha_c, m_c, n_c, N_c, my_arr)
+	lib.RPY_Smith_M_tt_matrix(a, p, box_length_c, alpha_c, m_c, n_c, N_c, my_arr)
 
 	M = np.reshape(my_arr, (3*N, 3*N))
 
