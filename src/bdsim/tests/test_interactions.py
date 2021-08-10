@@ -20,10 +20,11 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, pointer
+from pyBrown.bead import Bead, pointer, compute_pointer_pbc_matrix
 from pyBrown.interactions import Interactions, LJ_6_attractive_energy, LJ_6_attractive_force,\
 								 LJ_12_repulsive_energy, LJ_12_repulsive_force,\
-								 LJ_6_12_energy, LJ_6_12_force
+								 LJ_6_12_energy, LJ_6_12_force, harmonic_bond_force, \
+								 harmonic_bond_energy
 
 #-------------------------------------------------------------------------------
 
@@ -45,12 +46,94 @@ class TestInteractions(unittest.TestCase):
 
 		self.beads = [ self.b1, self.b2 ]
 
-		self.rij = np.zeros((len(self.beads), len(self.beads), 3))
+		self.rij = compute_pointer_pbc_matrix(self.beads, box_length = 1000000.0)
 
-		for i in range(1, len(self.beads)):
-			for j in range(0, i):
-				self.rij[i][j] = pointer(self.beads[i], self.beads[j])
-				self.rij[j][i] = -self.rij[i][j]
+	#---------------------------------------------------------------------------
+
+	def test_force_and_energy_of_harmonic_dumbbell_eq(self):
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		dist_eq = self.d
+
+		force_constant = 1.0
+
+		self.b1.bead_id = 1
+		self.b2.bead_id = 2
+
+		self.b1.bonded_with.append(self.b2.bead_id)
+		self.b1.bonded_how[self.b2.bead_id] = [ dist_eq, force_constant ]
+
+		self.b2.bonded_with.append(self.b1.bead_id)
+		self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
+
+		i = Interactions(harmonic_bond_force, harmonic_bond_energy, {})
+
+		E += i.compute_forces_and_energy(self.beads, self.rij, F)
+
+		self.assertEqual(E, 0.0)
+
+		self.assertSequenceEqual(list(F), [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+	#---------------------------------------------------------------------------
+
+	def test_force_and_energy_of_harmonic_dumbbell_eq_plus_1(self):
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		dist_eq = self.d - 1.0
+
+		force_constant = 1.0
+
+		self.b1.bead_id = 1
+		self.b2.bead_id = 2
+
+		self.b1.bonded_with.append(self.b2.bead_id)
+		self.b1.bonded_how[self.b2.bead_id] = [ dist_eq, force_constant ]
+
+		self.b2.bonded_with.append(self.b1.bead_id)
+		self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
+
+		i = Interactions(harmonic_bond_force, harmonic_bond_energy, {})
+
+		E += i.compute_forces_and_energy(self.beads, self.rij, F)
+
+		self.assertEqual(E, 0.5*force_constant*(dist_eq - self.d)**2)
+
+		self.assertSequenceEqual(list(F), [0.0, 0.0, force_constant*(self.d - dist_eq), 0.0, 0.0, -force_constant*(self.d - dist_eq)])
+
+	#---------------------------------------------------------------------------
+
+	def test_force_and_energy_of_harmonic_dumbbell_eq_minus_1(self):
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		dist_eq = self.d + 1.0
+
+		force_constant = 1.0
+
+		self.b1.bead_id = 1
+		self.b2.bead_id = 2
+
+		self.b1.bonded_with.append(self.b2.bead_id)
+		self.b1.bonded_how[self.b2.bead_id] = [ dist_eq, force_constant ]
+
+		self.b2.bonded_with.append(self.b1.bead_id)
+		self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
+
+		i = Interactions(harmonic_bond_force, harmonic_bond_energy, {})
+
+		E += i.compute_forces_and_energy(self.beads, self.rij, F)
+
+		self.assertEqual(E, 0.5*force_constant*(dist_eq - self.d)**2)
+
+		self.assertSequenceEqual(list(F), [0.0, 0.0, -force_constant*(dist_eq - self.d), 0.0, 0.0, force_constant*(dist_eq - self.d)])
 
 	#---------------------------------------------------------------------------
 

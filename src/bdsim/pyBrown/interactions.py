@@ -112,9 +112,27 @@ def set_interactions(input_data):
 
 	_set_lennard_jones_interactions(input_data, interactions_for_simulation)
 
+	_set_harmonic_bond_interactions(input_data, interactions_for_simulation)
+
 	_set_custom_interactions(input_data, interactions_for_simulation)
 
 	return interactions_for_simulation
+
+#-------------------------------------------------------------------------------
+
+def _set_harmonic_bond_interactions(input_data, interactions_for_simulation):
+
+	if False:
+
+		return
+
+	aux_keywords = [  ]
+
+	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
+
+	i = Interactions(harmonic_bond_force, harmonic_bond_energy, aux)
+
+	interactions_for_simulation.append(i)
 
 #-------------------------------------------------------------------------------
 
@@ -178,6 +196,44 @@ def _set_custom_interactions(input_data, interactions_for_simulation):
 		ef = eval( 'custom_module.' + energy_dictionary[key] )
 
 		interactions_for_simulation.append( Interactions(ff, ef, aux) )
+
+#-------------------------------------------------------------------------------
+
+def harmonic_bond_force(bead1, bead2, pointer):
+
+	if bead1.is_bonded_with(bead2):
+
+		dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
+
+		dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+
+		dist = math.sqrt(dist2)
+
+		versor = pointer / dist
+
+		return versor * force_constant * (dist - dist_eq)
+
+	else:
+
+		return np.zeros(3)
+
+#-------------------------------------------------------------------------------
+
+def harmonic_bond_energy(bead1, bead2, pointer):
+
+	if bead1.is_bonded_with(bead2):
+
+		dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
+
+		dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+
+		dist = math.sqrt(dist2)
+
+		return 0.5 * force_constant * (dist - dist_eq)**2
+
+	else:
+
+		return 0.0
 
 #-------------------------------------------------------------------------------
 

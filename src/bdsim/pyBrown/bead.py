@@ -71,7 +71,7 @@ class Bead():
 	:type mobile: `bool`
 	"""
 
-	def __init__(self, coords, hydrodynamic_radius, label = "XXX", hard_core_radius = None, epsilon_LJ = 0.0, mobile = True):
+	def __init__(self, coords, hydrodynamic_radius, label = "XXX", hard_core_radius = None, epsilon_LJ = 0.0, mobile = True, bead_id = None):
 
 		self.r = np.array(coords)
 		self.a = hydrodynamic_radius
@@ -79,6 +79,10 @@ class Bead():
 		self.mobile = mobile
 		self.hard_core_radius = hard_core_radius if hard_core_radius is not None else self.a
 		self.epsilon_LJ = epsilon_LJ
+		self.bead_id = bead_id
+
+		self.bonded_with = []
+		self.bonded_how = {}
 
 	#-------------------------------------------------------------------------------
 
@@ -140,6 +144,12 @@ class Bead():
 				self.r[i] += box_length
 			while self.r[i] >= box_length / 2:
 				self.r[i] -= box_length
+
+	#-------------------------------------------------------------------------------
+
+	def is_bonded_with(self, bead):
+
+		return ( bead.bead_id in self.bonded_with )
 
 	#-------------------------------------------------------------------------------
 

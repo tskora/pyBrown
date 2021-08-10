@@ -130,6 +130,7 @@ def read_str_file(input_str_filename):
 
             if line_segments[0] == 'sub':
                 label = line_segments[1]
+                bead_id = int(line_segments[2])
                 coords = np.array([ float(line_segments[i]) for i in range(3, 6) ])
                 hydrodynamic_radius = float(line_segments[6])
                 charge = float(line_segments[7])
@@ -137,7 +138,25 @@ def read_str_file(input_str_filename):
                 lennard_jones_energy = float(line_segments[9])
                 mass = float(line_segments[10])
 
-                beads.append( Bead(coords = coords, hydrodynamic_radius = hydrodynamic_radius, label = label, hard_core_radius = lennard_jones_radius, epsilon_LJ = lennard_jones_energy) )
+                beads.append( Bead(coords = coords, hydrodynamic_radius = hydrodynamic_radius, label = label, hard_core_radius = lennard_jones_radius, epsilon_LJ = lennard_jones_energy, bead_id = bead_id) )
+
+            if line_segments[0] == 'bond':
+                id1 = int( line_segments[1] )
+                id2 = int( line_segments[2] )
+                dist_eq = float( line_segments[3] )
+                force_constant = float( line_segments[5] )
+
+                for b in beads:
+                    if b.bead_id == id1:
+                        b1 = b
+                    if b.bead_id == id2:
+                        b2 = b
+
+                b1.bonded_with.append(id2)
+                b2.bonded_with.append(id1)
+
+                b1.bonded_how[id2] = [dist_eq, force_constant]
+                b2.bonded_how[id1] = [dist_eq, force_constant]
 
     return beads
 
