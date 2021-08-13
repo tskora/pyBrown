@@ -24,7 +24,7 @@ from pyBrown.bead import Bead, pointer, compute_pointer_pbc_matrix
 from pyBrown.interactions import Interactions, LJ_6_attractive_energy, LJ_6_attractive_force,\
 								 LJ_12_repulsive_energy, LJ_12_repulsive_force,\
 								 LJ_6_12_energy, LJ_6_12_force, harmonic_bond_force, \
-								 harmonic_bond_energy
+								 harmonic_bond_energy, harmonic_angle_force, harmonic_angle_energy
 
 #-------------------------------------------------------------------------------
 
@@ -66,10 +66,7 @@ class TestInteractions(unittest.TestCase):
 		self.b1.bonded_with.append(self.b2.bead_id)
 		self.b1.bonded_how[self.b2.bead_id] = [ dist_eq, force_constant ]
 
-		self.b2.bonded_with.append(self.b1.bead_id)
-		self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
-
-		i = Interactions(harmonic_bond_force, harmonic_bond_energy, {})
+		i = Interactions(harmonic_bond_force, harmonic_bond_energy, bonded = True, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
@@ -95,10 +92,10 @@ class TestInteractions(unittest.TestCase):
 		self.b1.bonded_with.append(self.b2.bead_id)
 		self.b1.bonded_how[self.b2.bead_id] = [ dist_eq, force_constant ]
 
-		self.b2.bonded_with.append(self.b1.bead_id)
-		self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
+		# self.b2.bonded_with.append(self.b1.bead_id)
+		# self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
 
-		i = Interactions(harmonic_bond_force, harmonic_bond_energy, {})
+		i = Interactions(harmonic_bond_force, harmonic_bond_energy, bonded = True, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
@@ -124,10 +121,7 @@ class TestInteractions(unittest.TestCase):
 		self.b1.bonded_with.append(self.b2.bead_id)
 		self.b1.bonded_how[self.b2.bead_id] = [ dist_eq, force_constant ]
 
-		self.b2.bonded_with.append(self.b1.bead_id)
-		self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
-
-		i = Interactions(harmonic_bond_force, harmonic_bond_energy, {})
+		i = Interactions(harmonic_bond_force, harmonic_bond_energy, bonded = True, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
@@ -137,13 +131,138 @@ class TestInteractions(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
+	def test_force_and_energy_of_angle_eq(self):
+
+		angle_eq = 90.0
+
+		force_constant = 1.0
+
+		b1 = Bead([0.0, 0.0, 0.0], 1.0, bead_id = 1)
+		b2 = Bead([0.5, 0.0, 0.5], 1.0, bead_id = 2)
+		b3 = Bead([1.0, 0.0, 0.0], 1.0, bead_id = 3)
+
+		beads = [b1, b2, b3]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length = 1000000.0)
+
+		b1.angled_with.append([b2.bead_id, b3.bead_id])
+		b1.angled_how[(b2.bead_id, b3.bead_id)] = [ angle_eq, force_constant ]
+
+		F = harmonic_angle_force(b1, b2, b3, rij[0][1], rij[1][2], box_length = 1000000.0)
+
+		E = harmonic_angle_energy(b1, b2, b3, rij[0][1], rij[1][2], box_length = 1000000.0)
+
+		self.assertEqual(E, 0.0)
+
+		self.assertSequenceEqual(list(F), [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+	#---------------------------------------------------------------------------
+
+	def test_force_and_energy_of_angle_eq_2(self):
+
+		F = np.zeros(9)
+
+		E = 0.0
+
+		angle_eq = 90.0
+
+		force_constant = 1.0
+
+		b1 = Bead([0.0, 0.0, 0.0], 1.0, bead_id = 1)
+		b2 = Bead([0.5, 0.0, 0.5], 1.0, bead_id = 2)
+		b3 = Bead([1.0, 0.0, 0.0], 1.0, bead_id = 3)
+
+		beads = [b1, b2, b3]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length = 1000000.0)
+
+		i = Interactions(harmonic_angle_force, harmonic_angle_energy, bonded = True, how_many_body = 3)
+
+		E += i.compute_forces_and_energy(self.beads, self.rij, F)
+
+		self.assertEqual(E, 0.0)
+
+		self.assertSequenceEqual(list(F), [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+	#---------------------------------------------------------------------------
+
+	def test_force_and_energy_of_angle_noneq_fundamentals(self):
+
+		for angle in np.linspace(0.0, 360.0, 100):
+
+			angle_eq = angle
+
+			force_constant = 1.0
+
+			b1 = Bead([0.0, 0.0, 0.0], 1.0, bead_id = 1)
+			b2 = Bead([0.5, 0.0, 0.5], 1.0, bead_id = 2)
+			b3 = Bead([1.0, 0.0, 0.0], 1.0, bead_id = 3)
+
+			beads = [b1, b2, b3]
+
+			rij = compute_pointer_pbc_matrix(beads, box_length = 1000000.0)
+
+			b1.angled_with.append([b2.bead_id, b3.bead_id])
+			b1.angled_how[(b2.bead_id, b3.bead_id)] = [ angle_eq, force_constant ]
+
+			F = harmonic_angle_force(b1, b2, b3, rij[0][1], rij[1][2], box_length = 1000000.0)
+
+			E = harmonic_angle_energy(b1, b2, b3, rij[0][1], rij[1][2], box_length = 1000000.0)
+
+			self.assertEqual(E, 0.5 * force_constant * (angle_eq - 90.0)**2)
+
+			self.assertSequenceEqual(list(F[:3] + F[3:6] + F[6:]), [0.0, 0.0, 0.0])
+
+			self.assertAlmostEqual(np.dot(F[:3],  rij[0][1]), 0.0, places = 10)
+			self.assertAlmostEqual(np.dot(F[6:],  rij[1][2]), 0.0, places = 10)
+
+	#---------------------------------------------------------------------------
+
+	def test_force_and_energy_of_angle_noneq_fundamentals_2(self):
+
+		for angle in np.linspace(0.0, 360.0, 100):
+
+			F = np.zeros(9)
+
+			angle_eq = angle
+
+			force_constant = 1.0
+
+			box_length = 1000000.0
+
+			b1 = Bead([0.0, 0.0, 0.0], 1.0, bead_id = 1)
+			b2 = Bead([0.5, 0.0, 0.5], 1.0, bead_id = 2)
+			b3 = Bead([1.0, 0.0, 0.0], 1.0, bead_id = 3)
+
+			beads = [b1, b2, b3]
+
+			rij = compute_pointer_pbc_matrix(beads, box_length = box_length)
+
+			b1.angled_with.append([b2.bead_id, b3.bead_id])
+			b1.angled_how[(b2.bead_id, b3.bead_id)] = [ angle_eq, force_constant ]
+
+			i = Interactions(harmonic_angle_force, harmonic_angle_energy, auxiliary_force_parameters = {"box_length": box_length}, bonded = True, how_many_body = 3)
+
+			E = i.compute_forces_and_energy(beads, rij, F)
+
+			self.assertEqual(E, 0.5 * force_constant * (angle_eq - 90.0)**2)
+
+			self.assertSequenceEqual(list(F[:3] + F[3:6] + F[6:]), [0.0, 0.0, 0.0])
+
+			self.assertAlmostEqual(np.dot(F[:3],  rij[0][1]), 0.0, places = 10)
+			self.assertAlmostEqual(np.dot(F[6:],  rij[1][2]), 0.0, places = 10)
+
+	#---------------------------------------------------------------------------
+
 	def test_force_and_energy_of_LJ_6_particles_in_sigma(self):
+
+		box_length = 1000000.0
 
 		F = np.zeros(6)
 
 		E = 0.0
 
-		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, {"lennard_jones_alpha": self.alpha})
+		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
@@ -155,11 +274,13 @@ class TestInteractions(unittest.TestCase):
 
 	def test_force_and_energy_of_LJ_12_particles_in_sigma(self):
 
+		box_length = 1000000.0
+
 		F = np.zeros(6)
 
 		E = 0.0
 
-		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, {"lennard_jones_alpha": self.alpha})
+		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(self.beads, self.rij, F)
 
@@ -171,15 +292,17 @@ class TestInteractions(unittest.TestCase):
 
 	def test_force_and_energy_of_LJ_6_12_particles_in_sigma(self):
 
+		box_length = 1000000.0
+
 		F = np.zeros(6)
 
 		E = 0.0
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
-		ia = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, {"lennard_jones_alpha": self.alpha})
+		ia = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
-		ir = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, {"lennard_jones_alpha": self.alpha})
+		ir = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
 		Fa = np.zeros(6)
 
@@ -205,6 +328,8 @@ class TestInteractions(unittest.TestCase):
 
 	def test_force_and_energy_of_LJ_6_12_particles_at_minimum(self):
 
+		box_length = 1000000.0
+
 		F = np.zeros(6)
 
 		E = 0.0
@@ -220,7 +345,7 @@ class TestInteractions(unittest.TestCase):
 				rij[i][j] = pointer(beads[i], beads[j])
 				rij[j][i] = -rij[i][j]
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(beads, rij, F)
 
@@ -233,6 +358,8 @@ class TestInteractions(unittest.TestCase):
 	#---------------------------------------------------------------------------
 
 	def test_force_and_energy_of_LJ_6_12_particles_on_stable_equilateral_triangle(self):
+
+		box_length = 1000000.0
 
 		F = np.zeros(9)
 
@@ -248,14 +375,9 @@ class TestInteractions(unittest.TestCase):
 
 		beads = [ bead4, bead5, bead6 ]
 
-		rij = np.zeros((len(beads), len(beads), 3))
+		rij = compute_pointer_pbc_matrix(beads, box_length = box_length)
 
-		for i in range(1, len(beads)):
-			for j in range(0, i):
-				rij[i][j] = pointer(beads[i], beads[j])
-				rij[j][i] = -rij[i][j]
-
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(beads, rij, F)
 
@@ -268,6 +390,8 @@ class TestInteractions(unittest.TestCase):
 	#---------------------------------------------------------------------------
 
 	def test_energy_of_LJ_6_12_particles_on_unstable_equilateral_triangle(self):
+
+		box_length = 1000000.0
 
 		F = np.zeros(9)
 
@@ -283,14 +407,9 @@ class TestInteractions(unittest.TestCase):
 
 		beads = [ bead4, bead5, bead6 ]
 
-		rij = np.zeros((len(beads), len(beads), 3))
+		rij = compute_pointer_pbc_matrix(beads, box_length = box_length)
 
-		for i in range(1, len(beads)):
-			for j in range(0, i):
-				rij[i][j] = pointer(beads[i], beads[j])
-				rij[j][i] = -rij[i][j]
-
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(beads, rij, F)
 
@@ -299,6 +418,8 @@ class TestInteractions(unittest.TestCase):
 	#---------------------------------------------------------------------------
 
 	def test_energy_of_LJ_particles_with_dummy_immobile_particles(self):
+
+		box_length = 1000000.0
 
 		F = np.zeros(9)
 
@@ -320,14 +441,9 @@ class TestInteractions(unittest.TestCase):
 
 		beads = [ dummy1, bead4, dummy2, bead5, dummy3, bead6 ]
 
-		rij = np.zeros((len(beads), len(beads), 3))
+		rij = compute_pointer_pbc_matrix(beads, box_length = box_length)
 
-		for i in range(1, len(beads)):
-			for j in range(0, i):
-				rij[i][j] = pointer(beads[i], beads[j])
-				rij[j][i] = -rij[i][j]
-
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, {"lennard_jones_alpha": self.alpha})
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(beads, rij, F)
 

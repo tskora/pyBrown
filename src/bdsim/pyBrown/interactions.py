@@ -18,11 +18,13 @@ import importlib
 import math
 import numpy as np
 
+from pyBrown.bead import angle_pbc, get_bead_with_id
+
 #-------------------------------------------------------------------------------
 
 class Interactions():
 
-	def __init__(self, force_function, energy_function, auxiliary_force_parameters, energy_unit = "joule"):
+	def __init__(self, force_function, energy_function, auxiliary_force_parameters = {}, bonded = False, how_many_body = 2):
 
 		self.force = force_function
 
@@ -30,13 +32,75 @@ class Interactions():
 
 		self.auxiliary_force_parameters = auxiliary_force_parameters
 
+		self.bonded = bonded
+
+		self.how_many_body = how_many_body
+
 	#-------------------------------------------------------------------------------
 
 	def compute_forces_and_energy(self, beads, pointers, F):
 
+		temporary_force = np.zeros(3*len(beads))
+
+		if self.how_many_body == 2:
+
+			if self.bonded:
+
+				E = self._compute_2B_bonded_force_and_energy(beads, pointers, temporary_force)
+
+			elif not self.bonded:
+
+				E = self._compute_2B_nonbonded_force_and_energy(beads, pointers, temporary_force)
+
+		if self.how_many_body == 3:
+
+			if self.bonded:
+
+				E = self._compute_3B_bonded_force_and_energy(beads, pointers, temporary_force)
+
+			elif not self.bonded:
+
+				print('not implemented')
+
+				1/0
+
+		self._rearrange_force_to_ommit_immobile_beads(beads, temporary_force, F)
+
+		return E
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_2B_bonded_force_and_energy(self, beads, pointers, temp_F):
+
 		E = 0.0
 
-		temporary_force = np.zeros(3*len(beads))
+		for i in range(len(beads)):
+
+			beadi = beads[i]
+
+			for idx in beadi.bonded_with:
+
+				j = get_bead_with_id(beads, idx)
+
+				beadj = beads[j]
+
+				pointerij = pointers[i][j]
+
+				f = self._compute_2B_force(beadi, beadj, pointerij)
+
+				temp_F[3*i:3*(i+1)] += f
+
+				temp_F[3*j:3*(j+1)] -= f
+
+				E += self._compute_2B_energy(beadi, beadj, pointerij)
+
+		return E
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_2B_nonbonded_force_and_energy(self, beads, pointers, temp_F):
+
+		E = 0.0
 
 		for i in range(1, len(beads)):
 
@@ -48,29 +112,87 @@ class Interactions():
 
 				pointerij = pointers[i][j]
 
-				f = self._compute_force(beadi, beadj, pointerij, self.auxiliary_force_parameters)
+				f = self._compute_2B_force(beadi, beadj, pointerij)
 
-				temporary_force[3*i:3*(i+1)] += f
+				temp_F[3*i:3*(i+1)] += f
 
-				temporary_force[3*j:3*(j+1)] -= f
+				temp_F[3*j:3*(j+1)] -= f
 
-				E += self._compute_pair_energy(beadi, beadj, pointerij, self.auxiliary_force_parameters)
-
-		self._rearrange_force_to_ommit_immobile_beads(beads, temporary_force, F)
+				E += self._compute_2B_energy(beadi, beadj, pointerij)
 
 		return E
 
 	#-------------------------------------------------------------------------------
 
-	def _compute_force(self, bead1, bead2, pointer, auxiliary_force_parameters):
+	def _compute_3B_bonded_force_and_energy(self, beads, pointers, temp_F):
 
-		return self.force(bead1, bead2, pointer, **auxiliary_force_parameters)
+		E = 0.0
+
+		for i in range(len(beads)):
+
+			beadi = beads[i]
+
+			for idx1, idx2 in beadi.angled_with:
+
+				j = get_bead_with_id(beads, idx1)
+
+				k = get_bead_with_id(beads, idx2)
+
+				beadj = beads[j]
+
+				beadk = beads[k]
+
+				pointerij = pointers[i][j]
+
+				pointerjk = pointers[j][k]
+
+				f = self._compute_3B_force(beadi, beadj, beadk, pointerij, pointerjk)
+
+				temp_F[3*i:3*(i+1)] += f[:3]
+
+				temp_F[3*j:3*(j+1)] += f[3:6]
+
+				temp_F[3*k:3*(k+1)] += f[6:]
+
+				E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
+
+		return E
 
 	#-------------------------------------------------------------------------------
 
-	def _compute_pair_energy(self, bead1, bead2, pointer, auxiliary_force_parameters):
+	def _compute_2B_force(self, bead1, bead2, pointer):
 
-		return self.energy(bead1, bead2, pointer, **auxiliary_force_parameters)
+		return self.force(bead1, bead2, pointer, **self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_3B_force(self, bead1, bead2, bead3, pointer12, pointer23):
+
+		return self.force(bead1, bead2, bead3, pointer12, pointer23, **self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_4B_force(self, bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34):
+
+		return self.force(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, **self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_2B_energy(self, bead1, bead2, pointer):
+
+		return self.energy(bead1, bead2, pointer, **self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_3B_energy(self, bead1, bead2, bead3, pointer12, pointer23):
+
+		return self.energy(bead1, bead2, bead3, pointer12, pointer23, **self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_4B_energy(self, bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34):
+
+		return self.energy(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, **self.auxiliary_force_parameters)
 
 	#-------------------------------------------------------------------------------
 
@@ -114,6 +236,8 @@ def set_interactions(input_data):
 
 	_set_harmonic_bond_interactions(input_data, interactions_for_simulation)
 
+	_set_harmonic_angle_interactions(input_data, interactions_for_simulation)
+
 	_set_custom_interactions(input_data, interactions_for_simulation)
 
 	return interactions_for_simulation
@@ -130,7 +254,23 @@ def _set_harmonic_bond_interactions(input_data, interactions_for_simulation):
 
 	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
 
-	i = Interactions(harmonic_bond_force, harmonic_bond_energy, aux)
+	i = Interactions(harmonic_bond_force, harmonic_bond_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = True)
+
+	interactions_for_simulation.append(i)
+
+#-------------------------------------------------------------------------------
+
+def _set_harmonic_angle_interactions(input_data, interactions_for_simulation):
+
+	if False:
+
+		return
+
+	aux_keywords = [ "box_length" ]
+
+	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
+
+	i = Interactions(harmonic_angle_force, harmonic_angle_energy, auxiliary_force_parameters = aux, how_many_body = 3, bonded = True)
 
 	interactions_for_simulation.append(i)
 
@@ -148,15 +288,15 @@ def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
 
 	if input_data["lennard_jones_6"] and input_data["lennard_jones_12"]:
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, aux)
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
 
 	elif input_data["lennard_jones_6"]:
 
-		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, aux)
+		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
 
 	elif input_data["lennard_jones_12"]:
 
-		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, aux)
+		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
 
 	interactions_for_simulation.append(i)
 
@@ -230,6 +370,48 @@ def harmonic_bond_energy(bead1, bead2, pointer):
 		dist = math.sqrt(dist2)
 
 		return 0.5 * force_constant * (dist - dist_eq)**2
+
+	else:
+
+		return 0.0
+
+#-------------------------------------------------------------------------------
+
+def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
+
+	angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
+
+	angle = angle_pbc(bead1, bead2, bead3, box_length)
+
+	dist2_12 = pointer12[0]*pointer12[0] + pointer12[1]*pointer12[1] + pointer12[2]*pointer12[2]
+
+	dist2_23 = pointer23[0]*pointer23[0] + pointer23[1]*pointer23[1] + pointer23[2]*pointer23[2]
+
+	dist_12 = math.sqrt(dist2_12)
+
+	dist_23 = math.sqrt(dist2_23)
+
+	scaffold = np.zeros(9)
+
+	scaffold[:3] = pointer23 / dist_12 / dist_23 + np.cos(np.deg2rad(angle)) * pointer12 / dist2_12
+
+	scaffold[3:6] = (pointer12 - pointer23) / dist_12 / dist_23 - np.cos(np.deg2rad(angle)) * ( pointer12 / dist2_12 - pointer23 / dist2_23 )
+
+	scaffold[6:] = -pointer12 / dist_12 / dist_23 - np.cos(np.deg2rad(angle)) * pointer23 / dist2_23
+
+	return force_constant * (angle - angle_eq) / np.sin(np.deg2rad(angle)) * scaffold
+
+#-------------------------------------------------------------------------------
+
+def harmonic_angle_energy(bead1, bead2, bead3, pointer12, pointer23, box_length):
+
+	if bead1.is_angled_with(bead2, bead3):
+
+		angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
+
+		angle = angle_pbc(bead1, bead2, bead3, box_length)
+
+		return 0.5 * force_constant * (angle - angle_eq)**2
 
 	else:
 

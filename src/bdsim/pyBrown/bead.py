@@ -84,6 +84,9 @@ class Bead():
 		self.bonded_with = []
 		self.bonded_how = {}
 
+		self.angled_with = []
+		self.angled_how = {}
+
 	#-------------------------------------------------------------------------------
 
 	def translate(self, vector):
@@ -153,6 +156,12 @@ class Bead():
 
 	#-------------------------------------------------------------------------------
 
+	def is_angled_with(self, bead1, bead2):
+
+		return ( [bead1.bead_id, bead2.bead_id] in self.angled_with )
+
+	#-------------------------------------------------------------------------------
+
 	def __str__(self):
 
 		if self.mobile: mobile_string = "mobile"
@@ -205,6 +214,32 @@ def pointer_pbc(bead1, bead2, box_size):
 			r[i] += box_size
 
 	return r
+
+#-------------------------------------------------------------------------------
+
+def angle_pbc(bead1, bead2, bead3, box_size):
+
+	r12 = pointer(bead1, bead2)
+
+	for i in range(3):
+		while r12[i] >= box_size/2:
+			r12[i] -= box_size
+		while r12[i] <= -box_size/2:
+			r12[i] += box_size
+
+	dist12 = math.sqrt( r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2] )
+
+	r23 = pointer(bead3, bead2)
+
+	for i in range(3):
+		while r23[i] >= box_size/2:
+			r23[i] -= box_size
+		while r23[i] <= -box_size/2:
+			r23[i] += box_size
+
+	dist23 = math.sqrt( r23[0]*r23[0] + r23[1]*r23[1] + r23[2]*r23[2] )
+
+	return np.rad2deg( np.arccos( ( r12[0]*r23[0] + r12[1]*r23[1] + r12[2]*r23[2] ) / dist12 / dist23 ) )
 
 #-------------------------------------------------------------------------------
 
@@ -315,5 +350,15 @@ def check_overlaps(beads, box_length, overlap_treshold):
 	overlaps = lib.check_overlaps(r, a, N_c, box_length_c, overlap_treshold_c)
 
 	return overlaps == 1
+
+#-------------------------------------------------------------------------------
+
+def get_bead_with_id(beads, bead_id):
+
+	for i in range(len(beads)):
+
+		if beads[i].bead_id == bead_id: return i
+
+	return None
 
 #-------------------------------------------------------------------------------

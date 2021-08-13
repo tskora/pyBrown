@@ -149,14 +149,25 @@ def read_str_file(input_str_filename):
                 for b in beads:
                     if b.bead_id == id1:
                         b1 = b
-                    if b.bead_id == id2:
-                        b2 = b
 
                 b1.bonded_with.append(id2)
-                b2.bonded_with.append(id1)
 
                 b1.bonded_how[id2] = [dist_eq, force_constant]
-                b2.bonded_how[id1] = [dist_eq, force_constant]
+
+            if line_segments[0] == 'angle':
+                id1 = int( line_segments[2] )
+                id2 = int( line_segments[3] )
+                id3 = int( line_segments[4] )
+                angle_eq = float( line_segments[5] )
+                force_constant = float( line_segments[6] )
+
+                for b in beads:
+                    if b.bead_id == id1:
+                        b1 = b
+
+                b1.angled_with.append([id2, id3])
+
+                b1.angled_how[(id2, id3)] = [angle_eq, force_constant]
 
     return beads
 
