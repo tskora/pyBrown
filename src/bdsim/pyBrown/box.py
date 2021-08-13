@@ -71,6 +71,7 @@ class Box():
 
 		if self.overlaps:
 			self.connection_matrix = build_connection_matrix(self.beads)
+			assert not self._check_overlaps(), 'starting configuration contains overlaps'
 
 		self.is_energy = False
 		if "enr_write_freq" in self.inp.keys():
