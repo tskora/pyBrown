@@ -19,7 +19,7 @@ import numpy as np
 
 from scipy.constants import Boltzmann
 
-from pyBrown.bead import compute_pointer_pbc_matrix, check_overlaps
+from pyBrown.bead import compute_pointer_pbc_matrix, check_overlaps, build_connection_matrix
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timing
@@ -68,6 +68,9 @@ class Box():
 			self.m_midpoint = self.inp["m_midpoint"]
 
 		self.overlaps = self.inp["check_overlaps"]
+
+		if self.overlaps:
+			self.connection_matrix = build_connection_matrix(self.beads)
 
 		self.is_energy = False
 		if "enr_write_freq" in self.inp.keys():
@@ -361,7 +364,7 @@ class Box():
 	# @timing
 	def _check_overlaps(self):
 
-		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"])
+		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"], self.connection_matrix)
 
 	#-------------------------------------------------------------------------------
 

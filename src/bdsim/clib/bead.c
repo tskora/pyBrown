@@ -96,7 +96,14 @@ void pointer_pbc_matrix(double* positions, int number_of_beads, double box_lengt
 
 // -------------------------------------------------------------------------------
 
-int check_overlaps(double* positions, double *as, int number_of_beads, double box_length, double overlap_treshold)
+static int is_there_bond_between(int* connection_matrix, int number_of_beads, int i, int j)
+{
+	return *(connection_matrix + i + number_of_beads*j);
+}
+
+// -------------------------------------------------------------------------------
+
+int check_overlaps(double* positions, double *as, int number_of_beads, double box_length, double overlap_treshold, int* connection_matrix)
 {
 	register int i = 0;
 	register int j = 0;
@@ -116,6 +123,11 @@ int check_overlaps(double* positions, double *as, int number_of_beads, double bo
 			radii_sum = *(as+i) + *(as+j);
 
 			radii_sum_pbc = box_length - radii_sum;
+
+			if ( is_there_bond_between(connection_matrix, number_of_beads, j, i) )
+			{
+				continue;
+			}
 
 			if ( ( (rx > radii_sum) && (rx < radii_sum_pbc) ) || ( (rx < -radii_sum) && (rx > -radii_sum_pbc) ) )
 			{

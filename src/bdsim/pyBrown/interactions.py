@@ -341,39 +341,27 @@ def _set_custom_interactions(input_data, interactions_for_simulation):
 
 def harmonic_bond_force(bead1, bead2, pointer):
 
-	if bead1.is_bonded_with(bead2):
+	dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
 
-		dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
+	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
 
-		dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist = math.sqrt(dist2)
 
-		dist = math.sqrt(dist2)
+	versor = pointer / dist
 
-		versor = pointer / dist
-
-		return versor * force_constant * (dist - dist_eq)
-
-	else:
-
-		return np.zeros(3)
+	return versor * force_constant * (dist - dist_eq)
 
 #-------------------------------------------------------------------------------
 
 def harmonic_bond_energy(bead1, bead2, pointer):
 
-	if bead1.is_bonded_with(bead2):
+	dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
 
-		dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
+	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
 
-		dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist = math.sqrt(dist2)
 
-		dist = math.sqrt(dist2)
-
-		return 0.5 * force_constant * (dist - dist_eq)**2
-
-	else:
-
-		return 0.0
+	return 0.5 * force_constant * (dist - dist_eq)**2
 
 #-------------------------------------------------------------------------------
 
@@ -405,17 +393,11 @@ def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
 def harmonic_angle_energy(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
-	if bead1.is_angled_with(bead2, bead3):
+	angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
 
-		angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
+	angle = angle_pbc(bead1, bead2, bead3, box_length)
 
-		angle = angle_pbc(bead1, bead2, bead3, box_length)
-
-		return 0.5 * force_constant * (angle - angle_eq)**2
-
-	else:
-
-		return 0.0
+	return 0.5 * force_constant * (angle - angle_eq)**2
 
 #-------------------------------------------------------------------------------
 

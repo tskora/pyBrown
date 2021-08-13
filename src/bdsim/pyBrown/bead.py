@@ -150,15 +150,15 @@ class Bead():
 
 	#-------------------------------------------------------------------------------
 
-	def is_bonded_with(self, bead):
+	def is_there_bond_between(self, bead):
 
-		return ( bead.bead_id in self.bonded_with )
+		return ( bead.bead_id in self.bonded_with or self.bead_id in bead.bonded_with  )
 
-	#-------------------------------------------------------------------------------
+	# #-------------------------------------------------------------------------------
 
-	def is_angled_with(self, bead1, bead2):
+	# def is_angled_with(self, bead1, bead2):
 
-		return ( [bead1.bead_id, bead2.bead_id] in self.angled_with )
+	# 	return ( [bead1.bead_id, bead2.bead_id] in self.angled_with )
 
 	#-------------------------------------------------------------------------------
 
@@ -328,9 +328,24 @@ def overlap_pbc(bead1, bead2, box_size, epsilon = 0.0):
 
 #-------------------------------------------------------------------------------
 
-def check_overlaps(beads, box_length, overlap_treshold):
+def build_connection_matrix(beads):
+
+	connection_matrix = np.zeros((len(beads), len(beads)), dtype = int)
+
+	for i in range(len(beads)):
+
+		for j in range(len(beads)):
+
+			if beads[i].is_there_bond_between(beads[j]): connection_matrix[i][j] = connection_matrix[j][i] = 1
+
+	return connection_matrix
+
+#-------------------------------------------------------------------------------
+
+def check_overlaps(beads, box_length, overlap_treshold, connection_matrix):
 
 	c_double = ctypes.c_double
+	c_int = ctypes.c_int
 
 	N = len(beads)
 	N_c = ctypes.c_int(N)
@@ -347,7 +362,11 @@ def check_overlaps(beads, box_length, overlap_treshold):
 
 	overlap_treshold_c = ctypes.c_double(overlap_treshold)
 
-	overlaps = lib.check_overlaps(r, a, N_c, box_length_c, overlap_treshold_c)
+	connection_matrix_list = [ connection_matrix[i][j] for i in range(N) for j in range(N) ]
+	v2 = array('i', connection_matrix_list)
+	connection_matrix_c = (c_int * len(v2)).from_buffer(v2)
+	
+	overlaps = lib.check_overlaps(r, a, N_c, box_length_c, overlap_treshold_c, connection_matrix_c)
 
 	return overlaps == 1
 

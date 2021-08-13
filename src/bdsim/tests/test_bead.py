@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix, check_overlaps, angle_pbc
+from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
 
 #-------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ def compute_pointer_pbc_matrix_python(beads, box_length):
 
 #-------------------------------------------------------------------------------
 
-def check_overlaps_python(beads, box_length, overlap_treshold):
+def check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix):
 
 	overlaps = False
 
@@ -48,6 +48,9 @@ def check_overlaps_python(beads, box_length, overlap_treshold):
 			pointer = beads[i].r - beads[j].r
 			radii_sum = beads[i].a + beads[j].a
 			radii_sum_pbc = box_length - radii_sum
+
+			if connection_matrix[i][j]:
+				continue
 
 			if ( pointer[0] > radii_sum and pointer[0] < radii_sum_pbc ) or ( pointer[0] < -radii_sum and pointer[0] > -radii_sum_pbc ):
 				continue
@@ -347,7 +350,7 @@ class TestBead(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	def test_pointer_pbc_matrix(self):
+	def test_overlap_pbc(self):
 
 		np.random.seed(0)
 
@@ -357,13 +360,68 @@ class TestBead(unittest.TestCase):
 
 		for i in range(10000):
 
-			beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(10) ]
+			beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0, bead_id = i+1) for i in range(10) ]
 
-			c_ish = check_overlaps(beads, box_length, overlap_treshold)
+			connection_matrix = build_connection_matrix(beads)
+			self.assertSequenceEqual(list(connection_matrix.flatten()), list(np.transpose(np.zeros((10,10)).flatten())))
 
-			python_ish = check_overlaps_python(beads, box_length, overlap_treshold)
+			c_ish = check_overlaps(beads, box_length, overlap_treshold, connection_matrix)
+
+			python_ish = check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix)
 
 			self.assertEqual(c_ish, python_ish)
+
+	#---------------------------------------------------------------------------
+
+	def test_overlap_pbc_with_random_connections(self):
+
+		np.random.seed(0)
+
+		box_length = 10.0
+
+		overlap_treshold = 0.0
+
+		for i in range(10000):
+
+			beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0, bead_id = i+1) for i in range(10) ]
+
+			for j in range(len(beads)-1):
+
+				for k in range(j+1, len(beads)):
+
+					if np.random.choice([True, False]):
+
+						beads[j].bonded_with.append(beads[k].bead_id)
+						beads[j].bonded_how[beads[k].bead_id] = [0.0, 0.0]
+
+			connection_matrix = build_connection_matrix(beads)
+			self.assertSequenceEqual(list(connection_matrix.flatten()), list(np.transpose(connection_matrix.flatten())))
+
+			c_ish = check_overlaps(beads, box_length, overlap_treshold, connection_matrix)
+
+			python_ish = check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix)
+
+			self.assertEqual(c_ish, python_ish)
+
+	#---------------------------------------------------------------------------
+
+	def test_overlap_vs_bonds(self):
+
+		box_length = 10.0
+
+		overlap_treshold = 0.0
+
+		beads = [ Bead([0.0, 0.0, 0.0], 1.0, bead_id = 1), Bead([0.0, 0.0, 1.0], 1.0, bead_id = 2) ]
+
+		connection_matrix = build_connection_matrix(beads)
+
+		self.assertTrue( check_overlaps(beads, box_length, overlap_treshold, connection_matrix) )
+
+		beads[0].bonded_with.append( beads[1].bead_id )
+
+		connection_matrix = build_connection_matrix(beads)
+
+		self.assertFalse( check_overlaps(beads, box_length, overlap_treshold, connection_matrix) )
 
 	#---------------------------------------------------------------------------
 
