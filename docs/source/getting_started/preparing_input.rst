@@ -18,7 +18,10 @@ Below we ellaborate on their structure and meaning.
 
 Structure (``.str``) file contains the information about the physical system under study. First and foremost, It introduces initial positions of beads and their sizes (both hydrodynamic and hard-core). Moreover, it contains information about masses qnd charges of beads. Last but not least, it encodes bonded and nonbonded interaction parameters.
 
-Structure file consists of bead-defining lines starting with ``sub``. They have a following structure:
+Structure file consists of bead-defining lines starting with ``sub``, ``bond`` or ``angle``. Their structure is discussed below.
+
+Subunit
+^^^^^^^^
 
 ``sub label index x y z a q 2r ε m``
 
@@ -34,10 +37,49 @@ Only the ``sub`` string has to be identical in every bead-defining line. All the
 - ``m`` -- the mass of the bead (``float``, *?*)
 
 .. todo::
-    Indices, hard-core radii, masses, charges and Lennard-Jones well depths are not yet consumed by ``pyBrown`` -- change it.
+    Masses and charges are not yet consumed by ``pyBrown`` -- change it.
+
+Bond
+^^^^^
+
+``bond index1 index2 r0 rmax k``
+
+Only the ``bond`` string has to be identical in every bond-defining line. All the other entries should be replaced with values specific to a given pair of beads. Below their meanings are explained:
+
+- ``index1 index2`` -- indices of the beads connected with the bond (see above) (``int``)
+- ``r0`` -- equilibrium distance between the beads (``float``, *Å*)
+- ``rmax`` -- maximal possible distance between the beads (``float``, *Å*) **NOT IMPLEMENTED YET, just write any number**
+- ``k`` -- force constant of the bond (``float``, *? Å*:sup:`-2`)
+
+For each bonded pair the energy is incremented by a harmonic term:
+
+.. math::
+    E = \frac{1}{2} k ( r - r_0 )^2 .
 
 .. todo::
-    Implement definition of bonding potential, angle potential and dihedral potential *via* ``bond``, ``angle`` and ``dihe`` lines.
+    For now only harmonic bond works. In future implement more general bonded potential allowing for setting the max bond lengths.
+
+Angle
+^^^^^^
+
+``angle angle index1 index2 index3 φ0 k``
+
+Only the ``angle angle`` string has to be identical in every angle-defining line. All the other entries should be replaced with values specific to a given triple of beads. Below their meanings are explained:
+
+- ``index1 index2 index3`` -- indices of the beads defining the angle (see above) (``int``)
+- ``φ0`` -- equilibrium distance between the beads (``float``, :math:`^\circ`)
+- ``k`` -- force constant of the angle potential (``float``, *? rad*:sup:`-2`)
+
+For each angle the energy is incremented by a harmonic term:
+
+.. math::
+    E = \frac{1}{2} k ( \phi - \phi_0 )^2 .
+
+.. todo::
+    Implement cos angle potential *via* ``angle cos`` lines.
+
+.. todo::
+    Implement definition of dihedral potential *via* ``dihe`` lines.
 
 ``.json`` file
 ***************
