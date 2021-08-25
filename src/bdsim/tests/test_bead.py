@@ -433,7 +433,7 @@ class TestBead(unittest.TestCase):
 
 		box_length = 1000.0
 
-		self.assertEqual(angle_pbc(bead1, bead2, bead3, box_length), 0.0)
+		self.assertEqual(angle_pbc(bead2.r-bead1.r, bead3.r-bead2.r), 0.0)
 
 	#---------------------------------------------------------------------------
 
@@ -443,9 +443,7 @@ class TestBead(unittest.TestCase):
 		bead2 = Bead([1.0, 1.0, 0.0], 1.0)
 		bead3 = Bead([0.0, 1.0, 0.0], 1.0)
 
-		box_length = 1000.0
-
-		self.assertAlmostEqual(angle_pbc(bead1, bead2, bead3, box_length), 45.0, places = 7)
+		self.assertAlmostEqual(angle_pbc(bead2.r-bead1.r, bead3.r-bead2.r), 45.0, places = 7)
 
 	#---------------------------------------------------------------------------
 
@@ -455,9 +453,7 @@ class TestBead(unittest.TestCase):
 		bead2 = Bead([0.0, 0.0, 2.5], 1.0)
 		bead3 = Bead([0.0, 1.0, 2.5], 1.0)
 
-		box_length = 1000.0
-
-		self.assertEqual(angle_pbc(bead1, bead2, bead3, box_length), 90.0)
+		self.assertEqual(angle_pbc(bead2.r-bead1.r, bead3.r-bead2.r), 90.0)
 
 	#---------------------------------------------------------------------------
 
@@ -467,9 +463,7 @@ class TestBead(unittest.TestCase):
 		bead2 = Bead([0.0, 0.0, 2.5], 1.0)
 		bead3 = Bead([0.0, 0.0, 6.0], 1.0)
 
-		box_length = 1000.0
-
-		self.assertEqual(angle_pbc(bead1, bead2, bead3, box_length), 180.0)
+		self.assertEqual(angle_pbc(bead2.r-bead1.r, bead3.r-bead2.r), 180.0)
 
 #-------------------------------------------------------------------------------
 

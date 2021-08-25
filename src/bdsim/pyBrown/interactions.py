@@ -228,19 +228,47 @@ class Interactions():
 
 #-------------------------------------------------------------------------------
 
-def set_interactions(input_data):
+def set_interactions(input_data, beads):
 
 	interactions_for_simulation = []
 
-	_set_lennard_jones_interactions(input_data, interactions_for_simulation)
+	if input_data["lennard_jones_6"] or input_data["lennard_jones_12"]:
 
-	_set_harmonic_bond_interactions(input_data, interactions_for_simulation)
+		_set_lennard_jones_interactions(input_data, interactions_for_simulation)
 
-	_set_harmonic_angle_interactions(input_data, interactions_for_simulation)
+	if _are_bonds(beads):
 
-	_set_custom_interactions(input_data, interactions_for_simulation)
+		_set_harmonic_bond_interactions(input_data, interactions_for_simulation)
+
+	if _are_angles(beads):
+
+		_set_harmonic_angle_interactions(input_data, interactions_for_simulation)
+
+	if input_data["custom_interactions"]:
+
+		_set_custom_interactions(input_data, interactions_for_simulation)
 
 	return interactions_for_simulation
+
+#-------------------------------------------------------------------------------
+
+def _are_bonds(beads):
+
+	for bead in beads:
+
+		if len(bead.bonded_with) > 0: return True
+
+	return False
+
+#-------------------------------------------------------------------------------
+
+def _are_angles(beads):
+
+	for bead in beads:
+
+		if len(bead.angled_with) > 0: return True
+
+	return False
 
 #-------------------------------------------------------------------------------
 
@@ -369,7 +397,12 @@ def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
 	angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
 
-	angle = angle_pbc(bead1, bead2, bead3, box_length)
+	# angle = angle_pbc(bead1, bead2, bead3, box_length)
+	angle = angle_pbc(pointer12, pointer23)
+
+	angle_eq *= np.pi / 180.0
+
+	angle *= np.pi / 180.0
 
 	dist2_12 = pointer12[0]*pointer12[0] + pointer12[1]*pointer12[1] + pointer12[2]*pointer12[2]
 
@@ -381,13 +414,13 @@ def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
 	scaffold = np.zeros(9)
 
-	scaffold[:3] = pointer23 / dist_12 / dist_23 + np.cos(np.deg2rad(angle)) * pointer12 / dist2_12
+	scaffold[:3] = ( pointer23 / dist_23 + np.cos(angle) * pointer12 / dist_12 ) / dist_12
 
-	scaffold[3:6] = (pointer12 - pointer23) / dist_12 / dist_23 - np.cos(np.deg2rad(angle)) * ( pointer12 / dist2_12 - pointer23 / dist2_23 )
+	scaffold[3:6] = (pointer12 - pointer23) / dist_12 / dist_23 - np.cos(angle) * ( pointer12 / dist2_12 - pointer23 / dist2_23 )
 
-	scaffold[6:] = -pointer12 / dist_12 / dist_23 - np.cos(np.deg2rad(angle)) * pointer23 / dist2_23
+	scaffold[6:] = -pointer12 / dist_12 / dist_23 - np.cos(angle) * pointer23 / dist2_23
 
-	return force_constant * (angle - angle_eq) / np.sin(np.deg2rad(angle)) * scaffold
+	return force_constant * (angle - angle_eq) / np.sin(angle) * scaffold
 
 #-------------------------------------------------------------------------------
 
@@ -395,7 +428,12 @@ def harmonic_angle_energy(bead1, bead2, bead3, pointer12, pointer23, box_length)
 
 	angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
 
-	angle = angle_pbc(bead1, bead2, bead3, box_length)
+	# angle = angle_pbc(bead1, bead2, bead3, box_length)
+	angle = angle_pbc(pointer12, pointer23)
+
+	angle_eq *= np.pi / 180.0
+
+	angle *= np.pi / 180.0
 
 	return 0.5 * force_constant * (angle - angle_eq)**2
 

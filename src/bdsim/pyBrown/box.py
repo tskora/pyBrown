@@ -330,13 +330,13 @@ class Box():
 
 		elif self.inp["energy_unit"] == "kcal/mol":
 
-			self.E = kcal_per_mole_to_joule(self.E)
+			# self.E = kcal_per_mole_to_joule(self.E)
 
 			self.F = kcal_per_mole_to_joule(self.F)
 
 		elif self.inp["energy_unit"] == "eV":
 
-			self.E = eV_to_joule(self.E)
+			# self.E = eV_to_joule(self.E)
 
 			self.F = eV_to_joule(self.F)
 
@@ -629,7 +629,7 @@ class Box():
 
 	def _initialize_interactions(self):
 
-		self.interactions = set_interactions(self.inp)
+		self.interactions = set_interactions(self.inp, self.beads)
 
 	#-------------------------------------------------------------------------------
 

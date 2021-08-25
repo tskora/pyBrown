@@ -92,9 +92,6 @@ class TestInteractions(unittest.TestCase):
 		self.b1.bonded_with.append(self.b2.bead_id)
 		self.b1.bonded_how[self.b2.bead_id] = [ dist_eq, force_constant ]
 
-		# self.b2.bonded_with.append(self.b1.bead_id)
-		# self.b2.bonded_how[self.b1.bead_id] = [ dist_eq, force_constant ]
-
 		i = Interactions(harmonic_bond_force, harmonic_bond_energy, bonded = True, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(self.beads, self.rij, F)
@@ -209,9 +206,10 @@ class TestInteractions(unittest.TestCase):
 
 			E = harmonic_angle_energy(b1, b2, b3, rij[0][1], rij[1][2], box_length = 1000000.0)
 
-			self.assertEqual(E, 0.5 * force_constant * (angle_eq - 90.0)**2)
+			self.assertAlmostEqual(E, 0.5 * force_constant * (angle_eq - 90.0)**2 * (np.pi / 180.0)**2, places = 10 )
 
-			self.assertSequenceEqual(list(F[:3] + F[3:6] + F[6:]), [0.0, 0.0, 0.0])
+			for j in range(3):
+				self.assertAlmostEqual(list(F[:3] + F[3:6] + F[6:])[j], 0.0, places = 10)
 
 			self.assertAlmostEqual(np.dot(F[:3],  rij[0][1]), 0.0, places = 10)
 			self.assertAlmostEqual(np.dot(F[6:],  rij[1][2]), 0.0, places = 10)
@@ -245,12 +243,77 @@ class TestInteractions(unittest.TestCase):
 
 			E = i.compute_forces_and_energy(beads, rij, F)
 
-			self.assertEqual(E, 0.5 * force_constant * (angle_eq - 90.0)**2)
+			self.assertAlmostEqual(E, 0.5 * force_constant * (angle_eq - 90.0)**2 * (np.pi / 180.0)**2, places = 10 )
 
-			self.assertSequenceEqual(list(F[:3] + F[3:6] + F[6:]), [0.0, 0.0, 0.0])
+			for j in range(3):
+				self.assertAlmostEqual(list(F[:3] + F[3:6] + F[6:])[j], 0.0, places = 10)
 
 			self.assertAlmostEqual(np.dot(F[:3],  rij[0][1]), 0.0, places = 10)
 			self.assertAlmostEqual(np.dot(F[6:],  rij[1][2]), 0.0, places = 10)
+
+	#---------------------------------------------------------------------------
+
+	def test_force_and_energy_of_angle_against_derivative(self):
+
+		from pyBrown.bead import angle_pbc
+
+		box_length = 1000000.0
+
+		dx = 0.0000001
+
+		grid_points = [ np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 1.0]), np.array([0.0, 1.0, 1.0]),
+						np.array([2.0, 4.0, 7.0]), np.array([-np.pi, np.pi, np.pi**2]) ]
+
+		angles = [ 30.0, 60.0, 90.0, 120.0 ]
+
+		ks = [0.01, 1.0]
+
+		for r1 in grid_points:
+
+			for r2 in grid_points:
+
+				for r3 in grid_points:
+
+					if (r1 == r2).all() or (r1 == r3).all() or (r2 == r3).all(): continue
+
+					for angle_eq in angles:
+
+						for force_constant in ks:
+
+							F = np.zeros(9)
+
+							b1 = Bead(r1, 1.0, bead_id = 1)
+							b2 = Bead(r2, 1.0, bead_id = 2)
+							b3 = Bead(r3, 1.0, bead_id = 3)
+
+							beads = [b1, b2, b3]
+
+							rij = compute_pointer_pbc_matrix(beads, box_length = box_length)
+
+							b1.angled_with.append([b2.bead_id, b3.bead_id])
+							b1.angled_how[(b2.bead_id, b3.bead_id)] = [ angle_eq, force_constant ]
+
+							E = harmonic_angle_energy(b1, b2, b3, rij[0][1], rij[1][2], 1000000.0)
+							F = harmonic_angle_force(b1, b2, b3, rij[0][1], rij[1][2], 1000000.0)
+
+							Fder = np.zeros(9)
+
+							trans = np.array([dx, 0.0, 0.0])
+							Fder[0] = -( harmonic_angle_energy(b1, b2, b3, b2.r-b1.r-trans, b3.r-b2.r, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-b1.r+trans, b3.r-b2.r, 1000000.0) ) / 2 / dx
+							Fder[3] = -( harmonic_angle_energy(b1, b2, b3, b2.r+trans-b1.r, b3.r-b2.r-trans, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-trans-b1.r, b3.r-b2.r+trans, 1000000.0) ) / 2 / dx
+							Fder[6] = -( harmonic_angle_energy(b1, b2, b3, b2.r-b1.r, b3.r+trans-b2.r, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-b1.r, b3.r-trans-b2.r, 1000000.0) ) / 2 / dx
+							trans = np.array([0.0, dx, 0.0])
+							Fder[1] = -( harmonic_angle_energy(b1, b2, b3, b2.r-b1.r-trans, b3.r-b2.r, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-b1.r+trans, b3.r-b2.r, 1000000.0) ) / 2 / dx
+							Fder[4] = -( harmonic_angle_energy(b1, b2, b3, b2.r+trans-b1.r, b3.r-b2.r-trans, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-trans-b1.r, b3.r-b2.r+trans, 1000000.0) ) / 2 / dx
+							Fder[7] = -( harmonic_angle_energy(b1, b2, b3, b2.r-b1.r, b3.r+trans-b2.r, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-b1.r, b3.r-trans-b2.r, 1000000.0) ) / 2 / dx
+							trans = np.array([0.0, 0.0, dx])
+							Fder[2] = -( harmonic_angle_energy(b1, b2, b3, b2.r-b1.r-trans, b3.r-b2.r, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-b1.r+trans, b3.r-b2.r, 1000000.0) ) / 2 / dx
+							Fder[5] = -( harmonic_angle_energy(b1, b2, b3, b2.r+trans-b1.r, b3.r-b2.r-trans, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-trans-b1.r, b3.r-b2.r+trans, 1000000.0) ) / 2 / dx
+							Fder[8] = -( harmonic_angle_energy(b1, b2, b3, b2.r-b1.r, b3.r+trans-b2.r, 1000000.0) - harmonic_angle_energy(b1, b2, b3, b2.r-b1.r, b3.r-trans-b2.r, 1000000.0) ) / 2 / dx
+							
+							for j in range(9):
+
+								self.assertAlmostEqual(F[j], Fder[j], places = 6)
 
 	#---------------------------------------------------------------------------
 

@@ -154,12 +154,6 @@ class Bead():
 
 		return ( bead.bead_id in self.bonded_with or self.bead_id in bead.bonded_with  )
 
-	# #-------------------------------------------------------------------------------
-
-	# def is_angled_with(self, bead1, bead2):
-
-	# 	return ( [bead1.bead_id, bead2.bead_id] in self.angled_with )
-
 	#-------------------------------------------------------------------------------
 
 	def __str__(self):
@@ -217,29 +211,13 @@ def pointer_pbc(bead1, bead2, box_size):
 
 #-------------------------------------------------------------------------------
 
-def angle_pbc(bead1, bead2, bead3, box_size):
-
-	r12 = pointer(bead1, bead2)
-
-	for i in range(3):
-		while r12[i] >= box_size/2:
-			r12[i] -= box_size
-		while r12[i] <= -box_size/2:
-			r12[i] += box_size
+def angle_pbc(r12, r23):
 
 	dist12 = math.sqrt( r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2] )
 
-	r23 = pointer(bead3, bead2)
-
-	for i in range(3):
-		while r23[i] >= box_size/2:
-			r23[i] -= box_size
-		while r23[i] <= -box_size/2:
-			r23[i] += box_size
-
 	dist23 = math.sqrt( r23[0]*r23[0] + r23[1]*r23[1] + r23[2]*r23[2] )
 
-	return np.rad2deg( np.arccos( ( r12[0]*r23[0] + r12[1]*r23[1] + r12[2]*r23[2] ) / dist12 / dist23 ) )
+	return np.rad2deg( np.arccos( -( r12[0]*r23[0] + r12[1]*r23[1] + r12[2]*r23[2] ) / dist12 / dist23 ) )
 
 #-------------------------------------------------------------------------------
 
