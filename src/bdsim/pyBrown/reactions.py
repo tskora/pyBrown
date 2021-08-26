@@ -63,6 +63,10 @@ class Reactions():
 
 			lhs, rhs = reaction_string.split('<->')
 
+			print('not implemented yet')
+
+			1/0
+
 		elif '->' in reaction_string:
 
 			lhs, rhs = reaction_string.split('->')
