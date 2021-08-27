@@ -19,7 +19,7 @@ import numpy as np
 
 from scipy.constants import Boltzmann
 
-from pyBrown.bead import compute_pointer_pbc_matrix, check_overlaps, build_connection_matrix
+from pyBrown.bead import compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timing
@@ -89,8 +89,13 @@ class Box():
 
 		if self.inp["hydrodynamics"] != "nohi" or len(self.interactions) > 0 or len(self.reactions) > 0:
 			self.rij_is_needed = True
+			if len(self.immobile_beads) > 0:
+				self.rik_is_needed = True
+			else:
+				self.rik_is_needed = False
 		else:
 			self.rij_is_needed = False
+			self.rik_is_needed = False
 
 	#-------------------------------------------------------------------------------
 
@@ -114,6 +119,7 @@ class Box():
 			self.concentration = {label: 0 for label in self.mobile_labels}
 
 		if self.rij_is_needed: self._compute_rij_matrix()
+		if self.rik_is_needed: self._compute_rik_matrix()
 
 		if self.hydrodynamics != "nohi":
 
@@ -322,7 +328,7 @@ class Box():
 
 		for interaction in self.interactions:
 
-			self.E += interaction.compute_forces_and_energy(self.beads, self.rij, self.F)
+			self.E += interaction.compute_forces_and_energy(self.mobile_beads, self.rij, self.F)
 
 		if self.inp["energy_unit"] == "joule":
 
@@ -346,7 +352,7 @@ class Box():
 
 		for reaction in self.reactions:
 
-			reaction.check_for_reactions(self.beads, self.rij)
+			reaction.check_for_reactions(self.mobile_beads, self.rij)
 
 	#-------------------------------------------------------------------------------
 
@@ -373,6 +379,13 @@ class Box():
 	def _compute_rij_matrix(self):
 
 		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
+
+	#-------------------------------------------------------------------------------
+
+	# @timing
+	def _compute_rik_matrix(self):
+
+		self.rik = compute_pointer_immobile_pbc_matrix(self.mobile_beads, self.immobile_beads, self.box_length)
 
 	#-------------------------------------------------------------------------------
 

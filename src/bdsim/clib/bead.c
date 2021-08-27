@@ -96,6 +96,69 @@ void pointer_pbc_matrix(double* positions, int number_of_beads, double box_lengt
 
 // -------------------------------------------------------------------------------
 
+void pointer_immobile_pbc_matrix(double* positions_mobile, double* positions_immobile, int number_of_mobile, int number_of_immobile, double box_length, double* pointers)
+{
+	register int i = 0;
+	register int j = 0;
+
+	double* shifted_pointers;
+
+	double* temp;
+
+	for (j = 0; j < number_of_immobile; j++)
+	{
+		for (i = 0; i < number_of_mobile; i++)
+		{
+			temp = calloc(3, sizeof(double));
+
+			*temp = *(positions_immobile+3*j) - *(positions_mobile+3*i);
+
+			while (*temp >= box_length/2.0)
+			{
+				*temp -= box_length;
+			}
+			while (*temp <= -box_length/2.0)
+			{
+				*temp += box_length;
+			}
+
+			*(temp+1) = *(positions_immobile+3*j+1) - *(positions_mobile+3*i+1);
+
+			while (*(temp+1) >= box_length/2.0)
+			{
+				*(temp+1) -= box_length;
+			}
+			while (*(temp+1) <= -box_length/2.0)
+			{
+				*(temp+1) += box_length;
+			}
+
+			*(temp+2) = *(positions_immobile+3*j+2) - *(positions_mobile+3*i+2);
+
+			while (*(temp+2) >= box_length/2.0)
+			{
+				*(temp+2) -= box_length;
+			}
+			while (*(temp+2) <= -box_length/2.0)
+			{
+				*(temp+2) += box_length;
+			}
+
+			shifted_pointers = pointers + 3*j + 3*i*number_of_immobile;
+
+			*shifted_pointers = *temp;
+
+			*(shifted_pointers+1) = *(temp+1);
+
+			*(shifted_pointers+2) = *(temp+2);
+
+			free(temp);
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------
+
 static int is_there_bond_between(int* connection_matrix, int number_of_beads, int i, int j)
 {
 	return *(connection_matrix + i + number_of_beads*j);

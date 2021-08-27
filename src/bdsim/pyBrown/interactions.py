@@ -40,23 +40,23 @@ class Interactions():
 
 	def compute_forces_and_energy(self, beads, pointers, F):
 
-		temporary_force = np.zeros(3*len(beads))
+		# temporary_force = np.zeros(3*len(beads))
 
 		if self.how_many_body == 2:
 
 			if self.bonded:
 
-				E = self._compute_2B_bonded_force_and_energy(beads, pointers, temporary_force)
+				E = self._compute_2B_bonded_force_and_energy(beads, pointers, F)
 
 			elif not self.bonded:
 
-				E = self._compute_2B_nonbonded_force_and_energy(beads, pointers, temporary_force)
+				E = self._compute_2B_nonbonded_force_and_energy(beads, pointers, F)
 
 		if self.how_many_body == 3:
 
 			if self.bonded:
 
-				E = self._compute_3B_bonded_force_and_energy(beads, pointers, temporary_force)
+				E = self._compute_3B_bonded_force_and_energy(beads, pointers, F)
 
 			elif not self.bonded:
 
@@ -64,7 +64,7 @@ class Interactions():
 
 				1/0
 
-		self._rearrange_force_to_ommit_immobile_beads(beads, temporary_force, F)
+		# self._rearrange_force_to_ommit_immobile_beads(beads, temporary_force, F)
 
 		return E
 

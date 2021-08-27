@@ -480,41 +480,41 @@ class TestInteractions(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	def test_energy_of_LJ_particles_with_dummy_immobile_particles(self):
+	# def test_energy_of_LJ_particles_with_dummy_immobile_particles(self):
 
-		box_length = 1000000.0
+	# 	box_length = 1000000.0
 
-		F = np.zeros(9)
+	# 	F = np.zeros(9)
 
-		E = 0.0
+	# 	E = 0.0
 
-		A = 2*2.0**(1/6) / ( np.cos(5*np.pi/6) - np.cos(np.pi/6) )
+	# 	A = 2*2.0**(1/6) / ( np.cos(5*np.pi/6) - np.cos(np.pi/6) )
 
-		bead4 = Bead([A*np.cos(np.pi/6), A*np.sin(np.pi/6), 0.0], 1.0, epsilon_LJ = 1.0)
+	# 	bead4 = Bead([A*np.cos(np.pi/6), A*np.sin(np.pi/6), 0.0], 1.0, epsilon_LJ = 1.0)
 
-		bead5 = Bead([A*np.cos(5*np.pi/6), A*np.sin(5*np.pi/6), 0.0], 1.0, epsilon_LJ = 1.0)
+	# 	bead5 = Bead([A*np.cos(5*np.pi/6), A*np.sin(5*np.pi/6), 0.0], 1.0, epsilon_LJ = 1.0)
 
-		bead6 = Bead([A*np.cos(3*np.pi/2), A*np.sin(3*np.pi/2), 0.0], 1.0, epsilon_LJ = 1.0)
+	# 	bead6 = Bead([A*np.cos(3*np.pi/2), A*np.sin(3*np.pi/2), 0.0], 1.0, epsilon_LJ = 1.0)
 
-		dummy1 = Bead([5.0, 5.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
+	# 	dummy1 = Bead([5.0, 5.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
 
-		dummy2 = Bead([3.0, 3.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
+	# 	dummy2 = Bead([3.0, 3.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
 
-		dummy3 = Bead([0.0, 0.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
+	# 	dummy3 = Bead([0.0, 0.0, 0.0], 1.0, epsilon_LJ = 0.0, mobile = False)
 
-		beads = [ dummy1, bead4, dummy2, bead5, dummy3, bead6 ]
+	# 	beads = [ dummy1, bead4, dummy2, bead5, dummy3, bead6 ]
 
-		rij = compute_pointer_pbc_matrix(beads, box_length = box_length)
+	# 	rij = compute_pointer_pbc_matrix(beads, box_length = box_length)
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
+	# 	i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = {"lennard_jones_alpha": self.alpha}, bonded = False, how_many_body = 2)
 
-		E += i.compute_forces_and_energy(beads, rij, F)
+	# 	E += i.compute_forces_and_energy(beads, rij, F)
 
-		self.assertEqual(E, -3*self.epsilon)
+	# 	self.assertEqual(E, -3*self.epsilon)
 
-		for j in range(9):
+	# 	for j in range(9):
 
-			self.assertAlmostEqual(F[j], 0.0, places = 7)
+	# 		self.assertAlmostEqual(F[j], 0.0, places = 7)
 
 #-------------------------------------------------------------------------------
 

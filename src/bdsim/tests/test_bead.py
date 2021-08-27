@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
+from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
 
 #-------------------------------------------------------------------------------
 
@@ -30,12 +30,24 @@ def compute_pointer_pbc_matrix_python(beads, box_length):
 
 	rij = np.zeros((len(beads), len(beads), 3))
 
-	for i in range(1, len(beads)):
-		for j in range(0, i):
+	for i in range(len(beads)-1):
+		for j in range(i+1, len(beads)):
 			rij[i][j] = pointer_pbc(beads[i], beads[j], box_length)
 			rij[j][i] = -rij[i][j]
 
 	return rij
+
+#-------------------------------------------------------------------------------
+
+def compute_pointer_immobile_pbc_matrix_python(mobile_beads, immobile_beads, box_length):
+
+	rik = np.zeros((len(mobile_beads), len(immobile_beads), 3))
+
+	for i in range(len(mobile_beads)):
+		for k in range(len(immobile_beads)):
+			rik[i][k] = pointer_pbc(mobile_beads[i], immobile_beads[k], box_length)
+
+	return rik
 
 #-------------------------------------------------------------------------------
 
@@ -330,23 +342,49 @@ class TestBead(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	def test_pointer_pbc_matrix(self):
+	def test_pointer_pbc_matrix_vs_python(self):
 
-		np.random.seed(0)
+		for s in range(100):
 
-		box_length = 10.0
+			np.random.seed(s)
 
-		beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(100) ]
+			box_length = 10.0
 
-		c_ish = compute_pointer_pbc_matrix(beads, box_length)
+			beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(100) ]
 
-		python_ish = compute_pointer_pbc_matrix_python(beads, box_length)
+			c_ish = compute_pointer_pbc_matrix(beads, box_length)
 
-		for i in range(len(beads)):
-			for j in range(len(beads)):
-				for k in range(3):
+			python_ish = compute_pointer_pbc_matrix_python(beads, box_length)
 
-					self.assertEqual(c_ish[i][j][k], python_ish[i][j][k])
+			for i in range(len(beads)):
+				for j in range(len(beads)):
+					for k in range(3):
+
+						self.assertEqual(c_ish[i][j][k], python_ish[i][j][k])
+
+	#---------------------------------------------------------------------------
+
+	def test_pointer_immobile_pbc_matrix_vs_python(self):
+
+		for s in range(100):
+
+			np.random.seed(s)
+
+			box_length = 10.0
+
+			mobile_beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(20) ]
+
+			immobile_beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(80) ]
+
+			c_ish = compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, box_length)
+
+			python_ish = compute_pointer_immobile_pbc_matrix_python(mobile_beads, immobile_beads, box_length)
+
+			for i in range(len(mobile_beads)):
+				for j in range(len(immobile_beads)):
+					for k in range(3):
+
+						self.assertEqual(c_ish[i][j][k], python_ish[i][j][k])
 
 	#---------------------------------------------------------------------------
 

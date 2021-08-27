@@ -246,6 +246,38 @@ def compute_pointer_pbc_matrix(beads, box_length):
 
 #-------------------------------------------------------------------------------
 
+def compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, box_length):
+
+	c_double = ctypes.c_double
+
+	N_mob = len(mobile_beads)
+	N_mob_c = ctypes.c_int(N_mob)
+
+	N_immob = len(immobile_beads)
+	N_immob_c = ctypes.c_int(N_immob)
+
+	r_mob_list = [ ri  for b in mobile_beads for ri in b.r]
+	v0 = array('d', r_mob_list)
+	r_mob = (c_double * len(v0)).from_buffer(v0)
+
+	r_immob_list = [ ri  for b in immobile_beads for ri in b.r]
+	v1 = array('d', r_immob_list)
+	r_immob = (c_double * len(v1)).from_buffer(v1)
+
+	p_list = [0.0]*N_mob*N_immob*3
+	v2 = array('d', p_list)
+	p = (c_double * len(v2)).from_buffer(v2)
+
+	box_length_c = ctypes.c_double(box_length)
+
+	lib.pointer_immobile_pbc_matrix(r_mob, r_immob, N_mob_c, N_immob_c, box_length_c, p)
+
+	rik = np.reshape(p, (N_mob, N_immob, 3))
+
+	return rik
+
+#-------------------------------------------------------------------------------
+
 def distance(bead1, bead2):
 
 	r = pointer(bead1, bead2)
