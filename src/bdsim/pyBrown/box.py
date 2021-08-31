@@ -328,7 +328,7 @@ class Box():
 
 		for interaction in self.interactions:
 
-			self.E += interaction.compute_forces_and_energy(self.mobile_beads, self.rij, self.F)
+			self.E += interaction.compute_forces_and_energy(self.mobile_beads, self.immobile_beads, self.rij, self.rik, self.F)
 
 		if self.inp["energy_unit"] == "joule":
 

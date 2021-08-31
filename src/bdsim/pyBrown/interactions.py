@@ -38,7 +38,7 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
-	def compute_forces_and_energy(self, beads, pointers, F):
+	def compute_forces_and_energy(self, mobile_beads, pointers_mobile, F, immobile_beads = [], pointers_mobile_immobile = []):
 
 		# temporary_force = np.zeros(3*len(beads))
 
@@ -46,17 +46,17 @@ class Interactions():
 
 			if self.bonded:
 
-				E = self._compute_2B_bonded_force_and_energy(beads, pointers, F)
+				E = self._compute_2B_bonded_force_and_energy(mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F)
 
 			elif not self.bonded:
 
-				E = self._compute_2B_nonbonded_force_and_energy(beads, pointers, F)
+				E = self._compute_2B_nonbonded_force_and_energy(mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F)
 
 		if self.how_many_body == 3:
 
 			if self.bonded:
 
-				E = self._compute_3B_bonded_force_and_energy(beads, pointers, F)
+				E = self._compute_3B_bonded_force_and_energy(mobile_beads, pointers_mobile, F)
 
 			elif not self.bonded:
 
@@ -70,53 +70,103 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
-	def _compute_2B_bonded_force_and_energy(self, beads, pointers, temp_F):
+	def _compute_2B_bonded_force_and_energy(self, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F):
 
 		E = 0.0
 
-		for i in range(len(beads)):
+		for i in range(len(mobile_beads)):
 
-			beadi = beads[i]
+			beadi = mobile_beads[i]
 
 			for idx in beadi.bonded_with:
 
-				j = get_bead_with_id(beads, idx)
+				j = get_bead_with_id(mobile_beads, idx)
 
-				beadj = beads[j]
+				if j is not None:
 
-				pointerij = pointers[i][j]
+					beadj = mobile_beads[j]
 
-				f = self._compute_2B_force(beadi, beadj, pointerij)
+					pointerij = pointers_mobile[i][j]
 
-				temp_F[3*i:3*(i+1)] += f
+					f = self._compute_2B_force(beadi, beadj, pointerij)
 
-				temp_F[3*j:3*(j+1)] -= f
+					F[3*i:3*(i+1)] += f
 
-				E += self._compute_2B_energy(beadi, beadj, pointerij)
+					F[3*j:3*(j+1)] -= f
+
+					E += self._compute_2B_energy(beadi, beadj, pointerij)
+
+				else:
+
+					j = get_bead_with_id(immobile_beads, idx)
+
+					pointerij = pointers_mobile_immobile[i][j]
+
+					f = self._compute_2B_force(beadi, beadj, pointerij)
+
+					F[3*i:3*(i+1)] += f
+
+					E += self._compute_2B_energy(beadi, beadj, pointerij)
+
+		for i in range(len(immobile_beads)):
+
+			beadi = immobile_beads[i]
+
+			for idx in beadi.bonded_with:
+
+				j = get_bead_with_id(mobile_beads, idx)
+
+				if j is not None:
+
+					beadj = mobile_beads[j]
+
+					pointerij = -pointers_mobile_immobile[j][i]
+
+					f = self._compute_2B_force(beadi, beadj, pointerij)
+
+					F[3*j:3*(j+1)] -= f
+
+					E += self._compute_2B_energy(beadi, beadj, pointerij)
 
 		return E
 
 	#-------------------------------------------------------------------------------
 
-	def _compute_2B_nonbonded_force_and_energy(self, beads, pointers, temp_F):
+	def _compute_2B_nonbonded_force_and_energy(self, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F):
 
 		E = 0.0
 
-		for i in range(1, len(beads)):
+		for i in range(1, len(mobile_beads)):
 
-			beadi = beads[i]
+			beadi = mobile_beads[i]
 
 			for j in range(i):
 
-				beadj = beads[j]
+				beadj = mobile_beads[j]
 
-				pointerij = pointers[i][j]
+				pointerij = pointers_mobile[i][j]
 
 				f = self._compute_2B_force(beadi, beadj, pointerij)
 
-				temp_F[3*i:3*(i+1)] += f
+				F[3*i:3*(i+1)] += f
 
-				temp_F[3*j:3*(j+1)] -= f
+				F[3*j:3*(j+1)] -= f
+
+				E += self._compute_2B_energy(beadi, beadj, pointerij)
+
+		for i in range(len(mobile_beads)):
+
+			beadi = mobile_beads[i]
+
+			for j in range(len(immobile_beads)):
+
+				beadj = immobile_beads[j]
+
+				pointerij = pointers_mobile_immobile[i][j]
+
+				f = self._compute_2B_force(beadi, beadj, pointerij)
+
+				F[3*i:3*(i+1)] += f
 
 				E += self._compute_2B_energy(beadi, beadj, pointerij)
 
@@ -125,6 +175,8 @@ class Interactions():
 	#-------------------------------------------------------------------------------
 
 	def _compute_3B_bonded_force_and_energy(self, beads, pointers, temp_F):
+
+		#  introduce mobile-immobile interactions here
 
 		E = 0.0
 
