@@ -40,7 +40,7 @@ class Interactions():
 
 	def compute_forces_and_energy(self, mobile_beads, pointers_mobile, F, immobile_beads = [], pointers_mobile_immobile = []):
 
-		# temporary_force = np.zeros(3*len(beads))
+		assert len(F) == 3*len(mobile_beads), 'ERROR: invalid length of force vector'
 
 		if self.how_many_body == 2:
 
@@ -56,15 +56,13 @@ class Interactions():
 
 			if self.bonded:
 
-				E = self._compute_3B_bonded_force_and_energy(mobile_beads, pointers_mobile, F)
+				E = self._compute_3B_bonded_force_and_energy(mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F)
 
 			elif not self.bonded:
 
 				print('not implemented')
 
 				1/0
-
-		# self._rearrange_force_to_ommit_immobile_beads(beads, temporary_force, F)
 
 		return E
 
@@ -99,6 +97,8 @@ class Interactions():
 				else:
 
 					j = get_bead_with_id(immobile_beads, idx)
+
+					beadj = immobile_beads[j]
 
 					pointerij = pointers_mobile_immobile[i][j]
 
@@ -174,37 +174,126 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
-	def _compute_3B_bonded_force_and_energy(self, beads, pointers, temp_F):
-
-		#  introduce mobile-immobile interactions here
+	def _compute_3B_bonded_force_and_energy(self, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F):
 
 		E = 0.0
 
-		for i in range(len(beads)):
+		for i in range(len(mobile_beads)):
 
-			beadi = beads[i]
+			beadi = mobile_beads[i]
 
 			for idx1, idx2 in beadi.angled_with:
 
-				j = get_bead_with_id(beads, idx1)
+				j = get_bead_with_id(mobile_beads, idx1)
 
-				k = get_bead_with_id(beads, idx2)
+				k = get_bead_with_id(mobile_beads, idx2)
 
-				beadj = beads[j]
+				if j is not None:
 
-				beadk = beads[k]
+					beadj = mobile_beads[j]
 
-				pointerij = pointers[i][j]
+					pointerij = pointers_mobile[i][j]
 
-				pointerjk = pointers[j][k]
+				else:
+
+					j = get_bead_with_id(immobile_beads, idx1)
+
+					beadj = immobile_beads[j]
+
+					pointerij = pointers_mobile_immobile[i][j]
+
+				if k is not None:
+
+					beadk = mobile_beads[k]
+
+					if beadj.mobile:
+
+						pointerjk = pointers_mobile[j][k]
+
+					else:
+
+						pointerjk = -pointers_mobile_immobile[k][j]
+
+				else:
+
+					k = get_bead_with_id(immobile_beads, idx2)
+
+					beadk = immobile_beads[k]
+
+					if beadj.mobile:
+
+						pointerjk = pointers_mobile_immobile[j][k]
+
+					else:
+
+						pointerik = pointers_mobile_immobile[i][k]
+
+						pointerjk = pointerik - pointerij
 
 				f = self._compute_3B_force(beadi, beadj, beadk, pointerij, pointerjk)
 
-				temp_F[3*i:3*(i+1)] += f[:3]
+				F[3*i:3*(i+1)] += f[:3]
 
-				temp_F[3*j:3*(j+1)] += f[3:6]
+				if beadj.mobile: F[3*j:3*(j+1)] += f[3:6]
 
-				temp_F[3*k:3*(k+1)] += f[6:]
+				if beadk.mobile: F[3*k:3*(k+1)] += f[6:]
+
+				E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
+
+
+		for i in range(len(immobile_beads)):
+
+			beadi = immobile_beads[i]
+
+			for idx1, idx2 in beadi.angled_with:
+
+				j = get_bead_with_id(mobile_beads, idx1)
+
+				k = get_bead_with_id(mobile_beads, idx2)
+
+				if j is None and k is None: continue
+
+				elif ( j is not None ) and ( k is not None ):
+
+					beadj = mobile_beads[j]
+
+					beadk = mobile_beads[k]
+
+					pointerij = -pointers_mobile_immobile[j][i]
+
+					pointerjk = pointers_mobile[j][k]
+
+				elif j is not None:
+
+					beadj = mobile_beads[j]
+
+					k = get_bead_with_id(immobile_beads, idx2)
+
+					beadk = immobile_beads[k]
+
+					pointerij = -pointers_mobile_immobile[j][i]
+
+					pointerjk = pointers_mobile_immobile[j][k]
+
+				else:
+
+					j = get_bead_with_id(immobile_beads, idx1)
+
+					beadj = immobile_beads[j]
+
+					beadk = mobile_beads[k]
+
+					pointerjk = -pointers_mobile_immobile[k][j]
+
+					pointerik = -pointers_mobile_immobile[k][i]
+
+					pointerij = pointerik - pointerjk
+
+				f = self._compute_3B_force(beadi, beadj, beadk, pointerij, pointerjk)
+
+				if beadj.mobile: F[3*j:3*(j+1)] += f[3:6]
+
+				if beadk.mobile: F[3*k:3*(k+1)] += f[6:]
 
 				E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
 
