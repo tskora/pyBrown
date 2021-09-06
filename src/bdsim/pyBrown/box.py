@@ -93,6 +93,7 @@ class Box():
 				self.rik_is_needed = True
 			else:
 				self.rik_is_needed = False
+				self.rik = np.zeros((0,0))
 		else:
 			self.rij_is_needed = False
 			self.rik_is_needed = False
@@ -328,7 +329,7 @@ class Box():
 
 		for interaction in self.interactions:
 
-			self.E += interaction.compute_forces_and_energy(self.mobile_beads, self.immobile_beads, self.rij, self.rik, self.F)
+			self.E += interaction.compute_forces_and_energy(mobile_beads = self.mobile_beads, pointers_mobile = self.rij, F = self.F, immobile_beads = self.immobile_beads, pointers_mobile_immobile = self.rik)
 
 		if self.inp["energy_unit"] == "joule":
 
