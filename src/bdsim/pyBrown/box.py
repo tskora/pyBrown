@@ -141,6 +141,8 @@ class Box():
 
 		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
 
+		self._check_for_reactions()
+
 		self._keep_beads_in_box()
 
 		if self.is_concentration: self._compute_concentration_in_region()
@@ -354,6 +356,14 @@ class Box():
 		for reaction in self.reactions:
 
 			reaction.check_for_reactions(self.mobile_beads, self.rij)
+
+			if reaction.end_simulation:
+
+				self.end_simulation = True
+
+				self.which_reaction_happened = reaction.reaction_name
+
+				break
 
 	#-------------------------------------------------------------------------------
 
@@ -650,6 +660,8 @@ class Box():
 	def _initialize_reactions(self):
 
 		self.reactions = set_reactions(self.inp)
+
+		self.end_simulation = False
 
 	#-------------------------------------------------------------------------------
 
