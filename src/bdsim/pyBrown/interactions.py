@@ -465,7 +465,7 @@ def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
 
 	elif input_data["lennard_jones_12"]:
 
-		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
+		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
 
 	interactions_for_simulation.append(i)
 
