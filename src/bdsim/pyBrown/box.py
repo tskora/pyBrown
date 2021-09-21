@@ -100,6 +100,42 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
+	def _refresh_box(self):
+
+		self._handle_bead_mobility()
+		self.labels = self._handle_bead_labels()
+
+		self.hydrodynamics = self.inp["hydrodynamics"]
+		if self.hydrodynamics == "nohi":
+			self._compute_Dff_matrix()
+			self._decompose_D_matrix()
+
+		if self.overlaps:
+			self.connection_matrix = build_connection_matrix(self.beads)
+			assert not self._check_overlaps(), 'starting configuration contains overlaps'
+
+		self._initialize_force()
+
+		self._initialize_interactions()
+
+		# self._initialize_reactions()
+
+		if self.inp["hydrodynamics"] != "nohi" or len(self.interactions) > 0 or len(self.reactions) > 0:
+			self.rij_is_needed = True
+			if len(self.immobile_beads) > 0:
+				self.rik_is_needed = True
+			else:
+				self.rik_is_needed = False
+				self.rik = []
+		else:
+			self.rij_is_needed = False
+			self.rik_is_needed = False
+
+		if self.rij_is_needed: self._compute_rij_matrix()
+		if self.rik_is_needed: self._compute_rik_matrix()
+
+	#-------------------------------------------------------------------------------
+
 	# @timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True):
 		"""Single propagation of dynamics
@@ -122,6 +158,10 @@ class Box():
 		if self.rij_is_needed: self._compute_rij_matrix()
 		if self.rik_is_needed: self._compute_rik_matrix()
 
+		self._check_for_reactions()
+
+		if self.rij_is_needed and len(self.rij) == 0: return
+
 		if self.hydrodynamics != "nohi":
 
 			if build_Dff:
@@ -140,8 +180,6 @@ class Box():
 		if self.propagation_scheme == "ermak": self._ermak_step(dt, build_Dff, build_Dnf)
 
 		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
-
-		self._check_for_reactions()
 
 		self._keep_beads_in_box()
 
@@ -355,7 +393,7 @@ class Box():
 
 		for reaction in self.reactions:
 
-			reaction.check_for_reactions(self.mobile_beads, self.rij)
+			reaction.check_for_reactions(mobile_beads = self.mobile_beads, immobile_beads = self.immobile_beads, pointers_mobile = self.rij, pointers_mobile_immobile = self.rik)
 
 			if reaction.end_simulation:
 
@@ -364,6 +402,10 @@ class Box():
 				self.which_reaction_happened = reaction.reaction_name
 
 				break
+
+			if reaction.refresh_box:
+
+				self._refresh_box()
 
 	#-------------------------------------------------------------------------------
 
@@ -388,6 +430,10 @@ class Box():
 
 	# @timing
 	def _compute_rij_matrix(self):
+
+		# if len(self.mobile_beads) == 0: self.rij = np.zeros((0,0))
+
+		# else: self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 
 		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 
