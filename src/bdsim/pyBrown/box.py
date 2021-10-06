@@ -207,6 +207,11 @@ class Box():
 
 			self._stochastic_step(dt)
 
+			if self.is_wall:
+				if self.crossed_wall:
+					self._stochastic_step(dt, mult = -1)
+					continue
+
 			if self.overlaps:
 
 				if self._check_overlaps():
@@ -247,6 +252,11 @@ class Box():
 			self._generate_random_vector()
 
 			self._stochastic_step(dt, mult = 1.0 / self.m_midpoint)
+
+			if self.is_wall:
+				if self.crossed_wall:
+					self._stochastic_step(dt, mult = -1.0 / self.m_midpoint)
+					continue#here i am
 
 			if self.overlaps:
 
@@ -344,6 +354,7 @@ class Box():
 
 		for i, bead in enumerate( self.mobile_beads ):
 			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+			elif self.is_wall: self.crossed_wall = self.crossed_wall or ( bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point ) != 0 )
 			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
 
 		if self.inp["debug"]: print('translation vector: {}\n'.format(vector.tolist()))
