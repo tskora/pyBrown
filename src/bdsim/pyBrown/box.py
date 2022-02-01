@@ -99,6 +99,7 @@ class Box():
 			self.rij_is_needed = False
 			self.rik_is_needed = False
 
+		self.is_wall = False
 		if "walls" in self.inp.keys():
 			self.is_wall = True
 			walls = self.inp["walls"]
