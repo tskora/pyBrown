@@ -23,6 +23,7 @@ from pyBrown.bead import compute_pointer_pbc_matrix, compute_pointer_immobile_pb
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timing
+from pyBrown.plane import Plane
 from pyBrown.reactions import set_reactions
 
 #-------------------------------------------------------------------------------
@@ -98,6 +99,14 @@ class Box():
 			self.rij_is_needed = False
 			self.rik_is_needed = False
 
+		if "walls" in self.inp.keys():
+			self.is_wall = True
+			walls = self.inp["walls"]
+			self.planes = []
+			for index in range(len(walls["normal"])):
+				self.planes.append( Plane(plane_point = walls["plane_point"][index], normal_vector = walls["normal"][index]) )
+			print(self.planes)
+
 	#-------------------------------------------------------------------------------
 
 	def _refresh_box(self):
@@ -150,6 +159,8 @@ class Box():
 		:type cholesky: `bool`
 		"""
 
+		if self.is_wall:
+			self.crossed_wall = False
 		if self.is_flux:
 			self.net_flux = {label: 0 for label in self.mobile_labels}
 		if self.is_concentration:
@@ -210,6 +221,7 @@ class Box():
 			if self.is_wall:
 				if self.crossed_wall:
 					self._stochastic_step(dt, mult = -1)
+					self.crossed_wall = False
 					continue
 
 			if self.overlaps:
@@ -353,8 +365,11 @@ class Box():
 	def _translate_beads(self, vector):
 
 		for i, bead in enumerate( self.mobile_beads ):
-			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
-			elif self.is_wall: self.crossed_wall = self.crossed_wall or ( bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point ) != 0 )
+			if self.is_flux:
+				self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.planes )
+			elif self.is_wall:
+				crossed_wall_now = bead.translate_and_check_for_plane_crossing( vector[3 * i: 3 * (i + 1)], self.planes )
+				self.crossed_wall = self.crossed_wall or crossed_wall_now
 			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
 
 		if self.inp["debug"]: print('translation vector: {}\n'.format(vector.tolist()))

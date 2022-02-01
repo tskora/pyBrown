@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..'
 import unittest
 
 from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
+from pyBrown.plane import Plane
 
 #-------------------------------------------------------------------------------
 
@@ -140,7 +141,9 @@ class TestBead(unittest.TestCase):
 
 		plane_point = [0.0, 0.0, 0.0]
 
-		self.assertEqual( self.b0.translate_and_return_flux([0.0, 0.0, 0.0], normal, plane_point), 0 )
+		plane = Plane(plane_point, normal)
+
+		self.assertEqual( self.b0.translate_and_return_flux([0.0, 0.0, 0.0], plane), 0 )
 
 	#---------------------------------------------------------------------------
 
@@ -150,7 +153,9 @@ class TestBead(unittest.TestCase):
 
 		plane_point = [0.0, 0.0, 1.0]
 
-		self.assertEqual( self.b0.translate_and_return_flux([0.0, 0.0, 2.0], normal, plane_point), 1 )
+		plane = Plane(plane_point, normal)
+
+		self.assertEqual( self.b0.translate_and_return_flux([0.0, 0.0, 2.0], plane), 1 )
 
 	#---------------------------------------------------------------------------
 
@@ -160,7 +165,9 @@ class TestBead(unittest.TestCase):
 
 		plane_point = [0.0, 0.0, 1.0]
 
-		self.assertEqual( self.b0.translate_and_return_flux([0.0, 0.0, 2.0], normal, plane_point), -1 )
+		plane = Plane(plane_point, normal)
+
+		self.assertEqual( self.b0.translate_and_return_flux([0.0, 0.0, 2.0], plane), -1 )
 
 	#---------------------------------------------------------------------------
 
@@ -174,9 +181,11 @@ class TestBead(unittest.TestCase):
 
 		plane_point = [0.0, 0.0, 0.0]
 
-		self.assertEqual( b_start.translate_and_return_flux(translation_vector, normal, plane_point), 0 )
+		plane = Plane(plane_point, normal)
 
-		self.assertEqual( b_start.translate_and_return_flux(translation_vector, normal, plane_point), 1 )
+		self.assertEqual( b_start.translate_and_return_flux(translation_vector, plane), 0 )
+
+		self.assertEqual( b_start.translate_and_return_flux(translation_vector, plane), 1 )
 
 	#---------------------------------------------------------------------------
 
@@ -190,7 +199,75 @@ class TestBead(unittest.TestCase):
 
 		plane_point = [0.0, 0.0, 0.0]
 
-		self.assertEqual( b_start.translate_and_return_flux(translation_vector, normal, plane_point), 0 )
+		plane = Plane(plane_point, normal)
+
+		self.assertEqual( b_start.translate_and_return_flux(translation_vector, plane), 0 )
+
+	#---------------------------------------------------------------------------
+
+	def test_if_going_through_xy_plane_is_crossing(self):
+
+		b_start = Bead([0.0, 0.0, -1.0], 0.0)
+
+		translation_vector = np.array([0.0, 0.0, 2.0])
+
+		normal = np.array([0.0, 0.0, 1.0])
+
+		plane_point = np.array([0.0, 0.0, 0.0])
+
+		plane = Plane(plane_point, normal)
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+
+	def test_if_going_through_xz_plane_is_crossing(self):
+
+		b_start = Bead([0.0, 1.0, 0.0], 0.0)
+
+		translation_vector = np.array([0.0, -2.0, 0.0])
+
+		normal = np.array([0.0, -1.0, 0.0])
+
+		plane_point = np.array([0.0, 0.0, 0.0])
+
+		plane = Plane(plane_point, normal)
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+
+	def test_if_going_through_yz_plane_is_crossing(self):
+
+		b_start = Bead([-1.0, 0.0, 0.0], 0.0)
+
+		translation_vector = np.array([2.0, 0.0, 0.0])
+
+		normal = np.array([1.0, 0.0, 0.0])
+
+		plane_point = np.array([0.0, 0.0, 0.0])
+
+		plane = Plane(plane_point, normal)
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+
+	def test_if_going_through_shifted_xy_plane_is_crossing(self):
+
+		b_start = Bead([0.0, 0.0, 1.0], 0.0)
+
+		translation_vector = np.array([0.0, 0.0, 2.0])
+
+		normal = np.array([0.0, 0.0, 1.0])
+
+		plane_point = np.array([0.0, 0.0, 0.0])
+
+		plane = Plane(plane_point, normal)
+
+		plane_point_shift = np.array([0.0, 0.0, 2.0])
+
+		plane_shift = Plane(plane_point_shift, normal)
+
+		self.assertFalse( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+
+		self.assertFalse( b_start.translate_and_check_for_plane_crossing(-translation_vector, [plane]) )
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane_shift]) )
 
 	#---------------------------------------------------------------------------
 

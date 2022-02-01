@@ -61,7 +61,7 @@ def main(input_filename):
 				     "filename_range", "custom_interactions_filename",
 				     "auxiliary_custom_interactions_keywords",
 				     "external_force_region", "measure_flux",
-				     "measure_concentration" ]
+				     "measure_concentration", "walls" ]
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults, all_keywords)
