@@ -146,6 +146,24 @@ class Reactions():
 
 	#-------------------------------------------------------------------------------
 
+	def _parse_angle_condition(self, single_condition):
+
+		angle_condition_dictionary = {}
+
+		_, label1, label2, label3, sign, string_angle = single_condition.strip().split(' ')
+
+		angle = float(string_angle)
+
+		angle_condition_dictionary[label1+" "+label2+" "+label3] = (sign, angle)
+
+		# permutations???
+
+		self.conditions.append(angle_condition_dictionary)
+
+		self.condition_types.append("angle")
+
+	#-------------------------------------------------------------------------------
+
 	def _parse_random_condition(self, single_condition):
 
 		if len( single_condition.strip().split(' ') ) == 3:
@@ -191,6 +209,8 @@ class Reactions():
 			condition_type = self.condition_types[i]
 
 			if condition_type == "dist": answer = answer and self._reaction_criterion_dist(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
+
+			elif condition_type == "angle": answer = answer and self._reaction_criterion_angle(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
 
 			elif condition_type == "random": answer = answer and self._reaction_criterion_random(condition)
 
