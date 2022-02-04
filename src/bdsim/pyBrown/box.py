@@ -23,6 +23,7 @@ from pyBrown.bead import compute_pointer_pbc_matrix, compute_pointer_immobile_pb
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
 from pyBrown.output import timing
+from pyBrown.plane import Plane
 from pyBrown.reactions import set_reactions
 
 #-------------------------------------------------------------------------------
@@ -98,6 +99,51 @@ class Box():
 			self.rij_is_needed = False
 			self.rik_is_needed = False
 
+		self.is_wall = False
+		if "walls" in self.inp.keys():
+			self.is_wall = True
+			walls = self.inp["walls"]
+			self.planes = []
+			for index in range(len(walls["normal"])):
+				self.planes.append( Plane(plane_point = walls["plane_point"][index], normal_vector = walls["normal"][index]) )
+			print(self.planes)
+
+	#-------------------------------------------------------------------------------
+
+	def _refresh_box(self):
+
+		self._handle_bead_mobility()
+		self.labels = self._handle_bead_labels()
+
+		self.hydrodynamics = self.inp["hydrodynamics"]
+		if self.hydrodynamics == "nohi":
+			self._compute_Dff_matrix()
+			self._decompose_D_matrix()
+
+		if self.overlaps:
+			self.connection_matrix = build_connection_matrix(self.beads)
+			assert not self._check_overlaps(), 'starting configuration contains overlaps'
+
+		self._initialize_force()
+
+		self._initialize_interactions()
+
+		# self._initialize_reactions()
+
+		if self.inp["hydrodynamics"] != "nohi" or len(self.interactions) > 0 or len(self.reactions) > 0:
+			self.rij_is_needed = True
+			if len(self.immobile_beads) > 0:
+				self.rik_is_needed = True
+			else:
+				self.rik_is_needed = False
+				self.rik = []
+		else:
+			self.rij_is_needed = False
+			self.rik_is_needed = False
+
+		if self.rij_is_needed: self._compute_rij_matrix()
+		if self.rik_is_needed: self._compute_rik_matrix()
+
 	#-------------------------------------------------------------------------------
 
 	# @timing
@@ -114,6 +160,8 @@ class Box():
 		:type cholesky: `bool`
 		"""
 
+		if self.is_wall:
+			self.crossed_wall = False
 		if self.is_flux:
 			self.net_flux = {label: 0 for label in self.mobile_labels}
 		if self.is_concentration:
@@ -121,6 +169,10 @@ class Box():
 
 		if self.rij_is_needed: self._compute_rij_matrix()
 		if self.rik_is_needed: self._compute_rik_matrix()
+
+		self._check_for_reactions()
+
+		if self.rij_is_needed and len(self.rij) == 0: return
 
 		if self.hydrodynamics != "nohi":
 
@@ -140,8 +192,6 @@ class Box():
 		if self.propagation_scheme == "ermak": self._ermak_step(dt, build_Dff, build_Dnf)
 
 		if self.propagation_scheme == "midpoint": self._midpoint_step(dt, build_Dff, build_Dnf, cholesky)
-
-		self._check_for_reactions()
 
 		self._keep_beads_in_box()
 
@@ -168,6 +218,12 @@ class Box():
 			self._generate_random_vector()
 
 			self._stochastic_step(dt)
+
+			if self.is_wall:
+				if self.crossed_wall:
+					self._stochastic_step(dt, mult = -1)
+					self.crossed_wall = False
+					continue
 
 			if self.overlaps:
 
@@ -209,6 +265,11 @@ class Box():
 			self._generate_random_vector()
 
 			self._stochastic_step(dt, mult = 1.0 / self.m_midpoint)
+
+			if self.is_wall:
+				if self.crossed_wall:
+					self._stochastic_step(dt, mult = -1.0 / self.m_midpoint)
+					continue#here i am
 
 			if self.overlaps:
 
@@ -305,7 +366,11 @@ class Box():
 	def _translate_beads(self, vector):
 
 		for i, bead in enumerate( self.mobile_beads ):
-			if self.is_flux: self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.flux_normal, self.flux_plane_point )
+			if self.is_flux:
+				self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.planes )
+			elif self.is_wall:
+				crossed_wall_now = bead.translate_and_check_for_plane_crossing( vector[3 * i: 3 * (i + 1)], self.planes )
+				self.crossed_wall = self.crossed_wall or crossed_wall_now
 			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
 
 		if self.inp["debug"]: print('translation vector: {}\n'.format(vector.tolist()))
@@ -355,7 +420,7 @@ class Box():
 
 		for reaction in self.reactions:
 
-			reaction.check_for_reactions(self.mobile_beads, self.rij)
+			reaction.check_for_reactions(mobile_beads = self.mobile_beads, immobile_beads = self.immobile_beads, pointers_mobile = self.rij, pointers_mobile_immobile = self.rik)
 
 			if reaction.end_simulation:
 
@@ -364,6 +429,10 @@ class Box():
 				self.which_reaction_happened = reaction.reaction_name
 
 				break
+
+			if reaction.refresh_box:
+
+				self._refresh_box()
 
 	#-------------------------------------------------------------------------------
 
@@ -388,6 +457,10 @@ class Box():
 
 	# @timing
 	def _compute_rij_matrix(self):
+
+		# if len(self.mobile_beads) == 0: self.rij = np.zeros((0,0))
+
+		# else: self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 
 		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 

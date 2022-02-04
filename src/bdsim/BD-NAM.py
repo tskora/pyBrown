@@ -42,19 +42,24 @@ def main(input_filename):
 	defaults = {"debug": False, "verbose": False, "hydrodynamics": "nohi",
 				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0,
 				"diff_freq": 1, "lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1,
+				"lubrication_cutoff": 1,
 				"seed": None, "immobile_labels": [],
-				"propagation_scheme": "ermak", "check_overlaps": True,
+				"propagation_scheme": "ermak", "m_midpoint": 100,
+				"divergence_term": False,
+				"check_overlaps": True,
 				"external_force": [0.0, 0.0, 0.0],
 				"lennard_jones_6": False, "lennard_jones_12": False,
 				"lennard_jones_alpha": 4.0, "energy_unit": "joule",
-				"custom_interactions": False}
+				"custom_interactions": False,
+				"cichocki_correction": True,
+				"overlap_treshold": 0.0, "max_move_attempts": 1000000}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
 				   [ "output_rst_filename", "rst_write_freq",
 				     "filename_range",
-				     "m_midpoint",
 				     "custom_interactions_filename",
-				     "auxiliary_custom_interactions_keywords" ]
+				     "auxiliary_custom_interactions_keywords",
+				     "external_force_region", "walls" ]
 
 	timestamp( 'Reading input from {} file', input_filename )
 	i = InputData(input_filename, required_keywords, defaults, all_keywords)

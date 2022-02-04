@@ -15,6 +15,7 @@
 # along with this program.  If not, see https://www.gnu.org/licenses.
 
 import math
+import numpy as np
 
 from itertools import product
 
@@ -36,9 +37,15 @@ class Reactions():
 
 		self.end_simulation = False
 
+		self.refresh_box = False
+
 	#-------------------------------------------------------------------------------
 
-	def check_for_reactions(self, beads, pointers):
+	def check_for_reactions(self, mobile_beads, pointers_mobile, immobile_beads = [], pointers_mobile_immobile = []):
+
+		self.refresh_box = False
+
+		beads = mobile_beads + immobile_beads
 
 		bead_indices = [ i for i in range(len(beads)) ]
 
@@ -47,7 +54,19 @@ class Reactions():
 
 		for ntuple in unique_ntuples:
 
-			if self._reaction_criterion(ntuple, beads, pointers): self._reaction_effect(ntuple, beads, pointers)
+			if self._reaction_criterion(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile): self._reaction_effect(ntuple, beads)
+
+	#-------------------------------------------------------------------------------
+
+	def _initialize_pseudorandom_number_generation(self, seed):
+
+		if seed is None:
+			# self.seed = np.random.randint(2**32 - 1)
+			self.seed = 0
+		else:
+			self.seed = seed
+		self.pseudorandom_number_generator = np.random.RandomState(self.seed)
+		self.draw_count = 0
 
 	#-------------------------------------------------------------------------------
 
@@ -87,17 +106,89 @@ class Reactions():
 
 	def _parse_condition_string(self, condition_string):
 
-		self.condition_dictionary = {}
+		self.conditions = []
+
+		self.condition_types = []
 
 		for single_condition in condition_string.split(','):
 
-			label1, label2, sign, string_dist = single_condition.strip().split(' ')
+			if single_condition.strip().split(' ')[0] == 'dist':
 
-			dist = float(string_dist)
+				self._parse_dist_condition(single_condition)
 
-			self.condition_dictionary[label1+" "+label2] = (sign, dist)
+			elif single_condition.strip().split(' ')[0] == 'random':
 
-			self.condition_dictionary[label2+" "+label1] = (sign, dist)
+				self._parse_random_condition(single_condition)
+
+			else:
+
+				print('unknown reaction condition')
+
+				1/0
+
+	#-------------------------------------------------------------------------------
+
+	def _parse_dist_condition(self, single_condition):
+
+		dist_condition_dictionary = {}
+
+		_, label1, label2, sign, string_dist = single_condition.strip().split(' ')
+
+		dist = float(string_dist)
+
+		dist_condition_dictionary[label1+" "+label2] = (sign, dist)
+
+		dist_condition_dictionary[label2+" "+label1] = (sign, dist)
+
+		self.conditions.append(dist_condition_dictionary)
+
+		self.condition_types.append("dist")
+
+	#-------------------------------------------------------------------------------
+
+	def _parse_angle_condition(self, single_condition):
+
+		angle_condition_dictionary = {}
+
+		_, label1, label2, label3, sign, string_angle = single_condition.strip().split(' ')
+
+		angle = float(string_angle)
+
+		angle_condition_dictionary[label1+" "+label2+" "+label3] = (sign, angle)
+
+		# permutations???
+
+		self.conditions.append(angle_condition_dictionary)
+
+		self.condition_types.append("angle")
+
+	#-------------------------------------------------------------------------------
+
+	def _parse_random_condition(self, single_condition):
+
+		if len( single_condition.strip().split(' ') ) == 3:
+
+			_, probability, seed = single_condition.strip().split(' ')
+
+		elif len( single_condition.strip().split(' ') ) == 2:
+
+			_, probability = single_condition.strip().split(' ')
+
+			probability = float(probability)
+
+			seed = None
+
+		else:
+
+			print('error in parsing condition string')
+
+			1/0
+
+		self._initialize_pseudorandom_number_generation(seed)
+
+		self.conditions.append(probability)
+
+		self.condition_types.append("random")
 
 	#-------------------------------------------------------------------------------
 
@@ -107,7 +198,31 @@ class Reactions():
 
 	#-------------------------------------------------------------------------------
 
-	def _reaction_criterion(self, ntuple, beads, pointers):
+	def _reaction_criterion(self, ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile):
+
+		answer = True
+
+		for i in range(len(self.conditions)):
+
+			condition = self.conditions[i]
+
+			condition_type = self.condition_types[i]
+
+			if condition_type == "dist": answer = answer and self._reaction_criterion_dist(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
+
+			elif condition_type == "angle": answer = answer and self._reaction_criterion_angle(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
+
+			elif condition_type == "random": answer = answer and self._reaction_criterion_random(condition)
+
+			else: 1/0
+
+		return answer
+
+	#-------------------------------------------------------------------------------
+
+	def _reaction_criterion_dist(self, ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition):
+
+		beads = mobile_beads + immobile_beads
 
 		for i in range(1, len(ntuple)):
 
@@ -121,39 +236,53 @@ class Reactions():
 
 				bead_j = beads[ntuple[j]]
 
-				pointer = pointers[index_i][index_j]
+				if bead_i.label+" "+bead_j.label not in condition.keys():
 
-				dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+					continue
 
-				dist = math.sqrt(dist2)
+				pointer = _return_proper_pointer(index_i, index_j, pointers_mobile, pointers_mobile_immobile)
 
-				# print('dist={}\n'.format(dist))
+				if pointer is not None:
 
-				assert bead_i.label+" "+bead_j.label in self.condition_dictionary.keys(), 'error in reactions -- unrecognized condition label'
+					dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
 
-				sign, dist_value = self.condition_dictionary[bead_i.label+" "+bead_j.label]
+					dist = math.sqrt(dist2)
 
-				if sign == ">":
+					# print('dist={}\n'.format(dist))
 
-					if dist <= dist_value:
+					sign, dist_value = condition[bead_i.label+" "+bead_j.label]
 
-						return False
+					if sign == ">":
 
-				if sign == ">=":
+						if dist <= dist_value:
 
-					if dist < dist_value:
+							return False
 
-						return False
+					if sign == ">=":
 
-				if sign == "<=":
+						if dist < dist_value:
 
-					if dist > dist_value:
+							return False
 
-						return False
+					if sign == "<=":
 
-				if sign == "<":
+						if dist > dist_value:
 
-					if dist >= dist_value:
+							return False
+
+					if sign == "<":
+
+						if dist >= dist_value:
+
+							return False
+
+				else:
+
+					if bead_j.bead_id in bead_i.bonded_with or bead_i.bead_id in bead_j.bonded_with:
+
+						continue
+
+					else:
 
 						return False
 
@@ -161,13 +290,160 @@ class Reactions():
 
 	#-------------------------------------------------------------------------------
 
-	def _reaction_effect(self, ntuple, beads, pointers):
+	def _reaction_criterion_random(self, probability):
+
+		a = self.pseudorandom_number_generator.uniform(0.0, 1.0)
+
+		self.draw_count += 1
+
+		return ( a < probability )
+
+	#-------------------------------------------------------------------------------
+
+	def _reaction_effect(self, ntuple, beads):
 
 		self.reaction_count += 1
 
 		if self.effect_string == "end_simulation":
 
 			self.end_simulation = True
+
+		elif self.effect_string == "freeze":
+
+			self._reaction_effect_freeze(ntuple, beads)
+
+		elif self.effect_string == "unfreeze":
+
+			self._reaction_effect_unfreeze(ntuple, beads)
+
+		elif "bond" in self.effect_string:
+
+			self._reaction_effect_bond(ntuple, beads)
+
+		else:
+
+			print('unknown reaction effect')
+
+			1/0
+
+	#-------------------------------------------------------------------------------
+
+	def _reaction_effect_freeze(self, ntuple, beads):
+
+		change_in_mobility = False
+
+		for i in ntuple:
+
+			change_in_mobility = change_in_mobility or beads[i].mobile
+
+			beads[i].mobile = False
+
+		if change_in_mobility:
+
+			for i in ntuple:
+
+				for j in ntuple:
+
+					if i == j: continue
+
+					if beads[j].bead_id in beads[i].bonded_with or beads[i].bead_id in beads[j].bonded_with:
+
+						continue
+
+					else:
+
+						beads[i].bonded_with.append(beads[j].bead_id)
+
+						beads[i].bonded_how[beads[j].bead_id] = (0.0, 0.0)
+
+			self.refresh_box = True
+
+		else:
+
+			self.refresh_box = False
+
+	#-------------------------------------------------------------------------------
+
+	def _reaction_effect_unfreeze(self, ntuple, beads):
+
+		change_in_mobility = False
+
+		for i in ntuple:
+
+			change_in_mobility = change_in_mobility or not beads[i].mobile
+
+			beads[i].mobile = True
+
+		if change_in_mobility:
+
+			for i in ntuple:
+
+				for j in ntuple:
+
+					if i == j: continue
+
+					if beads[j].bead_id in beads[i].bonded_with:
+
+						if beads[i].bonded_how[beads[j].bead_id] == (0.0, 0.0):
+
+							beads[i].bonded_with.remove(beads[j].bead_id)
+
+							del beads[i].bonded_how[beads[j].bead_id]
+
+					elif beads[i].bead_id in beads[j].bonded_with:
+
+						if beads[j].bonded_how[beads[i].bead_id] == (0.0, 0.0):
+
+							beads[j].bonded_with.remove(beads[i].bead_id)
+
+							del beads[j].bonded_how[beads[i].bead_id]
+
+					else:
+
+						print('surprise')
+
+						1/0
+
+			self.refresh_box = True
+
+		else:
+
+			self.refresh_box = False
+
+	#-------------------------------------------------------------------------------
+
+	def _reaction_effect_bond(self, ntuple, beads):
+
+		change_in_bonds = False
+
+		string_segments = self.effect_string.split()
+		dist_eq = float( string_segments[1] )
+		force_constant = float( string_segments[3] )
+
+		for i in range(1, len(ntuple)):
+
+			for j in range(i):
+
+				b1 = beads[i]
+
+				b2 = beads[j]
+
+				if b2.bead_id in b1.bonded_with or b1.bead_id in b2.bonded_with:
+
+					continue
+
+				else:
+
+					change_in_bonds = change_in_bonds or True
+
+				b1.bonded_with.append(b2.bead_id)
+
+				b1.bonded_how[b2.bead_id] = [dist_eq, force_constant]
+
+		if change_in_bonds:
+			self.refresh_box = True
+		else:
+			self.refresh_box = False
 
 	#-------------------------------------------------------------------------------
 
@@ -199,7 +475,7 @@ class Reactions():
 
 		string_template = 'Reaction: {}'
 
-		return string_template.format(self.reaction_name + self.reaction_string)
+		return string_template.format(self.reaction_name + ' ' + self.reaction_string)
 
 	#-------------------------------------------------------------------------------
 
@@ -224,5 +500,31 @@ def set_reactions(input_data):
 			reactions_for_simulation.append( Reactions(reaction_name, reaction_string, condition_string, effect_string) )
 
 	return reactions_for_simulation
+
+#-------------------------------------------------------------------------------
+
+def _return_proper_pointer(i, j, pointers_mobile, pointers_mobile_immobile):
+
+	limitter = len(pointers_mobile)
+
+	if i < limitter and j < limitter:
+
+		return pointers_mobile[i][j]
+
+	elif i < limitter and j >= limitter:
+
+		j -= limitter
+
+		return pointers_mobile_immobile[i][j]
+
+	elif i >= limitter and j < limitter:
+
+		i -= limitter
+
+		return -pointers_mobile_immobile[j][i]
+
+	else:
+
+		return None
 
 #-------------------------------------------------------------------------------

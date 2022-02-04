@@ -47,21 +47,23 @@ class TestReactions(unittest.TestCase):
 
 	def test_reaction_string_parsing(self):
 
-		r = Reactions('example_reaction', 'A+B->C', 'A B <= 25.0', 'end_simulation')
+		r = Reactions('example_reaction', 'A+B->C', 'dist A B <= 25.0', 'end_simulation')
 
 		self.assertSequenceEqual(r.substrates, ['A', 'B'])
 
 		self.assertSequenceEqual(r.products, ['C'])
 
-		self.assertSequenceEqual(r.condition_dictionary['A B'], ('<=', 25.0))
+		self.assertEqual(r.condition_types[0], "dist")
 
-		self.assertSequenceEqual(r.condition_dictionary['B A'], ('<=', 25.0))
+		self.assertSequenceEqual(r.conditions[0]['A B'], ('<=', 25.0))
+
+		self.assertSequenceEqual(r.conditions[0]['B A'], ('<=', 25.0))
 
 	#---------------------------------------------------------------------------
 
 	def test_ntuples(self):
 
-		r = Reactions('example_reaction', 'A+B->C', 'A B <= 25.0', 'end_simulation')
+		r = Reactions('example_reaction', 'A+B->C', 'dist A B <= 25.0', 'end_simulation')
 
 		r.check_for_reactions(self.beads, self.rij)
 

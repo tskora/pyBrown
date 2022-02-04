@@ -100,7 +100,7 @@ class Bead():
 
 	#-------------------------------------------------------------------------------
 
-	def translate_and_return_flux(self, vector, normal, plane_point):
+	def translate_and_return_flux(self, vector, plane):
 		"""Moves a bead by the provided vector and returns flux through the provided plane.
 		Plane is defined by its normal vector and any point lying on the plane. `1` is returned
 		if particle goes through the plana in the direction of the normal vector, `-1` if in the
@@ -119,17 +119,51 @@ class Bead():
 
 		r0 = np.array( [self.r[0], self.r[1], self.r[2]] )
 
-		f0 = np.dot( normal, (r0 - plane_point) ) > 0.0
+		f0 = np.dot( plane.normal_vector, (r0 - plane.plane_point) ) > 0.0
 
 		self.translate(vector)
 
-		f1 = np.dot( normal, (self.r - plane_point) ) > 0.0
+		f1 = np.dot( plane.normal_vector, (self.r - plane.plane_point) ) > 0.0
 
 		if f0 == f1: return 0
 
 		if f0: return -1
 
 		else: return 1
+
+	#-------------------------------------------------------------------------------
+
+	def translate_and_check_for_plane_crossing(self, vector, planes):
+
+		r0 = np.array( [self.r[0], self.r[1], self.r[2]] )
+
+		self.translate(vector)
+
+		r1 = np.array( [self.r[0], self.r[1], self.r[2]] )
+
+		for plane in planes:
+
+			r0f = r0 + self.a*plane.normal_vector
+
+			r0b = r0 - self.a*plane.normal_vector
+
+			r1f = r1 + self.a*plane.normal_vector
+
+			r1b = r1 - self.a*plane.normal_vector
+
+			f0f = np.dot( plane.normal_vector, (r0f - plane.plane_point) ) > 0.0
+
+			f0b = np.dot( plane.normal_vector, (r0b - plane.plane_point) ) > 0.0
+
+			f1f = np.dot( plane.normal_vector, (r1f - plane.plane_point) ) > 0.0
+
+			f1b = np.dot( plane.normal_vector, (r1b - plane.plane_point) ) > 0.0
+
+			if f0f == f1f and f0b == f1b: continue
+
+			else: return True
+
+		return False
 
 	#-------------------------------------------------------------------------------
 
