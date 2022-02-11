@@ -500,6 +500,8 @@ class TestBead(unittest.TestCase):
 
 			beads = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0, bead_id = i+1) for i in range(10) ]
 
+			cm = np.zeros((len(beads), len(beads)))
+
 			for j in range(len(beads)-1):
 
 				for k in range(j+1, len(beads)):
@@ -509,8 +511,12 @@ class TestBead(unittest.TestCase):
 						beads[j].bonded_with.append(beads[k].bead_id)
 						beads[j].bonded_how[beads[k].bead_id] = [0.0, 0.0]
 
+						cm[j][k] = 1
+						cm[k][j] = 1
+
 			connection_matrix = build_connection_matrix(beads)
 			self.assertSequenceEqual(list(connection_matrix.flatten()), list(np.transpose(connection_matrix.flatten())))
+			self.assertSequenceEqual(list(cm.flatten()), list(connection_matrix.flatten()))
 
 			c_ish = check_overlaps(beads, box_length, overlap_treshold, connection_matrix)
 
