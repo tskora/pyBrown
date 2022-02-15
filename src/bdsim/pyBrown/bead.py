@@ -219,6 +219,16 @@ def pointer(bead1, bead2):
 
 #-------------------------------------------------------------------------------
 
+def pole_pointer(bead1, bead2, bead3):
+
+	shift = bead2.r - bead1.r
+
+	shift *= bead2.a / np.linalg.norm(shift)
+
+	return bead3.r - bead2.r - shift
+
+#-------------------------------------------------------------------------------
+
 def pointer_pbc(bead1, bead2, box_size):
 	"""Computes the voctor pointing from `bead1` to `bead2` (its closest translational replica)
 	
@@ -234,6 +244,20 @@ def pointer_pbc(bead1, bead2, box_size):
 	"""
 
 	r = pointer(bead1, bead2)
+
+	for i in range(3):
+		while r[i] >= box_size/2:
+			r[i] -= box_size
+		while r[i] <= -box_size/2:
+			r[i] += box_size
+
+	return r
+
+#-------------------------------------------------------------------------------
+
+def pole_pointer_pbc(bead1, bead2, bead3, box_size):
+
+	r = pole_pointer(bead1, bead2, bead3)
 
 	for i in range(3):
 		while r[i] >= box_size/2:
@@ -334,13 +358,15 @@ def distance_pbc(bead1, bead2, box_size):
 	:rtype: `float`
 	"""
 
-	r = pointer(bead1, bead2)
+	r = pointer_pbc(bead1, bead2, box_size)
 
-	for i in range(3):
-		while r[i] >= box_size/2:
-			r[i] -= box_size
-		while r[i] <= -box_size/2:
-			r[i] += box_size
+	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
+
+#-------------------------------------------------------------------------------
+
+def pole_distance_pbc(bead1, bead2, bead3, box_size):
+
+	r = pole_pointer_pbc(bead1, bead2, bead3, box_size)
 
 	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
 
