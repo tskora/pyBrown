@@ -61,8 +61,7 @@ class Reactions():
 	def _initialize_pseudorandom_number_generation(self, seed):
 
 		if seed is None:
-			# self.seed = np.random.randint(2**32 - 1)
-			self.seed = 0
+			self.seed = np.random.randint(2**32 - 1)
 		else:
 			self.seed = seed
 		self.pseudorandom_number_generator = np.random.RandomState(self.seed)
@@ -116,6 +115,10 @@ class Reactions():
 
 				self._parse_dist_condition(single_condition)
 
+			elif single_condition.strip().split(' ')[0] == 'pole_dist':
+
+				self._parse_pole_dist_condition(single_condition)
+
 			elif single_condition.strip().split(' ')[0] == 'random':
 
 				self._parse_random_condition(single_condition)
@@ -143,6 +146,22 @@ class Reactions():
 		self.conditions.append(dist_condition_dictionary)
 
 		self.condition_types.append("dist")
+
+	#-------------------------------------------------------------------------------
+
+	def _parse_pole_dist_condition(self, single_condition):
+
+		pole_dist_condition_dictionary = {}
+
+		_, label1, label2, label3, sign, string_dist = single_condition.strip().split(' ')
+
+		dist = float(string_dist)
+
+		pole_dist_condition_dictionary[label1+" "+label2+" "+label3] = (sign, dist)
+
+		self.conditions.append(pole_dist_condition_dictionary)
+
+		self.condition_types.append("pole_dist")
 
 	#-------------------------------------------------------------------------------
 
@@ -209,6 +228,8 @@ class Reactions():
 			condition_type = self.condition_types[i]
 
 			if condition_type == "dist": answer = answer and self._reaction_criterion_dist(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
+
+			elif condition_type == "pole_dist": answer = answer and self._reaction_criterion_pole_dist(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
 
 			elif condition_type == "angle": answer = answer and self._reaction_criterion_angle(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
 
@@ -285,6 +306,84 @@ class Reactions():
 					else:
 
 						return False
+
+		return True
+
+	#-------------------------------------------------------------------------------
+
+	def _reaction_criterion_pole_dist(self, ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition):
+
+		beads = mobile_beads + immobile_beads
+
+		for i in range(len(ntuple)):
+
+			index_i = ntuple[i]
+
+			bead_i = beads[ntuple[i]]
+
+			for j in range(len(ntuple)):
+
+				if j == i: continue
+
+				index_j = ntuple[j]
+
+				bead_j = beads[ntuple[j]]
+
+				for k in range(len(ntuple)):
+
+					if k == i or k == j: continue
+
+					index_k = ntuple[k]
+
+					bead_k = beads[ntuple[k]]
+
+					if bead_i.label+" "+bead_j.label+" "+bead_k.label not in condition.keys():
+
+						continue
+
+					pointer1 = _return_proper_pointer(index_i, index_j, pointers_mobile, pointers_mobile_immobile)
+
+					pointer2 = _return_proper_pointer(index_j, index_k, pointers_mobile, pointers_mobile_immobile)
+
+					if pointer1 is not None and pointer2 is not None:
+
+						shift = pointer1
+
+						shift *= bead_j.a / np.linalg.norm(shift)
+
+						p_pointer = pointer2 - shift
+
+						p_dist = np.sqrt( p_pointer[0]*p_pointer[0] + p_pointer[1]*p_pointer[1] + p_pointer[2]*p_pointer[2] )
+
+						sign, dist_value = condition[bead_i.label+" "+bead_j.label+" "+bead_k.label]
+
+						if sign == ">":
+
+							if p_dist <= dist_value:
+
+								return False
+
+						if sign == ">=":
+
+							if p_dist < dist_value:
+
+								return False
+
+						if sign == "<=":
+
+							if p_dist > dist_value:
+
+								return False
+
+						if sign == "<":
+
+							if p_dist >= dist_value:
+
+								return False
+
+					else:
+
+						1/0
 
 		return True
 
@@ -458,6 +557,10 @@ class Reactions():
 	#-------------------------------------------------------------------------------
 
 	def _ntuple_is_reactive(self, ntuple, beads):
+
+		if len(ntuple) != self.number_of_substrates: return False
+
+		if len(set(ntuple)) < len(ntuple): return False
 
 		from_ntuple = { name:0 for name in self.substrates }
 
