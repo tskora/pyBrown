@@ -418,87 +418,87 @@ class TestReactions(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	# def test_reaction_criterion2(self):
+	def test_reaction_criterion2(self):
 
-	# 	r = Reactions(*self.reaction_strings[1])
+		r = Reactions(*self.reaction_strings[1])
 
-	# 	seed = r.seed
+		seed = r.seed
 
-	# 	np.random.seed( seed )
+		np.random.seed( seed )
 
-	# 	self.assertEqual( r._reaction_criterion([0, 1], self.beads, [], self.rij, []), np.random.uniform(0.0, 1.0) < 0.4 )
-
-	#---------------------------------------------------------------------------
-
-	# def test_reaction_criterion3(self):
-
-	# 	r = Reactions(*self.reaction_strings[2])
-
-	# 	self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
-
-	# 	self.beads[5].translate([0, 0, 8.8])
-
-	# 	self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
-
-	# 	self.assertTrue( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
-
-	# 	self.beads[0].translate([0, 0, 2.7])
-
-	# 	self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
-
-	# 	self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
+		self.assertEqual( r._reaction_criterion([0, 1], self.beads, [], self.rij, []), np.random.uniform(0.0, 1.0) < 0.4 )
 
 	#---------------------------------------------------------------------------
 
-	# def test_reaction_criterion4(self):
+	def test_reaction_criterion3(self):
 
-	# 	r = Reactions(*self.reaction_strings[3])
+		r = Reactions(*self.reaction_strings[2])
 
-	# 	self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
+		self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
 
-	# 	self.beads[5].translate([0, 0, 8.8])
+		self.beads[5].translate([0, 0, 8.8])
 
-	# 	self.beads[0].translate([0, 0, 2.5])
+		self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
 
-	# 	self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
+		self.assertTrue( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
 
-	# 	self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
+		self.beads[0].translate([0, 0, 2.7])
 
-	# 	self.beads[5].translate([0, 0, -0.05])
+		self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
 
-	# 	self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
-
-	# 	self.assertTrue( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
+		self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
 
 	#---------------------------------------------------------------------------
 
-	# def test_reaction_criterion5(self):
+	def test_reaction_criterion4(self):
 
-	# 	r = Reactions(*self.reaction_strings[4])
+		r = Reactions(*self.reaction_strings[3])
 
-	# 	seed = r.seed
+		self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
 
-	# 	np.random.seed( seed )
+		self.beads[5].translate([0, 0, 8.8])
 
-	# 	self.assertFalse( r._reaction_criterion([0, 2], self.beads, [], self.rij, []) )
+		self.beads[0].translate([0, 0, 2.5])
 
-	# 	self.beads[2].translate([0.05, -0.05, 2.95])
+		self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
 
-	# 	self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
+		self.assertFalse( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
 
-	# 	for i in range(300):
+		self.beads[5].translate([0, 0, -0.05])
 
-	# 		self.assertEqual( r._reaction_criterion([0, 2], self.beads, [], self.rij, []), np.random.uniform(0.0, 1.0) < 0.5 )
+		self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
+
+		self.assertTrue( r._reaction_criterion([0, 1, 5], self.beads, [], self.rij, []) )
 
 	#---------------------------------------------------------------------------
 
-	# def test_check_for_reactions(self):
+	def test_reaction_criterion5(self):
 
-	# 	r = Reactions(*self.reaction_strings[0])
+		r = Reactions(*self.reaction_strings[4])
 
-	# 	r.check_for_reactions(self.beads, self.rij)
+		seed = r.seed
 
-	# 	self.assertTrue( r.end_simulation )
+		np.random.seed( seed )
+
+		self.assertFalse( r._reaction_criterion([0, 2], self.beads, [], self.rij, []) )
+
+		self.beads[2].translate([0.05, -0.05, 2.95])
+
+		self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
+
+		for i in range(300):
+
+			self.assertEqual( r._reaction_criterion([0, 2], self.beads, [], self.rij, []), np.random.uniform(0.0, 1.0) < 0.5 )
+
+	#---------------------------------------------------------------------------
+
+	def test_check_for_reactions(self):
+
+		r = Reactions(*self.reaction_strings[0])
+
+		r.check_for_reactions(self.beads, self.rij)
+
+		self.assertTrue( r.end_simulation )
 
 	#---------------------------------------------------------------------------
 
