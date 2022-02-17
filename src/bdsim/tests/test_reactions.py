@@ -20,7 +20,7 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, pointer, compute_pointer_pbc_matrix
+from pyBrown.bead import Bead, pointer, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix
 from pyBrown.reactions import Reactions
 
 #-------------------------------------------------------------------------------
@@ -581,6 +581,29 @@ class TestReactions(unittest.TestCase):
 		r.check_for_reactions(beads, rij)
 
 		self.assertTrue( r.end_simulation )
+
+	#---------------------------------------------------------------------------
+
+	def test_check_for_reactions6(self):
+
+		mobile_beads = [ Bead([0.0, 0.0, 160.0], 45.0, label = 'A'),
+				  		 Bead([0.0, 0.0, 100.0], 10.0, label = 'B'),
+				  		 Bead([0.0, -31.947, 77.631], 24.2, label = 'C'),
+				  		 Bead([0.0, -56.521, 60.423], 24.2, label = 'D'),
+				  		 Bead([0.0, 31.947, 77.631], 24.2, label = 'E'),
+				  		 Bead([0.0, 56.521, 60.423], 24.2, label = 'F') ]
+		
+		immobile_beads = [ Bead([0.0, 0.0, 0.0], 24.2, label = 'AG', mobile = False) ]
+
+		rij = compute_pointer_pbc_matrix(mobile_beads, 750.0)
+
+		rik = compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, 750.0)
+
+		r = Reactions('no_react', 'B+AG->?', 'dist B AG > 202.0', 'end_simulation')
+
+		r.check_for_reactions(mobile_beads, rij, immobile_beads = immobile_beads, pointers_mobile_immobile = rik)
+
+		self.assertFalse( r.end_simulation )
 
 #-------------------------------------------------------------------------------
 

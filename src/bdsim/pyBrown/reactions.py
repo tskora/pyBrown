@@ -347,11 +347,7 @@ class Reactions():
 
 					if pointer1 is not None and pointer2 is not None:
 
-						shift = pointer1
-
-						shift *= bead_j.a / np.linalg.norm(shift)
-
-						p_pointer = pointer2 - shift
+						p_pointer = pointer2 - pointer1 * bead_j.a / np.linalg.norm(pointer1)
 
 						p_dist = np.sqrt( p_pointer[0]*p_pointer[0] + p_pointer[1]*p_pointer[1] + p_pointer[2]*p_pointer[2] )
 
