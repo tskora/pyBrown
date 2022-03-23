@@ -717,7 +717,7 @@ class Box():
 
 	def _initialize_force(self):
 
-		self.Fex = np.array( self.inp["external_force"], dtype = np.float )
+		self.Fex = np.array( self.inp["external_force"] )
 		self.F = np.zeros( 3*len(self.mobile_beads) )
 		self.E = 0.0
 		self._handle_external_force_restricted_to_region()

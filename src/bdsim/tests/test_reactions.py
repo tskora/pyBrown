@@ -584,7 +584,7 @@ class TestReactions(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
-	def test_check_for_reactions6(self):
+	def test_check_for_reactions_igg(self):
 
 		mobile_beads = [ Bead([0.0, 0.0, 160.0], 45.0, label = 'A'),
 				  		 Bead([0.0, 0.0, 100.0], 10.0, label = 'B'),
@@ -604,6 +604,64 @@ class TestReactions(unittest.TestCase):
 		r.check_for_reactions(mobile_beads, rij, immobile_beads = immobile_beads, pointers_mobile_immobile = rik)
 
 		self.assertFalse( r.end_simulation )
+
+	#---------------------------------------------------------------------------
+
+	def test_check_for_reactions_igg2(self):
+
+		mobile_beads = [ Bead([0.0, 0.0, 160.0], 45.0, label = 'A'),
+				  		 Bead([0.0, 0.0, 100.0], 10.0, label = 'B'),
+				  		 Bead([0.0, -31.947, 77.631], 24.2, label = 'C'),
+				  		 Bead([0.0, -56.521, 60.423], 24.2, label = 'D'),
+				  		 Bead([0.0, 0.0, 75.0], 24.2, label = 'E'),
+				  		 Bead([0.0, 0.0, 49.0], 24.2, label = 'F') ]
+
+		immobile_beads = [ Bead([0.0, 0.0, 0.0], 24.2, label = 'AG', mobile = False) ]
+
+		rij = compute_pointer_pbc_matrix(mobile_beads, 750.0)
+
+		rik = compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, 750.0)
+
+		r = Reactions('react', 'E+F+AG->?', 'pole_dist E F AG < 25.2', 'end_simulation')
+
+		rbis = Reactions('react', 'F+AG->?', 'dist F AG < 49.4', 'end_simulation')
+
+		r.check_for_reactions(mobile_beads, rij, immobile_beads = immobile_beads, pointers_mobile_immobile = rik)
+
+		rbis.check_for_reactions(mobile_beads, rij, immobile_beads = immobile_beads, pointers_mobile_immobile = rik)
+
+		self.assertTrue( r.end_simulation )
+
+		self.assertTrue( rbis.end_simulation )
+
+	#---------------------------------------------------------------------------
+
+	def test_check_for_reactions_igg3(self):
+
+		mobile_beads = [ Bead([0.0, 0.0, 160.0], 45.0, label = 'A'),
+				  		 Bead([0.0, 0.0, 100.0], 10.0, label = 'B'),
+				  		 Bead([0.0, -31.947, 77.631], 24.2, label = 'C'),
+				  		 Bead([0.0, -56.521, 60.423], 24.2, label = 'D'),
+				  		 Bead([0.0, 75.0, 75.0], 24.2, label = 'E'),
+				  		 Bead([0.0, 0.0, 49.0], 24.2, label = 'F') ]
+
+		immobile_beads = [ Bead([0.0, 0.0, 0.0], 24.2, label = 'AG', mobile = False) ]
+
+		rij = compute_pointer_pbc_matrix(mobile_beads, 750.0)
+
+		rik = compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, 750.0)
+
+		r = Reactions('react', 'E+F+AG->?', 'pole_dist E F AG < 25.2', 'end_simulation')
+
+		rbis = Reactions('react', 'F+AG->?', 'dist F AG < 49.4', 'end_simulation')
+
+		r.check_for_reactions(mobile_beads, rij, immobile_beads = immobile_beads, pointers_mobile_immobile = rik)
+
+		rbis.check_for_reactions(mobile_beads, rij, immobile_beads = immobile_beads, pointers_mobile_immobile = rik)
+
+		self.assertFalse( r.end_simulation )
+
+		self.assertTrue( rbis.end_simulation )
 
 #-------------------------------------------------------------------------------
 
