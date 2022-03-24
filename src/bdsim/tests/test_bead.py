@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
+from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, pole_pointer_pbc, pole_distance_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
 from pyBrown.plane import Plane
 
 #-------------------------------------------------------------------------------
@@ -219,6 +219,8 @@ class TestBead(unittest.TestCase):
 
 		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
 
+	#---------------------------------------------------------------------------
+
 	def test_if_going_through_xz_plane_is_crossing(self):
 
 		b_start = Bead([0.0, 1.0, 0.0], 0.0)
@@ -233,6 +235,8 @@ class TestBead(unittest.TestCase):
 
 		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
 
+	#---------------------------------------------------------------------------
+
 	def test_if_going_through_yz_plane_is_crossing(self):
 
 		b_start = Bead([-1.0, 0.0, 0.0], 0.0)
@@ -246,6 +250,8 @@ class TestBead(unittest.TestCase):
 		plane = Plane(plane_point, normal)
 
 		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+
+	#---------------------------------------------------------------------------
 
 	def test_if_going_through_shifted_xy_plane_is_crossing(self):
 
@@ -416,6 +422,46 @@ class TestBead(unittest.TestCase):
 		self.assertAlmostEqual( distance_pbc(self.b0, Bead([0.0, 10.0, -10.0], 1.0), 5.0), 0.0, places = 7 )
 		self.assertAlmostEqual( distance_pbc(self.b0, Bead([0.0, -10.0, 10.0], 1.0), 5.0), 0.0, places = 7 )
 		self.assertAlmostEqual( distance_pbc(self.b0, Bead([0.0, -10.0, -10.0], 1.0), 5.0), 0.0, places = 7 )
+
+	#---------------------------------------------------------------------------
+
+	def test_pole_pointer(self):
+
+		beada = Bead([0.0, 0.0, 0.0], 1.0)
+
+		beadb = Bead([0.0, 0.0, 2.0], 1.0)
+
+		beadc = Bead([0.0, 0.0, 4.0], 1.0)
+
+		beadd = Bead([0.0, 2.0, 2.0], 1.0)
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0)), [ 0.0, 0.0, 1.0 ] )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0), 1.0 )
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0)), [ 0.0, 2.0, -1.0] )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0), np.sqrt(5) )
+
+	#---------------------------------------------------------------------------
+
+	def test_pole_pointer2(self):
+
+		beada = Bead([0.0, 0.0, 0.0], 0.5)
+
+		beadb = Bead([0.0, 0.0, 2.0], 1.5)
+
+		beadc = Bead([0.0, 0.0, 4.0], 0.75)
+
+		beadd = Bead([0.0, 2.0, 2.0], 1.0)
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0)), [ 0.0, 0.0, 0.5 ] )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0), 0.5 )
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0)), [ 0.0, 2.0, -1.5] )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0), np.sqrt(6.25) )
 
 	#---------------------------------------------------------------------------
 

@@ -132,7 +132,7 @@ def main(input_filename):
 
 				if restart:
 					if j != 0 and j % n_restart == 0:
-						write_to_restart_file(rst_filename, index, j, box, xyz_filename, [])
+						write_to_restart_file(rst_filename, index, j, box, xyz_filename, [], pathway_count)
 
 				if box.end_simulation:
 					pathway_count[box.which_reaction_happened] += 1

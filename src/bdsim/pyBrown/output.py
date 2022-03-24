@@ -69,7 +69,7 @@ def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads):
 
 #-------------------------------------------------------------------------------
 
-def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_output_filenames = []):
+def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_output_filenames = [], extra_data = None):
 
 	with open(restart_filename, 'wb', buffering = 0) as restart_file:
 		pickle.dump(index, restart_file)
@@ -78,6 +78,8 @@ def write_to_restart_file(restart_filename, index, j, box, xyz_filename, extra_o
 		pickle.dump(_file_length(xyz_filename), restart_file)
 		for extra_output_filename in extra_output_filenames:
 			pickle.dump(_file_length(extra_output_filename), restart_file)
+		if extra_data != None:
+			pickle.dump(extra_data, restart_file)
 
 	shutil.copy(restart_filename, restart_filename+"2")
 
