@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Running simulation &mdash; pyBrown 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bead" href="../modules/bead.html" />
+    <link rel="prev" title="Preparing input" href="preparing_input.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyBrown
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="preparing_input.html">Preparing input</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running simulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#brownian-stokesian-dynamics-using-bd-py">Brownian/Stokesian dynamics using <code class="docutils literal notranslate"><span class="pre">BD.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#restarting-simulation-using-bd-restart-py">Restarting simulation using <code class="docutils literal notranslate"><span class="pre">BD-restart.py</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-input-patch">Using input patch</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/bead.html">Bead</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/diffusion.html">Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/interactions.html">Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/reactions.html">Reactions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyBrown</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Running simulation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/getting_started/running_simulation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="running-simulation">
+<span id="id1"></span><h1>Running simulation<a class="headerlink" href="#running-simulation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brownian-stokesian-dynamics-using-bd-py">
+<h2>Brownian/Stokesian dynamics using <code class="docutils literal notranslate"><span class="pre">BD.py</span></code><a class="headerlink" href="#brownian-stokesian-dynamics-using-bd-py" title="Permalink to this headline">¶</a></h2>
+<p>To run the simulations defined in <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> on a bead system defined in <code class="docutils literal notranslate"><span class="pre">inp.str</span></code> (and addressed in  <code class="docutils literal notranslate"><span class="pre">inp.json</span></code>)</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD.py inp.json
+</pre></div>
+</div>
+</div>
+<div class="section" id="restarting-simulation-using-bd-restart-py">
+<h2>Restarting simulation using <code class="docutils literal notranslate"><span class="pre">BD-restart.py</span></code><a class="headerlink" href="#restarting-simulation-using-bd-restart-py" title="Permalink to this headline">¶</a></h2>
+<p>It is often the case that simulation is interrupted. <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> ensures that the hours or days of computing are not lost. With a frequency defined by user in <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> (keyword <code class="docutils literal notranslate"><span class="pre">&quot;rst_write_freq&quot;</span></code>) <code class="docutils literal notranslate"><span class="pre">BD.py</span></code> pickles its state to the file again defined by user in <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> (keyword <code class="docutils literal notranslate"><span class="pre">&quot;rst_Write_freq&quot;</span></code>). You can restart the simulation in a following way:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD-restart.py my_restart.rst
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are really unlucky, the simulation may be interrupted in the very moment of writing restart. To ensure that the whole simulation will not be damaged, extra copy is made everytime restart file is created. it has exactly the same filename apart of extra <code class="docutils literal notranslate"><span class="pre">2</span></code> character at the end. For instance, if restart file has a name <code class="docutils literal notranslate"><span class="pre">my_restart.rst</span></code>, backup restart file has a name <code class="docutils literal notranslate"><span class="pre">my_restart.rst2</span></code>. If your primary restart file does not work, try using the backup one.</p>
+</div>
+</div>
+<div class="section" id="using-input-patch">
+<h2>Using input patch<a class="headerlink" href="#using-input-patch" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes it is useful to change some values provided in initial <code class="docutils literal notranslate"><span class="pre">.json</span></code> when restarting the simulation. It is very common to do that with <code class="docutils literal notranslate"><span class="pre">&quot;number_of_steps&quot;</span></code> keyword. To do that, you can provide additional optional <code class="docutils literal notranslate"><span class="pre">.json</span></code> file to <code class="docutils literal notranslate"><span class="pre">BD-restart.py</span></code>.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD-restart.py my_restart.rst inp_patch.json
+</pre></div>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">inp_patch.json</span></code> provide only those <code class="docutils literal notranslate"><span class="pre">keyword:</span> <span class="pre">value</span></code> pairs which you want to change. The rest will stay as it was configured in initial <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> file.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In text above it is assumed that the <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> was properly installed. If not, you can still use it but always providing the path (absolute or relative) to the <code class="docutils literal notranslate"><span class="pre">BD.py</span></code> or <code class="docutils literal notranslate"><span class="pre">BD-restart.py</span></code> script, eg.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> /path/to/script/BD.py inp.json
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../modules/bead.html" class="btn btn-neutral float-right" title="Bead" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="preparing_input.html" class="btn btn-neutral float-left" title="Preparing input" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Tomasz Skóra.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

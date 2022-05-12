@@ -1,0 +1,466 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Preparing input &mdash; pyBrown 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Running simulation" href="running_simulation.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyBrown
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Preparing input</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#str-file"><code class="docutils literal notranslate"><span class="pre">.str</span></code> file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subunit">Subunit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bond">Bond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#angle">Angle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#json-file"><code class="docutils literal notranslate"><span class="pre">.json</span></code> file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#input-output">Input/Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulation-box">Simulation box</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#forces">Forces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#propagation">Propagation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hydrodynamic-interactions">Hydrodynamic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#physical-conditions">Physical conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keyword-blocks">Keyword blocks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="running_simulation.html">Running simulation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/bead.html">Bead</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/diffusion.html">Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/interactions.html">Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/reactions.html">Reactions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyBrown</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Preparing input</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/getting_started/preparing_input.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="preparing-input">
+<span id="id1"></span><h1>Preparing input<a class="headerlink" href="#preparing-input" title="Permalink to this headline">¶</a></h1>
+<p>Input for <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> consists of two text files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.str</span></code> – providing initial configuration of beads and their properties,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.json</span></code> – providing simulation parameters.</p></li>
+</ul>
+<p>Below we ellaborate on their structure and meaning.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Consult <a class="reference internal" href="../index.html#units"><span class="std std-ref">Units</span></a> used in <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> before writing <code class="docutils literal notranslate"><span class="pre">.str</span></code> and <code class="docutils literal notranslate"><span class="pre">.json</span></code> files.</p>
+</div>
+<div class="section" id="str-file">
+<h2><code class="docutils literal notranslate"><span class="pre">.str</span></code> file<a class="headerlink" href="#str-file" title="Permalink to this headline">¶</a></h2>
+<p>Structure (<code class="docutils literal notranslate"><span class="pre">.str</span></code>) file contains the information about the physical system under study. First and foremost, It introduces initial positions of beads and their sizes (both hydrodynamic and hard-core). Moreover, it contains information about masses qnd charges of beads. Last but not least, it encodes bonded and nonbonded interaction parameters.</p>
+<p>Structure file consists of bead-defining lines starting with <code class="docutils literal notranslate"><span class="pre">sub</span></code>, <code class="docutils literal notranslate"><span class="pre">bond</span></code> or <code class="docutils literal notranslate"><span class="pre">angle</span></code>. Their structure is discussed below.</p>
+<div class="section" id="subunit">
+<h3>Subunit<a class="headerlink" href="#subunit" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">sub</span> <span class="pre">label</span> <span class="pre">index</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">a</span> <span class="pre">q</span> <span class="pre">2r</span> <span class="pre">ε</span> <span class="pre">m</span></code></p>
+<p>Only the <code class="docutils literal notranslate"><span class="pre">sub</span></code> string has to be identical in every bead-defining line. All the other entries should be replaced with values specific to a given type of bead. Below their meanings are explained:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">label</span></code> – label (name) of the bead (<code class="docutils literal notranslate"><span class="pre">string</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">index</span></code> – an unique number assigned to the bead (<code class="docutils literal notranslate"><span class="pre">int</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code> – <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> cartesian coordinates of the bead center (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>Å</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">a</span></code> – the hydrodynamic radius of the bead (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>Å</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">q</span></code> – the electric charge of the bead (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>e</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2r</span></code> – double the hard-core (Lennard-Jones) radius (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>Å</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ε</span></code> – Lennard-Jones well depth (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>?</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">m</span></code> – the mass of the bead (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>?</em>)</p></li>
+</ul>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>Masses and charges are not yet consumed by <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> – change it.</p>
+</div>
+</div>
+<div class="section" id="bond">
+<h3>Bond<a class="headerlink" href="#bond" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">bond</span> <span class="pre">index1</span> <span class="pre">index2</span> <span class="pre">r0</span> <span class="pre">rmax</span> <span class="pre">k</span></code></p>
+<p>Only the <code class="docutils literal notranslate"><span class="pre">bond</span></code> string has to be identical in every bond-defining line. All the other entries should be replaced with values specific to a given pair of beads. Below their meanings are explained:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">index1</span> <span class="pre">index2</span></code> – indices of the beads connected with the bond (see above) (<code class="docutils literal notranslate"><span class="pre">int</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r0</span></code> – equilibrium distance between the beads (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>Å</em>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rmax</span></code> – maximal possible distance between the beads (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>Å</em>) <strong>NOT IMPLEMENTED YET, just write any number</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">k</span></code> – force constant of the bond (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>? Å</em><sup>-2</sup>)</p></li>
+</ul>
+<p>For each bonded pair the energy is incremented by a harmonic term:</p>
+<div class="math notranslate nohighlight">
+\[E = \frac{1}{2} k ( r - r_0 )^2 .\]</div>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>For now only harmonic bond works. In future implement more general bonded potential allowing for setting the max bond lengths.</p>
+</div>
+</div>
+<div class="section" id="angle">
+<h3>Angle<a class="headerlink" href="#angle" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">angle</span> <span class="pre">angle</span> <span class="pre">index1</span> <span class="pre">index2</span> <span class="pre">index3</span> <span class="pre">φ0</span> <span class="pre">k</span></code></p>
+<p>Only the <code class="docutils literal notranslate"><span class="pre">angle</span> <span class="pre">angle</span></code> string has to be identical in every angle-defining line. All the other entries should be replaced with values specific to a given triple of beads. Below their meanings are explained:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">index1</span> <span class="pre">index2</span> <span class="pre">index3</span></code> – indices of the beads defining the angle (see above) (<code class="docutils literal notranslate"><span class="pre">int</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">φ0</span></code> – equilibrium distance between the beads (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <span class="math notranslate nohighlight">\(^\circ\)</span>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">k</span></code> – force constant of the angle potential (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>? rad</em><sup>-2</sup>)</p></li>
+</ul>
+<p>For each angle the energy is incremented by a harmonic term:</p>
+<div class="math notranslate nohighlight">
+\[E = \frac{1}{2} k ( \phi - \phi_0 )^2 .\]</div>
+<div class="admonition-todo admonition" id="id4">
+<p class="admonition-title">Todo</p>
+<p>Implement cos angle potential <em>via</em> <code class="docutils literal notranslate"><span class="pre">angle</span> <span class="pre">cos</span></code> lines.</p>
+</div>
+<div class="admonition-todo admonition" id="id5">
+<p class="admonition-title">Todo</p>
+<p>Implement definition of dihedral potential <em>via</em> <code class="docutils literal notranslate"><span class="pre">dihe</span></code> lines.</p>
+</div>
+</div>
+</div>
+<div class="section" id="json-file">
+<h2><code class="docutils literal notranslate"><span class="pre">.json</span></code> file<a class="headerlink" href="#json-file" title="Permalink to this headline">¶</a></h2>
+<p>Simulation parameters are provided in a standard <a class="reference external" href="https://www.json.org/json-en.html">JSON</a> data format. It consists of multiple lines in a form of <code class="docutils literal notranslate"><span class="pre">keyword:</span> <span class="pre">value</span></code> pairs enclosed by a curly bracket. Some keywords are obligatory, but a majority is not – for them default values will be loaded, if needed. <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> will inform you if it does not recognize some keywords in input <code class="docutils literal notranslate"><span class="pre">.json</span></code> file.</p>
+<p>The complete list of keywords is provided below.</p>
+<div class="section" id="input-output">
+<h3>Input/Output<a class="headerlink" href="#input-output" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;input_str_filename&quot;:</span> <span class="pre">string</span></code> – the name of the input <code class="docutils literal notranslate"><span class="pre">.str</span></code> file (<em>see above</em>), <strong>required</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;output_xyz_filename&quot;:</span> <span class="pre">string</span></code> – the name of the output <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> file to which <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> writes the trajectory, <strong>required</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;output_enr_filename&quot;:</span> <span class="pre">string</span></code> – the name of the output <code class="docutils literal notranslate"><span class="pre">.enr</span></code> file to which <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> writes the energy</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;output_rst_filename&quot;:</span> <span class="pre">string</span></code> – the name of the binary <code class="docutils literal notranslate"><span class="pre">.rst</span></code> file from which``pyBrown`` can restart simulation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;filename_range&quot;:</span> <span class="pre">[int,</span> <span class="pre">int]</span></code> – provided that all your input and output files have names of a following form: <code class="docutils literal notranslate"><span class="pre">&quot;name_{}.str</span></code>, <code class="docutils literal notranslate"><span class="pre">name_{}.xyz</span></code> etc., <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> will iteratively substitute numbers from filename range instead of <code class="docutils literal notranslate"><span class="pre">{}</span></code>, resulting with sequence of runs for consecutive jobs,</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If for example input file looks in a following way:</p>
+<div class="highlight-JSON notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;input_str_filename&quot;</span><span class="p">:</span> <span class="s2">&quot;test_{}.str&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;output_xyz_filename&quot;</span><span class="p">:</span> <span class="s2">&quot;test_{}.xyz&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;output_rst_filename&quot;</span><span class="p">:</span> <span class="s2">&quot;test_{}.rst&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;filename_range&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="nt">&quot;some_other_keywords&quot;</span><span class="p">:</span> <span class="s2">&quot;some values&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>then <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> will load <code class="docutils literal notranslate"><span class="pre">test_1.str</span></code>, run the simulation writing restart to <code class="docutils literal notranslate"><span class="pre">test_1.rst</span></code> and trajectory to <code class="docutils literal notranslate"><span class="pre">test_1.xyz</span></code>. After completing, it will load <code class="docutils literal notranslate"><span class="pre">test_2.str</span></code> and write to <code class="docutils literal notranslate"><span class="pre">test_2.rst</span></code> and <code class="docutils literal notranslate"><span class="pre">test_2.xyz</span></code>. After completing the second job, <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> will end the run. If we swap “filename_range” value for <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">11]</span></code> 10 jobs will be ran consecutively.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you use <code class="docutils literal notranslate"><span class="pre">&quot;filename_range&quot;</span></code> keyword and manually set <code class="docutils literal notranslate"><span class="pre">&quot;seed&quot;</span></code> keyword, seed will be <strong>the same</strong> for all jobs.</p>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;xyz_write_freq&quot;:</span> <span class="pre">int</span></code> – the frequency of writing to the <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> file (every … timesteps), default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;enr_write_freq&quot;:</span> <span class="pre">int</span></code> – the frequency of writing to the <code class="docutils literal notranslate"><span class="pre">.enr</span></code> file (every … timesteps)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;rst_write_freq&quot;:</span> <span class="pre">int</span></code> – the frequency of writing to the <code class="docutils literal notranslate"><span class="pre">.rst</span></code> file (every … timesteps)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;debug&quot;:</span> <span class="pre">boolean</span></code> – switching on/off the debug printout, default: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;verbose&quot;:</span> <span class="pre">boolean</span></code> – switching on/off the verbose printout, default: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;progress_bar&quot;:</span> <span class="pre">boolean</span></code> – switching on/off the progress bar, default: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="simulation-box">
+<h3>Simulation box<a class="headerlink" href="#simulation-box" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;box_length&quot;:</span> <span class="pre">float</span></code> – length of the cubic simulation box (<em>Å</em>), <strong>required</strong></p></li>
+</ul>
+<div class="admonition-todo admonition" id="id6">
+<p class="admonition-title">Todo</p>
+<p>Turning on and off periodic boundary conditions would be nice.</p>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ewald_alpha&quot;:</span> <span class="pre">float</span></code> – parameter controling the convergence of Ewald summation, default: <code class="docutils literal notranslate"><span class="pre">np.sqrt(np.pi)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ewald_real&quot;:</span> <span class="pre">int</span></code> – the maximal magnitude of the real lattice vectors in Ewald summation of the diffusion tensor, default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;ewald_imag&quot;:</span> <span class="pre">int</span></code> – the maximal magnitude of the reciprocal lattice vectors in Ewald summation of the diffusion tensor, default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="forces">
+<h3>Forces<a class="headerlink" href="#forces" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;energy_unit&quot;:</span> <span class="pre">string</span></code> – units in which energy and force (in case of force it is that unit per angstrom) are provided in input files, options: <code class="docutils literal notranslate"><span class="pre">&quot;joule&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;kcal/mol&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;eV&quot;</span></code>, default: <code class="docutils literal notranslate"><span class="pre">&quot;joule&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;lennard_jones_6&quot;:</span> <span class="pre">bool</span></code> – switching on/off the Lennard-Jones <span class="math notranslate nohighlight">\(\propto r^{-6}\)</span> attraction between beads (multiplicative coefficients and Lennard-Jones radii of every bead are defined in <code class="docutils literal notranslate"><span class="pre">.str</span></code> input file, see <a class="reference internal" href="#preparing-input"><span class="std std-ref">Preparing input</span></a>), default: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;lennard_jones_12&quot;:</span> <span class="pre">bool</span></code> – switching on/off the Lennard-Jones <span class="math notranslate nohighlight">\(\propto r^{-12}\)</span> repulsion between beads (multiplicative coefficients and Lennard-Jones radii of every bead are defined in <code class="docutils literal notranslate"><span class="pre">.str</span></code> input file, see <a class="reference internal" href="#preparing-input"><span class="std std-ref">Preparing input</span></a>), default: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;lennard_jones_alpha&quot;:</span> <span class="pre">float</span></code> – Lennard-Jones interaction scaling, if set to <code class="docutils literal notranslate"><span class="pre">4.0</span></code>, <code class="docutils literal notranslate"><span class="pre">ε</span></code> parameter from <code class="docutils literal notranslate"><span class="pre">.str</span></code> is equal to depth of combined LJ6-LJ12 potencial, default: <code class="docutils literal notranslate"><span class="pre">4.0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;custom_interactions&quot;:</span> <span class="pre">bool</span></code> – switching on/off reading of energy and force from custom external file, default: <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;custom_interactions_filename&quot;:</span> <span class="pre">string</span></code> – the name of the input <code class="docutils literal notranslate"><span class="pre">.py</span></code> file from which custom expressions for energy and force are loaded</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;auxiliary_custom_interactions_keywords&quot;:</span> <span class="pre">{}</span></code> – extra parameters for the custom energy and force</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;external_force&quot;:</span> <span class="pre">[float,</span> <span class="pre">float,</span> <span class="pre">float]</span></code> – external force experienced universally by all beads, default: <code class="docutils literal notranslate"><span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0]</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="propagation">
+<h3>Propagation<a class="headerlink" href="#propagation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;dt&quot;:</span> <span class="pre">float</span></code> – the timestep (<em>ps</em>), <strong>required</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;number_of_steps&quot;:</span> <span class="pre">int</span></code> – the total number of simulation steps, <strong>required</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;propagation_scheme&quot;:</span> <span class="pre">option</span></code> – propagation algorithm for the trajectory generation, options: <code class="docutils literal notranslate"><span class="pre">&quot;ermak&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;midpoint&quot;</span></code>, default: <code class="docutils literal notranslate"><span class="pre">&quot;ermak&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;m_midpoint&quot;:</span> <span class="pre">int</span></code> – inverse of a fraction of the time step made in a prediction part of midpoint algorithm (setting to <code class="docutils literal notranslate"><span class="pre">2</span></code> means that half of a time step will be made in a prediction part), default: <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;check_overlaps&quot;:</span> <span class="pre">boolean</span></code> – whether to check overlaps in every simulation step, default: <code class="docutils literal notranslate"><span class="pre">true</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;overlap_treshold&quot;:</span> <span class="pre">float</span></code> – how small distance is treated as overlap, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you turn on lubrication interactions, <code class="docutils literal notranslate"><span class="pre">&quot;overlap_treshold&quot;</span></code> should be slightly larger than <code class="docutils literal notranslate"><span class="pre">0.0</span></code> because small separations will lead to very small eigenvalues of diffusion matrix, and consequently to breakdown of the Choleski decomposition.</p>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;max_move_attempts&quot;:</span> <span class="pre">int</span></code> – maximal number of move attempts, if exceeded <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> will stop, default: <code class="docutils literal notranslate"><span class="pre">1000000</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;immobile_labels&quot;:</span> <span class="pre">[string,</span> <span class="pre">...,</span> <span class="pre">string]</span></code> – label of beads which are to be immobile in simulation, default: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;seed&quot;:</span> <span class="pre">int</span></code> – seed for pseudorandom number generation algorithm, default <code class="docutils literal notranslate"><span class="pre">np.random.randint(2**32</span> <span class="pre">-</span> <span class="pre">1)</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="hydrodynamic-interactions">
+<h3>Hydrodynamic interactions<a class="headerlink" href="#hydrodynamic-interactions" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;hydrodynamics&quot;:</span> <span class="pre">option</span></code> – the method used to compute diffusion tensor, options: <code class="docutils literal notranslate"><span class="pre">&quot;nohi&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;rpy&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;rpy_smith&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;rpy_lub&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">rpy_smith_lub</span></code>, default: <code class="docutils literal notranslate"><span class="pre">&quot;nohi&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;m_midpoint&quot;:</span> <span class="pre">int</span></code> – the inverse of the timestep fraction made in the first stage of the midpoint propagation scheme</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;diff_freq&quot;:</span> <span class="pre">int</span></code> – the frequency of computing far field diffusion tensor (every … timesteps), default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;lub_freq&quot;:</span> <span class="pre">int</span></code> – the frequency of computing near field resistance tensor and total diffusion matrix (every … timesteps), default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;chol_freq&quot;:</span> <span class="pre">int</span></code> – the frequency of performing Cholesky decomposition of diffusion tensor (every … timesteps), default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;lubrication_cutoff&quot;:</span> <span class="pre">float</span></code> – cutoff for lubrication interactions expressed as a ratio of distance between bead surfaces and a sum of their hydrodynamic radii (<span class="math notranslate nohighlight">\(s_\mathrm{cutoff} = \frac{r_{ij} - a_i - a_j}{a_i + a_j}\)</span>), default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">&quot;lubrication_cutoff&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">2</span></code> means that lubrication correction won’t be calculated for beads with surfaces separated by a distance equal to double of the sum of their hydrodynamic radii.</p>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cichocki_correction&quot;:</span> <span class="pre">bool</span></code> – switching on/off the operation of removing collective movements of bead pairs from the lubrication correction, default: ‘’true’’</p></li>
+</ul>
+</div>
+<div class="section" id="physical-conditions">
+<h3>Physical conditions<a class="headerlink" href="#physical-conditions" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;T&quot;:</span> <span class="pre">float</span></code> – temperature (<em>K</em>), <strong>required</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;viscosity&quot;:</span> <span class="pre">float</span></code> – viscosity (<em>P</em>), <strong>required</strong></p></li>
+</ul>
+</div>
+<div class="section" id="keyword-blocks">
+<h3>Keyword blocks<a class="headerlink" href="#keyword-blocks" title="Permalink to this headline">¶</a></h3>
+<p>Some more specific options are activated by keywords which are of <code class="docutils literal notranslate"><span class="pre">JSON</span></code> structure themselves. Such a keyword simultaneously turns on some functionality and specifies all the additional parameters regarding that functionality.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;external_force_region&quot;:</span> <span class="pre">{...}</span></code> – restrict external force to the selected region of the box</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;x&quot;:</span> <span class="pre">[float,</span> <span class="pre">float]</span></code> – <code class="docutils literal notranslate"><span class="pre">x</span></code> range defining the region</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;y&quot;:</span> <span class="pre">[float,</span> <span class="pre">float]</span></code> – <code class="docutils literal notranslate"><span class="pre">y</span></code> range defining the region</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;z&quot;:</span> <span class="pre">[float,</span> <span class="pre">float]</span></code> – <code class="docutils literal notranslate"><span class="pre">z</span></code> range defining the region</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;measure_flux&quot;:</span> <span class="pre">{...}</span></code> – measure the flux through a defined plane</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;flux_normal&quot;:</span> <span class="pre">[float,</span> <span class="pre">float,</span> <span class="pre">float]</span></code> – normal to the plane (defines the direction of positive flux)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;flux_plane_point&quot;:</span> <span class="pre">[float,</span> <span class="pre">float,</span> <span class="pre">float]</span></code> – any point on the plane,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;output_flux_filename&quot;:</span> <span class="pre">string</span></code> – the name of the output <code class="docutils literal notranslate"><span class="pre">.flx</span></code> file to which <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> writes the net flux</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">&quot;measure_concentration&quot;:</span> <span class="pre">{...}</span></code> – measure the concentration in a selected region</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;x&quot;:</span> <span class="pre">[float,</span> <span class="pre">float]</span></code> – <code class="docutils literal notranslate"><span class="pre">x</span></code> range defining the region</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;y&quot;:</span> <span class="pre">[float,</span> <span class="pre">float]</span></code> – <code class="docutils literal notranslate"><span class="pre">y</span></code> range defining the region</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;z&quot;:</span> <span class="pre">[float,</span> <span class="pre">float]</span></code> – <code class="docutils literal notranslate"><span class="pre">z</span></code> range defining the region</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;output_concentration_filename&quot;</span></code> – the name of the output <code class="docutils literal notranslate"><span class="pre">.con</span></code> file to which <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> writes the concentration in selected region</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="running_simulation.html" class="btn btn-neutral float-right" title="Running simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Tomasz Skóra.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

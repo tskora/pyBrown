@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Bead &mdash; pyBrown 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Box" href="box.html" />
+    <link rel="prev" title="Running simulation" href="../getting_started/running_simulation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyBrown
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/preparing_input.html">Preparing input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/running_simulation.html">Running simulation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Bead</a></li>
+<li class="toctree-l1"><a class="reference internal" href="box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diffusion.html">Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactions.html">Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reactions.html">Reactions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyBrown</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Bead</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/modules/bead.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pyBrown.bead">
+<span id="bead"></span><h1>Bead<a class="headerlink" href="#module-pyBrown.bead" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pyBrown.bead.Bead">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">Bead</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hydrodynamic_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XXX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_core_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon_LJ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mobile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is a class representing spherical beads used in Brownian and Stokesian
+dynamics simulations. First and foremost, it contains geometric parameters of the
+bead – the position of its center and its hydrodynamic radius. Apart from that,
+bead’s label (name) is present there as well. Finally, bead parametrization with
+respect to Lennard-Jones interaction potential is contained – Lennard-Jones energy
+and radius. Energy units are declared independently in input <code class="docutils literal notranslate"><span class="pre">.json</span></code> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (class: <cite>numpy.ndarray(3)</cite>) – cartesian coordinates of the bead center</p></li>
+<li><p><strong>a</strong> (<cite>float</cite>) – hydrodynamic radius</p></li>
+<li><p><strong>label</strong> (<cite>string</cite>) – bead label</p></li>
+<li><p><strong>mobile</strong> (<cite>bool</cite>) – switching on/off mobility of the bead</p></li>
+<li><p><strong>hard_core_radius</strong> (<cite>float</cite>) – Lennard-Jones radius: for two interacting particles
+the potential crosses <span class="math notranslate nohighlight">\(0\)</span> for separation equal to
+sum of their Lennard-Jones (hard core) radii.</p></li>
+<li><p><strong>epsilon_LJ</strong> (<cite>float</cite>) – Lennard-Jones energy: for two interacting particles the
+depth of the potential (in case of using both LJ6 and LJ12 terms)
+is equal to geometric mean of their Lennard-Jones energies.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<cite>[float, float, float]</cite>) – cartesian coordinates of the bead center</p></li>
+<li><p><strong>hydrodynamic_radius</strong> (<cite>float</cite>) – hydrodynamic radius</p></li>
+<li><p><strong>label</strong> (<cite>string</cite>) – bead label, defaults to <cite>“XXX”</cite></p></li>
+<li><p><strong>hard_core_radius</strong> (<cite>float</cite>) – radius used in computing Lennard-Jones
+potential, defaults to <cite>hydrodynamic_radius</cite></p></li>
+<li><p><strong>epsilon_LJ</strong> (<cite>float</cite>) – energy of Lennard-Jones interaction (for two beads
+interaction energy is a geometric mean of their Lennard-Jones
+energies), defaults to <cite>0.0</cite></p></li>
+<li><p><strong>mobile</strong> (<cite>bool</cite>) – switching on/off mobility of the bead, defaults to <cite>True</cite></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pyBrown.bead.Bead.is_there_bond_between">
+<code class="sig-name descname"><span class="pre">is_there_bond_between</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.is_there_bond_between" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pyBrown.bead.Bead.keep_in_box">
+<code class="sig-name descname"><span class="pre">keep_in_box</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.keep_in_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the bead into the box if it is outside of it by using a combination of
+translations parallel to the box sides and with length of a box length. Box’s interior
+lies between <cite>-box_length/2</cite> and <cite>box_length/2</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>box_length</strong> (<cite>float</cite>) – simulation box length</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyBrown.bead.Bead.translate">
+<code class="sig-name descname"><span class="pre">translate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves a bead by the provided vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vector</strong> (class: <cite>numpy.ndarray(3)</cite>) – translation vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pyBrown.bead.Bead.translate_and_return_flux">
+<code class="sig-name descname"><span class="pre">translate_and_return_flux</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.translate_and_return_flux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves a bead by the provided vector and returns flux through the provided plane.
+Plane is defined by its normal vector and any point lying on the plane. <cite>1</cite> is returned
+if particle goes through the plana in the direction of the normal vector, <cite>-1</cite> if in the
+opposite direction and <cite>0</cite> if the particle does not go through the plane whatsoever.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (class: <cite>numpy.ndarray(3)</cite>) – translation vector</p></li>
+<li><p><strong>normal</strong> – plane normal vector</p></li>
+<li><p><strong>plane_point</strong> (class: <cite>numpy.ndarray(3)</cite>) – any point in the plane</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>flux through the provided plane</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.angle_pbc">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">angle_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r23</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.angle_pbc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.build_connection_matrix">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">build_connection_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.build_connection_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.check_overlaps">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">check_overlaps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_treshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.check_overlaps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.compute_pointer_pbc_matrix">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">compute_pointer_pbc_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.compute_pointer_pbc_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.distance">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">distance</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.distance_pbc">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">distance_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.distance_pbc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the distance between <cite>bead1</cite> and <cite>bead2</cite> (its closest translational replica)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bead1</strong> (class: <cite>bead.Bead</cite>) – bead</p></li>
+<li><p><strong>bead2</strong> (class: <cite>bead.Bead</cite>) – bead</p></li>
+<li><p><strong>box_size</strong> (<cite>float</cite>) – simulation box length</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>distance</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.get_bead_with_id">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">get_bead_with_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.get_bead_with_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.overlap">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">overlap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.overlap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.overlap_pbc">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">overlap_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.overlap_pbc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if there is an overlap between <cite>bead1</cite> and <cite>bead2</cite> (its closest translational replica)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bead1</strong> (class: <cite>bead.Bead</cite>) – bead</p></li>
+<li><p><strong>bead2</strong> (class: <cite>bead.Bead</cite>) – bead</p></li>
+<li><p><strong>box_size</strong> (<cite>float</cite>) – simulation box length</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>do beads overlap?</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>bool</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.pointer">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">pointer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pointer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pyBrown.bead.pointer_pbc">
+<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">pointer_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pointer_pbc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the voctor pointing from <cite>bead1</cite> to <cite>bead2</cite> (its closest translational replica)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bead1</strong> (class: <cite>bead.Bead</cite>) – bead from which the vector points</p></li>
+<li><p><strong>bead2</strong> (class: <cite>bead.Bead</cite>) – bead to which the vector points</p></li>
+<li><p><strong>box_size</strong> (<cite>float</cite>) – simulation box length</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pointing vector</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>class: <cite>numpy.ndarray(3)</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="box.html" class="btn btn-neutral float-right" title="Box" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../getting_started/running_simulation.html" class="btn btn-neutral float-left" title="Running simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Tomasz Skóra.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

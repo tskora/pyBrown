@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pyBrown &mdash; pyBrown 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="getting_started/installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> pyBrown
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/preparing_input.html">Preparing input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/running_simulation.html">Running simulation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/bead.html">Bead</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/diffusion.html">Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/interactions.html">Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/reactions.html">Reactions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reference/authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">pyBrown</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>pyBrown</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pybrown">
+<h1>pyBrown<a class="headerlink" href="#pybrown" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p><em>These motions were such as to satisfy me … that they arose neither from currents in the fluid, nor from its gradual evaporation, but belonged to the particle itself</em>
+- <a class="reference external" href="https://en.wikipedia.org/wiki/Robert_Brown_(botanist,_born_1773)">Robert Brown</a></p>
+</div></blockquote>
+<p class="rubric">Overview</p>
+<p><code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> is a Brownian and Stokesian dynamics package and simulation tool. It is written mainly in <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">3</span></code>, with the most computationally demanding functions written in <code class="docutils literal notranslate"><span class="pre">C</span></code>. Brownian and Stokesian dynamics are computational methods to simulate systems driven by thermal fluctuations. Hydrodynamic interactions are taken into account using far-field <em>Rotne-Prager-Yamakawa</em> approximation but correcting for near-field <em>lubrication</em> effects is available as well.</p>
+<p class="rubric">Quickstart</p>
+<p>To configure, type the following command in the command line:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure --prefix<span class="o">=</span>DIR --with-lapack<span class="o">=</span>LAPACK_LIBS
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">DIR</span></code> is the installation directory (<code class="docutils literal notranslate"><span class="pre">/usr/local/</span></code> by default) and <code class="docutils literal notranslate"><span class="pre">LAPACK_LIBS</span></code> is lapack libraries to use (e.g. <code class="docutils literal notranslate"><span class="pre">--with-lapack=&quot;-llapack&quot;</span></code>).</p>
+<p>Then to compile and install proceed with:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> make
+<span class="gp">$</span> make install
+</pre></div>
+</div>
+<p>You can check <a class="reference internal" href="getting_started/installation.html#installation"><span class="std std-ref">Installation</span></a> for more details.</p>
+<p>To ensure that all <code class="docutils literal notranslate"><span class="pre">python</span></code> packages needed by <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> are present on your computer you can run</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip3 install -r requirements.txt
+</pre></div>
+</div>
+<p>If you want to run unit tests, go to a project directory <code class="docutils literal notranslate"><span class="pre">src/bdsim/tests/</span></code> and type:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> make <span class="nb">test</span>
+</pre></div>
+</div>
+<p>To run simulation, prepare <code class="docutils literal notranslate"><span class="pre">.str</span></code> and <code class="docutils literal notranslate"><span class="pre">.json</span></code> input files (see <a class="reference internal" href="getting_started/preparing_input.html#preparing-input"><span class="std std-ref">Preparing input</span></a>) and type:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD.py INPUT_JSON_FILENAME
+</pre></div>
+</div>
+<p>where instead of <code class="docutils literal notranslate"><span class="pre">INPUT_JSON_FILENAME</span></code> substitute the name of your input <code class="docutils literal notranslate"><span class="pre">.json</span></code> file.</p>
+<p>Provided that you have the restart <code class="docutils literal notranslate"><span class="pre">.rst</span></code> file and the trajectory <code class="docutils literal notranslate"><span class="pre">.xyz</span></code>, you can restart the simulation from the last save typing:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD-restart.py RESTART_FILENAME
+</pre></div>
+</div>
+<p>where instead of <code class="docutils literal notranslate"><span class="pre">RESTART_FILENAME</span></code> substitute the name of your restart file. For more details regarding running simulations check <a class="reference internal" href="getting_started/running_simulation.html#running-simulation"><span class="std std-ref">Running simulation</span></a>.</p>
+<p class="rubric" id="units">Units</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Physical property</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Temperature</p></td>
+<td><p>kelvin (<em>K</em>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Viscosity</p></td>
+<td><p>poise (<em>P</em>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Time</p></td>
+<td><p>picosecond (<em>ps</em>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Distance</p></td>
+<td><p>angstrom (<em>Å</em>)</p></td>
+</tr>
+</tbody>
+</table>
+<p>You can choose the energy units by <code class="docutils literal notranslate"><span class="pre">&quot;energy_unit&quot;</span></code> keyword in input <code class="docutils literal notranslate"><span class="pre">.json</span></code> file. Default is “joule” (<em>J</em>), other options are “kcal/mol” (kilocalorie per mol, <em>kcal/mol</em>) and “eV” (electronvolt, <em>eV</em>). Force unit is then energy unit per angstrom.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The work on <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> is still in progress. Some functionalities may be temporally unavailable.</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/preparing_input.html">Preparing input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/running_simulation.html">Running simulation</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/bead.html">Bead</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/diffusion.html">Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/interactions.html">Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/reactions.html">Reactions</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reference/authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/license.html">License</a></li>
+</ul>
+</div>
+<p class="rubric">Indices and tables</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="getting_started/installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Tomasz Skóra.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

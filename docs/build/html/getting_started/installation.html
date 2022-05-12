@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Installation &mdash; pyBrown 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Preparing input" href="preparing_input.html" />
+    <link rel="prev" title="pyBrown" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pyBrown
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-installation">Basic Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compilers-and-options">Compilers and Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compiling-for-multiple-architectures">Compiling For Multiple Architectures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-names">Installation Names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optional-features">Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#particular-systems">Particular systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#specifying-the-system-type">Specifying the System Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sharing-defaults">Sharing Defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defining-variables">Defining Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-invocation"><code class="docutils literal notranslate"><span class="pre">configure</span></code> Invocation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="preparing_input.html">Preparing input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_simulation.html">Running simulation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/bead.html">Bead</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/box.html">Box</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/diffusion.html">Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/interactions.html">Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/reactions.html">Reactions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyBrown</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/getting_started/installation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This text is copy-pasted from the standard GNU INSTALL file.</p>
+</div>
+<p>Copyright © 1994-1996, 1999-2002, 2004-2016 Free Software Foundation, Inc.</p>
+<p>Copying and distribution of this file, with or without modification, are permitted in any medium without royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without warranty of any kind.</p>
+<div class="section" id="basic-installation">
+<h2>Basic Installation<a class="headerlink" href="#basic-installation" title="Permalink to this headline">¶</a></h2>
+<p>Briefly, the shell command</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make install
+</pre></div>
+</div>
+<p>should configure, build, and install this package. The following more-detailed instructions are generic; see the <code class="docutils literal notranslate"><span class="pre">README</span></code> file for instructions specific to this package. Some packages provide this <code class="docutils literal notranslate"><span class="pre">INSTALL</span></code> file but do not implement all of the features documented below. The lack of an optional feature in a given package is not necessarily a bug. More recommendations for GNU packages can be found in note Makefile Conventions: (standards) Makefile Conventions.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">configure</span></code> shell script attempts to guess correct values for various system-dependent variables used during compilation. It uses those values to create a <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> in each directory of the package. It may also create one or more <code class="docutils literal notranslate"><span class="pre">.h</span></code> files containing system-dependent definitions. Finally, it creates a shell script <code class="docutils literal notranslate"><span class="pre">config.status</span></code> that you can run in the future to recreate the current configuration, and a file <code class="docutils literal notranslate"><span class="pre">config.log</span></code> containing compiler output (useful mainly for debugging <code class="docutils literal notranslate"><span class="pre">configure</span></code>).</p>
+<p>It can also use an optional file (typically called <code class="docutils literal notranslate"><span class="pre">config.cache</span></code> and enabled with <code class="docutils literal notranslate"><span class="pre">--cache-file=config.cache</span></code> or simply <code class="docutils literal notranslate"><span class="pre">-C</span></code>) that saves the results of its tests to speed up reconfiguring. Caching is disabled by default to prevent problems with accidental use of stale cache files.</p>
+<p>If you need to do unusual things to compile the package, please try to figure out how <code class="docutils literal notranslate"><span class="pre">onfigure</span></code> could check whether to do them, and mail diffs or instructions to the address given in the <code class="docutils literal notranslate"><span class="pre">README</span></code> so they can be considered for the next release. If you are using the cache, and at some point <code class="docutils literal notranslate"><span class="pre">config.cache</span></code>  contains results you don’t want to keep, you may remove or edit it.</p>
+<p>The file <code class="docutils literal notranslate"><span class="pre">configure.ac</span></code> (or <code class="docutils literal notranslate"><span class="pre">configure.in</span></code>) is used to create <code class="docutils literal notranslate"><span class="pre">configure</span></code> by a program called <code class="docutils literal notranslate"><span class="pre">autoconf</span></code>.  You need <code class="docutils literal notranslate"><span class="pre">configure.ac</span></code> if you want to change it or regenerate <code class="docutils literal notranslate"><span class="pre">configure</span></code> using a newer version of <code class="docutils literal notranslate"><span class="pre">autoconf</span></code>.</p>
+<p>The simplest way to compile this package is:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span></code> to the directory containing the package’s source code and type <code class="docutils literal notranslate"><span class="pre">./configure</span></code> to configure the package for your system. Running <code class="docutils literal notranslate"><span class="pre">configure</span></code> might take a while. While running, it prints some messages telling which features it is checking for.</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">make</span></code> to compile the package.</p></li>
+<li><p>Optionally, type <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check</span></code> to run any self-tests that come with the package, generally using the just-built uninstalled binaries.</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code> to install the programs and any data files and documentation. When installing into a prefix owned by root, it is recommended that the package be configured and built as a regular user, and only the <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code> phase executed with root privileges.</p></li>
+<li><p>Optionally, type <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">installcheck</span></code> to repeat any self-tests, but this time using the binaries in their final installed location. This target does not install anything. Running this target as a regular user, particularly if the prior <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code> required root privileges, verifies that the installation completed correctly.</p></li>
+<li><p>You can remove the program binaries and object files from the source code directory by typing <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code>. To also remove the files that <code class="docutils literal notranslate"><span class="pre">configure</span></code> created (so you can compile the package for a different kind of computer), type <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">distclean</span></code>. There is also a <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">maintainer-clean</span></code> target, but that is intended mainly for the package’s developers. If you use it, you may have to get all sorts of other programs in order to regenerate files that came with the distribution.</p></li>
+<li><p>Often, you can also type <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">uninstall</span></code> to remove the installed files again. In practice, not all packages have tested that uninstallation works correctly, even though it is required by the GNU Coding Standards.</p></li>
+<li><p>Some packages, particularly those that use Automake, provide <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">distcheck</span></code>, which can by used by developers to test that all other targets like <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">uninstall</span></code> work correctly. This target is generally not run by end users.</p></li>
+</ol>
+</div>
+<div class="section" id="compilers-and-options">
+<h2>Compilers and Options<a class="headerlink" href="#compilers-and-options" title="Permalink to this headline">¶</a></h2>
+<p>Some systems require unusual options for compilation or linking that the <code class="docutils literal notranslate"><span class="pre">configure</span></code> script does not know about. Run <code class="docutils literal notranslate"><span class="pre">./configure</span> <span class="pre">--help</span></code> for details on some of the pertinent environment variables.</p>
+<p>You can give <code class="docutils literal notranslate"><span class="pre">configure</span></code> initial values for configuration parameters by setting variables in the command line or in the environment. Here is an example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure <span class="nv">CC</span><span class="o">=</span>c99 <span class="nv">CFLAGS</span><span class="o">=</span>-g <span class="nv">LIBS</span><span class="o">=</span>-lposix
+</pre></div>
+</div>
+<p>Note Defining Variables, for more details.</p>
+</div>
+<div class="section" id="compiling-for-multiple-architectures">
+<h2>Compiling For Multiple Architectures<a class="headerlink" href="#compiling-for-multiple-architectures" title="Permalink to this headline">¶</a></h2>
+<p>You can compile the package for more than one kind of computer at the same time, by placing the object files for each architecture in their own directory. To do this, you can use GNU <code class="docutils literal notranslate"><span class="pre">make</span></code>. <code class="docutils literal notranslate"><span class="pre">cd</span></code> to the directory where you want the object files and executables to go and run the <code class="docutils literal notranslate"><span class="pre">configure</span></code> script.  <code class="docutils literal notranslate"><span class="pre">configure</span></code> automatically checks for the source code in the directory that <code class="docutils literal notranslate"><span class="pre">configure</span></code> is in and in <code class="docutils literal notranslate"><span class="pre">..</span></code>.  This is known as a <code class="docutils literal notranslate"><span class="pre">VPATH</span></code> build.</p>
+<p>With a non-GNU <code class="docutils literal notranslate"><span class="pre">make</span></code>, it is safer to compile the package for one architecture at a time in the source code directory. After you have installed the package for one architecture, use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">distclean</span></code> before reconfiguring for another architecture.</p>
+<p>On MacOS X 10.5 and later systems, you can create libraries and executables that work on multiple system types–known as “fat” or “universal” binaries–by specifying multiple <code class="docutils literal notranslate"><span class="pre">-arch</span></code> options to the compiler but only a single <code class="docutils literal notranslate"><span class="pre">-arch</span></code> option to the preprocessor. Like this:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;gcc -arch i386 -arch x86_64 -arch ppc -arch ppc64&quot;</span> <span class="se">\</span>
+<span class="nv">CXX</span><span class="o">=</span><span class="s2">&quot;g++ -arch i386 -arch x86_64 -arch ppc -arch ppc64&quot;</span> <span class="se">\</span>
+<span class="nv">CPP</span><span class="o">=</span><span class="s2">&quot;gcc -E&quot;</span> <span class="nv">CXXCPP</span><span class="o">=</span><span class="s2">&quot;g++ -E&quot;</span>
+</pre></div>
+</div>
+<p>This is not guaranteed to produce working output in all cases, you may have to build one architecture at a time and combine the results using the <code class="docutils literal notranslate"><span class="pre">lipo</span></code> tool if you have problems.</p>
+</div>
+<div class="section" id="installation-names">
+<h2>Installation Names<a class="headerlink" href="#installation-names" title="Permalink to this headline">¶</a></h2>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code> installs the package’s commands under <code class="docutils literal notranslate"><span class="pre">/usr/local/bin</span></code>, include files under <code class="docutils literal notranslate"><span class="pre">/usr/local/include</span></code>, etc. You can specify an installation prefix other than <code class="docutils literal notranslate"><span class="pre">/usr/local</span></code> by giving <code class="docutils literal notranslate"><span class="pre">configure</span></code> the option <code class="docutils literal notranslate"><span class="pre">--prefix=PREFIX</span></code>, where <code class="docutils literal notranslate"><span class="pre">PREFIX</span></code> must be an absolute file name.</p>
+<p>You can specify separate installation prefixes for architecture-specific files and architecture-independent files. If you pass the option <code class="docutils literal notranslate"><span class="pre">--exec-prefix=PREFIX</span></code> to <code class="docutils literal notranslate"><span class="pre">configure</span></code>, the package uses <code class="docutils literal notranslate"><span class="pre">PREFIX</span></code> as the prefix for installing programs and libraries. Documentation and other data files still use the regular prefix.</p>
+<p>In addition, if you use an unusual directory layout you can give options like <code class="docutils literal notranslate"><span class="pre">--bindir=DIR</span></code> to specify different values for particular kinds of files.  Run <code class="docutils literal notranslate"><span class="pre">configure</span> <span class="pre">--help</span></code> for a list of the directories you can set and what kinds of files go in them. In general, the default for these options is expressed in terms of <code class="docutils literal notranslate"><span class="pre">${prefix}</span></code>, so that specifying just <code class="docutils literal notranslate"><span class="pre">--prefix</span></code> will affect all of the other directory specifications that were not explicitly provided.</p>
+<p>The most portable way to affect installation locations is to pass the correct locations to <code class="docutils literal notranslate"><span class="pre">configure</span></code>; however, many packages provide one or both of the following shortcuts of passing variable assignments to the <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code> command line to change installation locations without having to reconfigure or recompile.</p>
+<p>The first method involves providing an override variable for each affected directory. For example,</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> make install <span class="nv">prefix</span><span class="o">=</span>/alternate/directory
+</pre></div>
+</div>
+<p>will choose an alternate location for all directory configuration variables that were expressed in terms of <code class="docutils literal notranslate"><span class="pre">${prefix}</span></code>. Any directories that were specified during <code class="docutils literal notranslate"><span class="pre">configure</span></code>, but not in terms of <code class="docutils literal notranslate"><span class="pre">${prefix}</span></code>, must each be overridden at install time for the entire installation to be relocated. The approach of makefile variable overrides for each directory variable is required by the GNU Coding Standards, and ideally causes no recompilation. However, some platforms have known limitations with the semantics of shared libraries that end up requiring recompilation when using this method, particularly noticeable in packages that use GNU Libtool.</p>
+<p>The second method involves providing the <code class="docutils literal notranslate"><span class="pre">DESTDIR</span></code> variable. For example,</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> make install <span class="nv">DESTDIR</span><span class="o">=</span>/alternate/directory
+</pre></div>
+</div>
+<p>will prepend <code class="docutils literal notranslate"><span class="pre">/alternate/directory</span></code> before all installation names. The approach of <code class="docutils literal notranslate"><span class="pre">DESTDIR</span></code> overrides is not required by the GNU Coding Standards, and does not work on platforms that have drive letters. On the other hand, it does better at avoiding recompilation issues, and works well even when some directory options were not specified in terms of <code class="docutils literal notranslate"><span class="pre">${prefix}</span></code> at <code class="docutils literal notranslate"><span class="pre">configure</span></code> time.</p>
+</div>
+<div class="section" id="optional-features">
+<h2>Optional Features<a class="headerlink" href="#optional-features" title="Permalink to this headline">¶</a></h2>
+<p>If the package supports it, you can cause programs to be installed with an extra prefix or suffix on their names by giving <code class="docutils literal notranslate"><span class="pre">configure</span></code> the option <code class="docutils literal notranslate"><span class="pre">--program-prefix=PREFIX</span></code> or <code class="docutils literal notranslate"><span class="pre">--program-suffix=SUFFIX</span></code>.</p>
+<p>Some packages pay attention to <code class="docutils literal notranslate"><span class="pre">--enable-FEATURE</span></code> options to <code class="docutils literal notranslate"><span class="pre">configure</span></code>, where <code class="docutils literal notranslate"><span class="pre">FEATURE</span></code> indicates an optional part of the package. They may also pay attention to <code class="docutils literal notranslate"><span class="pre">--with-PACKAGE</span></code> options, where <code class="docutils literal notranslate"><span class="pre">PACKAGE</span></code> is something like ‘gnu-as’ or ‘x’ (for the X Window System).  The <code class="docutils literal notranslate"><span class="pre">README</span></code> should mention any <code class="docutils literal notranslate"><span class="pre">--enable-</span></code> and <code class="docutils literal notranslate"><span class="pre">--with-</span></code> options that the package recognizes.</p>
+<p>For packages that use the X Window System, <code class="docutils literal notranslate"><span class="pre">configure</span></code> can usually find the X include and library files automatically, but if it doesn’t, you can use the <code class="docutils literal notranslate"><span class="pre">configure</span></code> options <code class="docutils literal notranslate"><span class="pre">--x-includes=DIR</span></code> and <code class="docutils literal notranslate"><span class="pre">--x-libraries=DIR</span></code> to specify their locations.</p>
+<p>Some packages offer the ability to configure how verbose the execution of <code class="docutils literal notranslate"><span class="pre">make</span></code> will be. For these packages, running</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure --enable-silent-rules
+</pre></div>
+</div>
+<p>sets the default to minimal output, which can be overridden with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">V=1</span></code>; while running</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure --disable-silent-rules
+</pre></div>
+</div>
+<p>sets the default to verbose, which can be overridden with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">V=0</span></code>.</p>
+</div>
+<div class="section" id="particular-systems">
+<h2>Particular systems<a class="headerlink" href="#particular-systems" title="Permalink to this headline">¶</a></h2>
+<p>On HP-UX, the default C compiler is not ANSI C compatible. If GNU CC is not installed, it is recommended to use the following options in order to use an ANSI C compiler:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;cc -Ae -D_XOPEN_SOURCE=500&quot;</span>
+</pre></div>
+</div>
+<p>and if that doesn’t work, install pre-built binaries of GCC for HP-UX.</p>
+<p>HP-UX <code class="docutils literal notranslate"><span class="pre">make</span></code> updates targets which have the same time stamps as their prerequisites, which makes it generally unusable when shipped generated files such as <code class="docutils literal notranslate"><span class="pre">configure</span></code> are involved. Use GNU <code class="docutils literal notranslate"><span class="pre">make</span></code> instead.</p>
+<p>On OSF/1 a.k.a. Tru64, some versions of the default C compiler cannot parse its <code class="docutils literal notranslate"><span class="pre">&lt;wchar.h&gt;</span></code> header file.  The option <code class="docutils literal notranslate"><span class="pre">-nodtk</span></code> can be used as a workaround. If GNU CC is not installed, it is therefore recommended to try</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;cc&quot;</span>
+</pre></div>
+</div>
+<p>and if that doesn’t work, try</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure <span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;cc -nodtk&quot;</span>
+</pre></div>
+</div>
+<p>On Solaris, don’t put <code class="docutils literal notranslate"><span class="pre">/usr/ucb</span></code> early in your <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.  This directory contains several dysfunctional programs; working variants of these programs are available in <code class="docutils literal notranslate"><span class="pre">/usr/bin</span></code>. So, if you need <code class="docutils literal notranslate"><span class="pre">/usr/ucb</span></code> in your <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, put it <em>after</em> <code class="docutils literal notranslate"><span class="pre">/usr/bin</span></code>.</p>
+<p>On Haiku, software installed for all users goes in <code class="docutils literal notranslate"><span class="pre">/boot/common</span></code>, not <code class="docutils literal notranslate"><span class="pre">/usr/local</span></code>. It is recommended to use the following options:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure --prefix<span class="o">=</span>/boot/common
+</pre></div>
+</div>
+</div>
+<div class="section" id="specifying-the-system-type">
+<h2>Specifying the System Type<a class="headerlink" href="#specifying-the-system-type" title="Permalink to this headline">¶</a></h2>
+<p>There may be some features <code class="docutils literal notranslate"><span class="pre">configure</span></code> cannot figure out automatically, but needs to determine by the type of machine the package will run on. Usually, assuming the package is built to be run on the <em>same</em> architectures, <code class="docutils literal notranslate"><span class="pre">configure</span></code> can figure that out, but if it prints a message saying it cannot guess the machine type, give it the <code class="docutils literal notranslate"><span class="pre">--build=TYPE</span></code> option. <code class="docutils literal notranslate"><span class="pre">TYPE</span></code> can either be a short name for the system type, such as <code class="docutils literal notranslate"><span class="pre">sun4</span></code>, or a canonical name which has the form:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">CPU-COMPANY-SYSTEM</span></code></p>
+</div></blockquote>
+<p>where <code class="docutils literal notranslate"><span class="pre">SYSTEM</span></code> can have one of these forms:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">OS</span></code>
+<code class="docutils literal notranslate"><span class="pre">KERNEL-OS</span></code></p>
+</div></blockquote>
+<p>See the file <code class="docutils literal notranslate"><span class="pre">config.sub</span></code> for the possible values of each field. If <code class="docutils literal notranslate"><span class="pre">config.sub</span></code> isn’t included in this package, then this package doesn’t need to know the machine type.</p>
+<p>If you are <em>building</em> compiler tools for cross-compiling, you should use the option <code class="docutils literal notranslate"><span class="pre">--target=TYPE</span></code> to select the type of system they will produce code for.</p>
+<p>If you want to <em>use</em> a cross compiler, that generates code for a platform different from the build platform, you should specify the “host” platform (i.e., that on which the generated programs will eventually be run) with <code class="docutils literal notranslate"><span class="pre">--host=TYPE</span></code>.</p>
+</div>
+<div class="section" id="sharing-defaults">
+<h2>Sharing Defaults<a class="headerlink" href="#sharing-defaults" title="Permalink to this headline">¶</a></h2>
+<p>If you want to set default values for <code class="docutils literal notranslate"><span class="pre">configure</span></code> scripts to share, you can create a site shell script called <code class="docutils literal notranslate"><span class="pre">config.site</span></code> that gives default values for variables like <code class="docutils literal notranslate"><span class="pre">CC</span></code>, <code class="docutils literal notranslate"><span class="pre">cache_file</span></code>, and <code class="docutils literal notranslate"><span class="pre">prefix</span></code>. <code class="docutils literal notranslate"><span class="pre">configure</span></code> looks for <code class="docutils literal notranslate"><span class="pre">PREFIX/share/config.site</span></code> if it exists, then <code class="docutils literal notranslate"><span class="pre">PREFIX/etc/config.site</span></code> if it exists. Or, you can set the <code class="docutils literal notranslate"><span class="pre">CONFIG_SITE</span></code> environment variable to the location of the site script. A warning: not all <code class="docutils literal notranslate"><span class="pre">configure</span></code> scripts look for a site script.</p>
+</div>
+<div class="section" id="defining-variables">
+<h2>Defining Variables<a class="headerlink" href="#defining-variables" title="Permalink to this headline">¶</a></h2>
+<p>Variables not defined in a site shell script can be set in the environment passed to <code class="docutils literal notranslate"><span class="pre">configure</span></code>.  However, some packages may run configure again during the build, and the customized values of these variables may be lost. In order to avoid this problem, you should set them in the <code class="docutils literal notranslate"><span class="pre">configure</span></code> command line, using <code class="docutils literal notranslate"><span class="pre">VAR=value</span></code>.  For example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure <span class="nv">CC</span><span class="o">=</span>/usr/local2/bin/gcc
+</pre></div>
+</div>
+<p>causes the specified <code class="docutils literal notranslate"><span class="pre">gcc</span></code> to be used as the C compiler (unless it is overridden in the site shell script).</p>
+<p>Unfortunately, this technique does not work for <code class="docutils literal notranslate"><span class="pre">CONFIG_SHELL</span></code> due to an Autoconf limitation. Until the limitation is lifted, you can use this workaround:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nv">CONFIG_SHELL</span><span class="o">=</span>/bin/bash ./configure <span class="nv">CONFIG_SHELL</span><span class="o">=</span>/bin/bash
+</pre></div>
+</div>
+</div>
+<div class="section" id="configure-invocation">
+<h2><code class="docutils literal notranslate"><span class="pre">configure</span></code> Invocation<a class="headerlink" href="#configure-invocation" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">configure</span></code> recognizes the following options to control how it operates.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>
+<code class="docutils literal notranslate"><span class="pre">-h</span></code>
+Print a summary of all of the options to <code class="docutils literal notranslate"><span class="pre">configure</span></code>, and exit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--help=short</span></code>
+<code class="docutils literal notranslate"><span class="pre">--help=recursive</span></code>
+Print a summary of the options unique to this package’s <code class="docutils literal notranslate"><span class="pre">configure</span></code>, and exit.  The ‘short’ variant lists options used only in the top level, while the ‘recursive’ variant lists options also present in any nested packages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--version</span></code>
+<code class="docutils literal notranslate"><span class="pre">-V</span></code>
+Print the version of Autoconf used to generate the <code class="docutils literal notranslate"><span class="pre">configure</span></code> script, and exit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--cache-file=FILE</span></code>
+Enable the cache: use and save the results of the tests in FILE, traditionally <code class="docutils literal notranslate"><span class="pre">config.cache</span></code>.  <code class="docutils literal notranslate"><span class="pre">FILE</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">/dev/null</span></code> to disable caching.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--config-cache</span></code>
+<code class="docutils literal notranslate"><span class="pre">-C</span></code>
+Alias for <code class="docutils literal notranslate"><span class="pre">--cache-file=config.cache</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--quiet</span></code>
+<code class="docutils literal notranslate"><span class="pre">--silent</span></code>
+<code class="docutils literal notranslate"><span class="pre">-q</span></code>
+Do not print messages saying which checks are being made. To suppress all normal output, redirect it to <code class="docutils literal notranslate"><span class="pre">/dev/null</span></code> (any error messages will still be shown).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--srcdir=DIR</span></code>
+Look for the package’s source code in directory <code class="docutils literal notranslate"><span class="pre">DIR</span></code>. Usually <code class="docutils literal notranslate"><span class="pre">configure</span></code> can determine that directory automatically.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--prefix=DIR</span></code>
+Use <code class="docutils literal notranslate"><span class="pre">DIR</span></code> as the installation prefix. note Installation Names for more details, including other options available for fine-tuning the installation locations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--no-create</span></code>
+<code class="docutils literal notranslate"><span class="pre">-n</span></code>
+Run the configure checks, but stop before creating any output files.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">configure</span></code> also accepts some other, not widely useful, options. Run <code class="docutils literal notranslate"><span class="pre">configure</span> <span class="pre">--help</span></code> for more details.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="preparing_input.html" class="btn btn-neutral float-right" title="Preparing input" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="pyBrown" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Tomasz Skóra.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
