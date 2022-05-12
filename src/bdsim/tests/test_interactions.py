@@ -2258,16 +2258,47 @@ class TestInteractions(unittest.TestCase):
 
 		_set_custom_interactions(input_data, interactions)
 
-		print(interactions)
+		self.assertEqual(interactions[0].energy.__name__, "angry_bonded_2B_energy")
+		self.assertEqual(interactions[0].force.__name__, "angry_bonded_2B_force")
+
+		self.assertEqual(interactions[1].energy.__name__, "funny_1B_energy")
+		self.assertEqual(interactions[1].force.__name__, "funny_1B_force")
 
 		self.assertEqual(interactions[0].auxiliary_force_parameters["test_parameter"], "test_value")
 		self.assertEqual(interactions[1].auxiliary_force_parameters["test_parameter"], "test_value")
 
+		self.assertEqual(interactions[0].how_many_body, 2)
+		self.assertEqual(interactions[1].how_many_body, 1)
+
+		self.assertTrue(interactions[0].bonded)
+		self.assertFalse(interactions[1].bonded)
+
 		F = np.zeros(6)
-		
 		E = 0
 
 		E += interactions[0].compute_forces_and_energy(self.beads, self.rij, F)
+
+		self.assertEqual(E, 0.0)
+		self.assertSequenceEqual(list(F), 6*[0.0])
+
+		self.b1.bead_id = 1
+		self.b2.bead_id = 2
+
+		self.b1.bonded_with.append(self.b2.bead_id)
+		self.b1.bonded_how[self.b2.bead_id] = [ 10.0, 100.0 ]
+
+		E += interactions[0].compute_forces_and_energy(self.beads, self.rij, F)
+
+		self.assertEqual(E, -1.0)
+		self.assertSequenceEqual(list(F), 3*[1.0]+3*[-1.0])
+
+		F = np.zeros(6)
+		E = 0
+
+		E += interactions[1].compute_forces_and_energy(self.beads, self.rij, F)
+
+		self.assertEqual(E, 2*100.0)
+		self.assertSequenceEqual(list(F), [0.0, 1.0, 2.0, 0.0, 1.0, 2.0])
 
 #-------------------------------------------------------------------------------
 
