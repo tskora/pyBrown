@@ -415,10 +415,6 @@ def _are_angles(beads):
 
 def _set_harmonic_bond_interactions(input_data, interactions_for_simulation):
 
-	if False:
-
-		return
-
 	aux_keywords = [  ]
 
 	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
