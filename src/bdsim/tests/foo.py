@@ -2,7 +2,7 @@ import numpy as np
 
 def funny_1B_force(bead1, test_parameter):
 
-	return np.zeros(3)
+	return np.array([0.0, 1.0, 2.0])
 
 def angry_bonded_2B_force(bead1, bead2, pointer, test_parameter):
 
