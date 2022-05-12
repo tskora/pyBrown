@@ -24,7 +24,8 @@ from pyBrown.bead import Bead, pointer, compute_pointer_pbc_matrix, compute_poin
 from pyBrown.interactions import Interactions, LJ_6_attractive_energy, LJ_6_attractive_force,\
 								 LJ_12_repulsive_energy, LJ_12_repulsive_force,\
 								 LJ_6_12_energy, LJ_6_12_force, harmonic_bond_force, \
-								 harmonic_bond_energy, harmonic_angle_force, harmonic_angle_energy
+								 harmonic_bond_energy, harmonic_angle_force, harmonic_angle_energy, \
+								 _set_custom_interactions
 
 #-------------------------------------------------------------------------------
 
@@ -2244,6 +2245,29 @@ class TestInteractions(unittest.TestCase):
 		for j in range(9):
 
 			self.assertAlmostEqual(F[j], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_setting_custom_interactions(self):
+
+		input_data = {"custom_interactions": True,
+					  "custom_interactions_filename": 'foo.py',
+					  "auxiliary_custom_interactions_keywords": {"test_parameter": "test_value"}}
+
+		interactions = []
+
+		_set_custom_interactions(input_data, interactions)
+
+		print(interactions)
+
+		self.assertEqual(interactions[0].auxiliary_force_parameters["test_parameter"], "test_value")
+		self.assertEqual(interactions[1].auxiliary_force_parameters["test_parameter"], "test_value")
+
+		F = np.zeros(6)
+		
+		E = 0
+
+		E += interactions[0].compute_forces_and_energy(self.beads, self.rij, F)
 
 #-------------------------------------------------------------------------------
 

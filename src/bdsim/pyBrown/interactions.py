@@ -538,7 +538,6 @@ def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
 	angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
 
-	# angle = angle_pbc(bead1, bead2, bead3, box_length)
 	angle = angle_pbc(pointer12, pointer23)
 
 	angle_eq *= np.pi / 180.0
@@ -569,7 +568,6 @@ def harmonic_angle_energy(bead1, bead2, bead3, pointer12, pointer23, box_length)
 
 	angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
 
-	# angle = angle_pbc(bead1, bead2, bead3, box_length)
 	angle = angle_pbc(pointer12, pointer23)
 
 	angle_eq *= np.pi / 180.0

@@ -55,20 +55,6 @@ def main(restart_filename, json_filename):
 
 	timestamp( 'Pathway count loaded from the restart file:\n{}', pathway_count )
 
-	# if json_filename != None:
-	# 	timestamp( 'Reading input patch from {} file', json_filename )
-	# 	input_patch = InputData(json_filename).input_data
-	# 	for key in input_patch.keys():
-	# 		if key in input_data.keys():
-	# 			timestamp('Keyword {} updated: from {} to {}', key, input_data[key], input_patch[key])
-	# 		else:
-	# 			timestamp('Keyword {} introduced: {}', key, input_patch[key])
-	# 		input_data[key] = input_patch[key]
-
-	# timestamp( 'Input data patched with the json file:\n{}', input_data )
-
-	# 1/0
-
 	str_filename = input_data["input_str_filename"]
 	xyz_filename = input_data["output_xyz_filename"]
 	rst_filename = input_data["output_rst_filename"]
