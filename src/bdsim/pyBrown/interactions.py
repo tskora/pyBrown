@@ -42,6 +42,18 @@ class Interactions():
 
 		assert len(F) == 3*len(mobile_beads), 'ERROR: invalid length of force vector'
 
+		if self.how_many_body == 1:
+
+			if self.bonded:
+
+				print('not implemented')
+
+				1/0
+
+			elif not self.bonded:
+
+				E = self._compute_1B_nonbonded_force_and_energy(mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F)
+
 		if self.how_many_body == 2:
 
 			if self.bonded:
@@ -63,6 +75,22 @@ class Interactions():
 				print('not implemented')
 
 				1/0
+
+		return E
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_1B_nonbonded_force_and_energy(self, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F):
+
+		E = 0.0
+
+		for i in range(len(mobile_beads)):
+
+			f = self._compute_1B_force(mobile_beads[i])
+
+			F[3*i:3*(i+1)] += f
+
+			E += self._compute_1B_energy(mobile_beads[i])
 
 		return E
 
@@ -301,6 +329,12 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
+	def _compute_1B_force(self, bead1):
+
+		return self.force(bead1, **self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
 	def _compute_2B_force(self, bead1, bead2, pointer):
 
 		return self.force(bead1, bead2, pointer, **self.auxiliary_force_parameters)
@@ -316,6 +350,12 @@ class Interactions():
 	def _compute_4B_force(self, bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34):
 
 		return self.force(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, **self.auxiliary_force_parameters)
+
+	#-------------------------------------------------------------------------------
+
+	def _compute_1B_energy(self, bead1):
+
+		return self.energy(bead1, **self.auxiliary_force_parameters)
 
 	#-------------------------------------------------------------------------------
 
@@ -357,9 +397,12 @@ class Interactions():
 
 	def __str__(self):
 
-		string_template = 'Force: {}, energy: {}, auxiliary parameters: {}'
+		string_template = 'Force: {}, energy: {}, auxiliary parameters: {}; {}-body {}'
 
-		return string_template.format(self.force.__name__, self.energy.__name__, self.auxiliary_force_parameters)
+		if self.bonded: bonded_string = 'bonded'
+		else: bonded_string = 'nonbonded'
+
+		return string_template.format(self.force.__name__, self.energy.__name__, self.auxiliary_force_parameters, self.how_many_body, bonded_string)
 
 	#-------------------------------------------------------------------------------
 
@@ -500,11 +543,16 @@ def _set_custom_interactions(input_data, interactions_for_simulation):
 
 	for key in energy_dictionary.keys():
 
+		if "bonded" in key.split('_'): bonded = True
+		else: bonded = False
+
+		how_many_body = int( key.split('_')[-2][:-1] )
+
 		ff = eval( 'custom_module.' + force_dictionary[key] )
 
 		ef = eval( 'custom_module.' + energy_dictionary[key] )
 
-		interactions_for_simulation.append( Interactions(ff, ef, aux) )
+		interactions_for_simulation.append( Interactions(ff, ef, aux, bonded = bonded, how_many_body = how_many_body) )
 
 #-------------------------------------------------------------------------------
 
