@@ -20,9 +20,76 @@ import numpy as np
 
 from pyBrown.bead import angle_pbc, get_bead_with_id
 
+	# :param force: function filling inputted vector with the values of forces acting on the
+	# respective beads computed using the pointer array, bead objects and information contained
+	# auxiliary force parameters.
+	# :type force: class: `function`
+	# :param energy: function returning the energy, taking the same input as the force function
+	# :type energy: class: `function`
+	# :param auxiliary_force_parameters: dictionary containing all the parameters from the input
+	# file which are of relevance for these particular interactions
+	# :type auxiliary_force_parameters: class: `dict`
+	# :param bonded: whether the interaction is bonded or not
+	# :type bonded: `bool`
+	# :param how_many_body: how many beads are involved in a single term of the potential/force
+	# expression
+	# :type how_many_body: `int`
+
+	# Constructor method
+
+	# :param force_function: function filling inputted vector with the values of forces acting on the
+	# respective beads computed using the pointer array, bead objects and information contained
+	# auxiliary force parameters.
+	# :type force_function: class: `function`
+	# :param energy_function: function returning the energy, taking the same input as the force function
+	# :type energy_function: class: `function`
+	# :param auxiliary_force_parameters: dictionary containing all the parameters from the input
+	# file which are of relevance for these particular interactions, defaults to `{}`
+	# :type auxiliary_force_parameters: class: `dict`
+	# :param bonded: whether the interaction is bonded or not, defaults to `False`
+	# :type bonded: `bool`
+	# :param how_many_body: how many beads are involved in a single term of the potential/force
+	# expression, defaults to `2`
+	# :type how_many_body: `int`
 #-------------------------------------------------------------------------------
 
 class Interactions():
+	"""This is a class representing interactions between beads. It contains the functions
+	used to evalute the force and energy. Apart from that, it contains the auxiliary
+	force parameters used by the force and energy functions. Additionally, it contains the information
+	about whether the interactions is bonded or not and how many bpdy the interaction is.
+
+	:param force: function filling inputted vector with the values of forces acting on the
+				  respective beads computed using the pointer array, bead objects and information contained
+				  auxiliary force parameters.
+	:type force: class: `function`
+	:param energy: function returning the energy, taking the same input as the force function
+	:type energy: class: `function`
+	:param auxiliary_force_parameters: dictionary containing all the parameters from the input
+									   file which are of relevance for these particular interactions
+	:type auxiliary_force_parameters: class: `dict`
+	:param bonded: whether the interaction is bonded or not
+	:type bonded: `bool`
+	:param how_many_body: how many beads are involved in a single term of the potential/force expression
+	:type how_many_body: `int`
+
+	Constructor method
+
+	:param force_function: function filling inputted vector with the values of forces acting on the
+						   respective beads computed using the pointer array, bead objects and information contained
+						   auxiliary force parameters.
+	:type force_function: class: `function`
+	:param energy_function: function returning the energy, taking the same input as the force function
+	:type energy_function: class: `function`
+	:param auxiliary_force_parameters: dictionary containing all the parameters from the input
+									   file which are of relevance for these particular interactions, defaults to `{}`
+	:type auxiliary_force_parameters: class: `dict`
+	:param bonded: whether the interaction is bonded or not, defaults to `False`
+	:type bonded: `bool`
+	:param how_many_body: how many beads are involved in a single term of the potential/force
+						  expression, defaults to `2`
+	:type how_many_body: `int`
+	"""
 
 	def __init__(self, force_function, energy_function, auxiliary_force_parameters = {}, bonded = False, how_many_body = 2):
 
