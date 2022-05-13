@@ -556,7 +556,7 @@ def harmonic_bond_force(bead1, bead2, pointer):
 
 	dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	dist = math.sqrt(dist2)
 
@@ -570,7 +570,7 @@ def harmonic_bond_energy(bead1, bead2, pointer):
 
 	dist_eq, force_constant = bead1.bonded_how[bead2.bead_id]
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	dist = math.sqrt(dist2)
 
@@ -588,9 +588,9 @@ def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
 	angle *= np.pi / 180.0
 
-	dist2_12 = pointer12[0]*pointer12[0] + pointer12[1]*pointer12[1] + pointer12[2]*pointer12[2]
+	dist2_12 = _dist2_from_pointer(pointer12)
 
-	dist2_23 = pointer23[0]*pointer23[0] + pointer23[1]*pointer23[1] + pointer23[2]*pointer23[2]
+	dist2_23 = _dist2_from_pointer(pointer23)
 
 	dist_12 = math.sqrt(dist2_12)
 
@@ -628,7 +628,7 @@ def LJ_6_attractive_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 	epsilon = math.sqrt( bead1.epsilon_LJ * bead2.epsilon_LJ )
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	dist = math.sqrt(dist2)
 
@@ -648,7 +648,7 @@ def LJ_6_attractive_energy(bead1, bead2, pointer, lennard_jones_alpha):
 
 	epsilon = math.sqrt( bead1.epsilon_LJ * bead2.epsilon_LJ )
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	s2 = sigma * sigma / dist2
 
@@ -664,7 +664,7 @@ def LJ_12_repulsive_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 	epsilon = math.sqrt( bead1.epsilon_LJ * bead2.epsilon_LJ )
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	dist = math.sqrt(dist2)
 
@@ -684,7 +684,7 @@ def LJ_12_repulsive_energy(bead1, bead2, pointer, lennard_jones_alpha):
 
 	epsilon = math.sqrt( bead1.epsilon_LJ * bead2.epsilon_LJ )
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	s2 = sigma * sigma / dist2
 
@@ -700,7 +700,7 @@ def LJ_6_12_energy(bead1, bead2, pointer, lennard_jones_alpha):
 
 	epsilon = math.sqrt( bead1.epsilon_LJ * bead2.epsilon_LJ )
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	s2 = sigma * sigma / dist2
 
@@ -718,7 +718,7 @@ def LJ_6_12_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 	epsilon = math.sqrt( bead1.epsilon_LJ * bead2.epsilon_LJ )
 
-	dist2 = pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	dist2 = _dist2_from_pointer(pointer)
 
 	dist = math.sqrt(dist2)
 
@@ -755,5 +755,11 @@ def eV_to_joule(value):
 def joule_to_eV(value):
 
 	return value / ( 10**(-19) * 1.602176634 )
+
+#-------------------------------------------------------------------------------
+
+def _dist2_from_pointer(pointer):
+
+	return pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
 
 #-------------------------------------------------------------------------------
