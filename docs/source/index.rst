@@ -8,6 +8,9 @@ pyBrown
 
 ``pyBrown`` is a Brownian and Stokesian dynamics package and simulation tool. It is written mainly in ``python 3``, with the most computationally demanding functions written in ``C``. Brownian and Stokesian dynamics are computational methods to simulate systems driven by thermal fluctuations. Hydrodynamic interactions are taken into account using far-field *Rotne-Prager-Yamakawa* approximation but correcting for near-field *lubrication* effects is available as well.
 
+.. warning::
+    The work on ``pyBrown`` is still in progress. Some functionalities may be temporally unavailable.
+
 .. rubric:: Quickstart
 
 To configure, type the following command in the command line:
@@ -72,9 +75,6 @@ where instead of ``RESTART_FILENAME`` substitute the name of your restart file. 
 +-------------------+----------------------------+
 
 You can choose the energy units by ``"energy_unit"`` keyword in input ``.json`` file. Default is "joule" (*J*), other options are "kcal/mol" (kilocalorie per mol, *kcal/mol*) and "eV" (electronvolt, *eV*). Force unit is then energy unit per angstrom.
-
-.. warning::
-    The work on ``pyBrown`` is still in progress. Some functionalities may be temporally unavailable.
 
 .. toctree::
    :maxdepth: 1
