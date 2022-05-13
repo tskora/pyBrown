@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,10 +31,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -85,13 +88,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/preparing_input.html">Preparing input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/running_simulation.html">Running simulation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="box.html">Box</a></li>
@@ -101,7 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reactions.html">Reactions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
@@ -175,8 +178,8 @@
   <div class="section" id="module-pyBrown.bead">
 <span id="bead"></span><h1>Bead<a class="headerlink" href="#module-pyBrown.bead" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="pyBrown.bead.Bead">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">Bead</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hydrodynamic_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XXX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_core_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon_LJ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mobile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.Bead">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">Bead</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hydrodynamic_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'XXX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_core_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon_LJ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mobile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This is a class representing spherical beads used in Brownian and Stokesian
 dynamics simulations. First and foremost, it contains geometric parameters of the
@@ -217,13 +220,13 @@ energies), defaults to <cite>0.0</cite></p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pyBrown.bead.Bead.is_there_bond_between">
-<code class="sig-name descname"><span class="pre">is_there_bond_between</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.is_there_bond_between" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.Bead.is_there_bond_between">
+<span class="sig-name descname"><span class="pre">is_there_bond_between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.is_there_bond_between" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="pyBrown.bead.Bead.keep_in_box">
-<code class="sig-name descname"><span class="pre">keep_in_box</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.keep_in_box" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.Bead.keep_in_box">
+<span class="sig-name descname"><span class="pre">keep_in_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.keep_in_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves the bead into the box if it is outside of it by using a combination of
 translations parallel to the box sides and with length of a box length. Box’s interior
 lies between <cite>-box_length/2</cite> and <cite>box_length/2</cite>.</p>
@@ -235,8 +238,8 @@ lies between <cite>-box_length/2</cite> and <cite>box_length/2</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyBrown.bead.Bead.translate">
-<code class="sig-name descname"><span class="pre">translate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.translate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.Bead.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.translate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves a bead by the provided vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -246,8 +249,13 @@ lies between <cite>-box_length/2</cite> and <cite>box_length/2</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyBrown.bead.Bead.translate_and_return_flux">
-<code class="sig-name descname"><span class="pre">translate_and_return_flux</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.translate_and_return_flux" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.Bead.translate_and_check_for_plane_crossing">
+<span class="sig-name descname"><span class="pre">translate_and_check_for_plane_crossing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">planes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.translate_and_check_for_plane_crossing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyBrown.bead.Bead.translate_and_return_flux">
+<span class="sig-name descname"><span class="pre">translate_and_return_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.Bead.translate_and_return_flux" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves a bead by the provided vector and returns flux through the provided plane.
 Plane is defined by its normal vector and any point lying on the plane. <cite>1</cite> is returned
 if particle goes through the plana in the direction of the normal vector, <cite>-1</cite> if in the
@@ -272,33 +280,38 @@ opposite direction and <cite>0</cite> if the particle does not go through the pl
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.angle_pbc">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">angle_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r23</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.angle_pbc" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.angle_pbc">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">angle_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r23</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.angle_pbc" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.build_connection_matrix">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">build_connection_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.build_connection_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.build_connection_matrix">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">build_connection_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.build_connection_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.check_overlaps">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">check_overlaps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_treshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.check_overlaps" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.check_overlaps">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">check_overlaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_treshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.check_overlaps" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.compute_pointer_pbc_matrix">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">compute_pointer_pbc_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.compute_pointer_pbc_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.compute_pointer_immobile_pbc_matrix">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">compute_pointer_immobile_pbc_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mobile_beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">immobile_beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.compute_pointer_immobile_pbc_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.distance">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">distance</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.distance" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.compute_pointer_pbc_matrix">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">compute_pointer_pbc_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.compute_pointer_pbc_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.distance_pbc">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">distance_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.distance_pbc" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.distance">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyBrown.bead.distance_pbc">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">distance_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.distance_pbc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the distance between <cite>bead1</cite> and <cite>bead2</cite> (its closest translational replica)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -318,18 +331,18 @@ opposite direction and <cite>0</cite> if the particle does not go through the pl
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.get_bead_with_id">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">get_bead_with_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.get_bead_with_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.get_bead_with_id">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">get_bead_with_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.get_bead_with_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.overlap">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">overlap</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.overlap" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.overlap">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.overlap" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.overlap_pbc">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">overlap_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.overlap_pbc" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.overlap_pbc">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">overlap_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.overlap_pbc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if there is an overlap between <cite>bead1</cite> and <cite>bead2</cite> (its closest translational replica)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -349,13 +362,13 @@ opposite direction and <cite>0</cite> if the particle does not go through the pl
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.pointer">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">pointer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pointer" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.pointer">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">pointer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pointer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.bead.pointer_pbc">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></code><code class="sig-name descname"><span class="pre">pointer_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pointer_pbc" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.bead.pointer_pbc">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">pointer_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pointer_pbc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the voctor pointing from <cite>bead1</cite> to <cite>bead2</cite> (its closest translational replica)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -373,6 +386,21 @@ opposite direction and <cite>0</cite> if the particle does not go through the pl
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyBrown.bead.pole_distance_pbc">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">pole_distance_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pole_distance_pbc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyBrown.bead.pole_pointer">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">pole_pointer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pole_pointer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyBrown.bead.pole_pointer_pbc">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.bead.</span></span><span class="sig-name descname"><span class="pre">pole_pointer_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.bead.pole_pointer_pbc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 

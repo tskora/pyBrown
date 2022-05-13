@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -84,13 +87,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/preparing_input.html">Preparing input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/running_simulation.html">Running simulation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="bead.html">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="box.html">Box</a></li>
@@ -100,7 +103,7 @@
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reactions.html">Reactions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
@@ -174,23 +177,23 @@
   <div class="section" id="module-pyBrown.diffusion">
 <span id="diffusion"></span><h1>Diffusion<a class="headerlink" href="#module-pyBrown.diffusion" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt id="pyBrown.diffusion.JO_2B_R_matrix">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></code><code class="sig-name descname"><span class="pre">JO_2B_R_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beadi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beadj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.JO_2B_R_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.diffusion.JO_2B_R_matrix">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></span><span class="sig-name descname"><span class="pre">JO_2B_R_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beadi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beadj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.JO_2B_R_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.diffusion.JO_R_lubrication_correction_matrix">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></code><code class="sig-name descname"><span class="pre">JO_R_lubrication_correction_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lubrication_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cichocki_correction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.JO_R_lubrication_correction_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.diffusion.JO_R_lubrication_correction_matrix">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></span><span class="sig-name descname"><span class="pre">JO_R_lubrication_correction_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lubrication_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cichocki_correction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.JO_R_lubrication_correction_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.diffusion.RPY_M_matrix">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></code><code class="sig-name descname"><span class="pre">RPY_M_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.RPY_M_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.diffusion.RPY_M_matrix">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></span><span class="sig-name descname"><span class="pre">RPY_M_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.RPY_M_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.diffusion.RPY_Smith_M_matrix">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></code><code class="sig-name descname"><span class="pre">RPY_Smith_M_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.RPY_Smith_M_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.diffusion.RPY_Smith_M_matrix">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.diffusion.</span></span><span class="sig-name descname"><span class="pre">RPY_Smith_M_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.diffusion.RPY_Smith_M_matrix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -84,13 +87,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/preparing_input.html">Preparing input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/running_simulation.html">Running simulation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="bead.html">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="box.html">Box</a></li>
@@ -100,7 +103,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reactions.html">Reactions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
@@ -174,43 +177,43 @@
   <div class="section" id="module-pyBrown.output">
 <span id="output"></span><h1>Output<a class="headerlink" href="#module-pyBrown.output" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt id="pyBrown.output.timestamp">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">timestamp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">variables</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.timestamp" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.timestamp">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">variables</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.timestamp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.output.timing">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">timing</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.timing" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.timing">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">timing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.timing" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.output.truncate_output_file_during_restart">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">truncate_output_file_during_restart</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.truncate_output_file_during_restart" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.truncate_output_file_during_restart">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">truncate_output_file_during_restart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.truncate_output_file_during_restart" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.output.write_to_con_file">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">write_to_con_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">con_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_con_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.write_to_con_file">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">write_to_con_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">con_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_con_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.output.write_to_enr_file">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">write_to_enr_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enr_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_enr_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.write_to_enr_file">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">write_to_enr_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enr_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_enr_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.output.write_to_flux_file">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">write_to_flux_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flux_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_flux</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_flux_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.write_to_flux_file">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">write_to_flux_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flux_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net_flux</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_flux_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.output.write_to_restart_file">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">write_to_restart_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyz_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_output_filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_restart_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.write_to_restart_file">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">write_to_restart_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyz_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_output_filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_restart_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.output.write_to_xyz_file">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></code><code class="sig-name descname"><span class="pre">write_to_xyz_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyz_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_xyz_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.output.write_to_xyz_file">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.output.</span></span><span class="sig-name descname"><span class="pre">write_to_xyz_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyz_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.output.write_to_xyz_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

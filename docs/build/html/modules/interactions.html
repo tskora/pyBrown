@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -84,13 +87,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/preparing_input.html">Preparing input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/running_simulation.html">Running simulation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="bead.html">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="box.html">Box</a></li>
@@ -100,7 +103,7 @@
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reactions.html">Reactions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
@@ -174,89 +177,89 @@
   <div class="section" id="module-pyBrown.interactions">
 <span id="interactions"></span><h1>Interactions<a class="headerlink" href="#module-pyBrown.interactions" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="pyBrown.interactions.Interactions">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">Interactions</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_force_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how_many_body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.Interactions" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.Interactions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">Interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_force_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how_many_body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.Interactions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt id="pyBrown.interactions.Interactions.compute_forces_and_energy">
-<code class="sig-name descname"><span class="pre">compute_forces_and_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.Interactions.compute_forces_and_energy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.Interactions.compute_forces_and_energy">
+<span class="sig-name descname"><span class="pre">compute_forces_and_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mobile_beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers_mobile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">immobile_beads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers_mobile_immobile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.Interactions.compute_forces_and_energy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.LJ_12_repulsive_energy">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">LJ_12_repulsive_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_12_repulsive_energy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.LJ_12_repulsive_energy">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">LJ_12_repulsive_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_12_repulsive_energy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.LJ_12_repulsive_force">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">LJ_12_repulsive_force</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_12_repulsive_force" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.LJ_12_repulsive_force">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">LJ_12_repulsive_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_12_repulsive_force" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.LJ_6_12_energy">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">LJ_6_12_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_12_energy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.LJ_6_12_energy">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">LJ_6_12_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_12_energy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.LJ_6_12_force">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">LJ_6_12_force</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_12_force" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.LJ_6_12_force">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">LJ_6_12_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_12_force" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.LJ_6_attractive_energy">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">LJ_6_attractive_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_attractive_energy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.LJ_6_attractive_energy">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">LJ_6_attractive_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_attractive_energy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.LJ_6_attractive_force">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">LJ_6_attractive_force</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_attractive_force" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.LJ_6_attractive_force">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">LJ_6_attractive_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lennard_jones_alpha</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.LJ_6_attractive_force" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.eV_to_joule">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">eV_to_joule</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.eV_to_joule" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.eV_to_joule">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">eV_to_joule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.eV_to_joule" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.harmonic_angle_energy">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">harmonic_angle_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer23</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_angle_energy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.harmonic_angle_energy">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">harmonic_angle_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer23</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_angle_energy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.harmonic_angle_force">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">harmonic_angle_force</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer23</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_angle_force" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.harmonic_angle_force">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">harmonic_angle_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer23</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_angle_force" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.harmonic_bond_energy">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">harmonic_bond_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_bond_energy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.harmonic_bond_energy">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">harmonic_bond_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_bond_energy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.harmonic_bond_force">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">harmonic_bond_force</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_bond_force" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.harmonic_bond_force">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">harmonic_bond_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.harmonic_bond_force" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.joule_to_eV">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">joule_to_eV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.joule_to_eV" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.joule_to_eV">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">joule_to_eV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.joule_to_eV" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.joule_to_kcal_per_mole">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">joule_to_kcal_per_mole</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.joule_to_kcal_per_mole" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.joule_to_kcal_per_mole">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">joule_to_kcal_per_mole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.joule_to_kcal_per_mole" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.kcal_per_mole_to_joule">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">kcal_per_mole_to_joule</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.kcal_per_mole_to_joule" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.kcal_per_mole_to_joule">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">kcal_per_mole_to_joule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.kcal_per_mole_to_joule" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="pyBrown.interactions.set_interactions">
-<code class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></code><code class="sig-name descname"><span class="pre">set_interactions</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.set_interactions" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyBrown.interactions.set_interactions">
+<span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">set_interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.set_interactions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

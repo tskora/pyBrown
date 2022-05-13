@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -83,13 +86,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/preparing_input.html">Preparing input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/running_simulation.html">Running simulation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules/bead.html">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/box.html">Box</a></li>
@@ -99,7 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modules/output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/reactions.html">Reactions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/license.html">License</a></li>
@@ -178,33 +181,37 @@
 </div></blockquote>
 <p class="rubric">Overview</p>
 <p><code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> is a Brownian and Stokesian dynamics package and simulation tool. It is written mainly in <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">3</span></code>, with the most computationally demanding functions written in <code class="docutils literal notranslate"><span class="pre">C</span></code>. Brownian and Stokesian dynamics are computational methods to simulate systems driven by thermal fluctuations. Hydrodynamic interactions are taken into account using far-field <em>Rotne-Prager-Yamakawa</em> approximation but correcting for near-field <em>lubrication</em> effects is available as well.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The work on <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> is still in progress. Some functionalities may be temporally unavailable.</p>
+</div>
 <p class="rubric">Quickstart</p>
 <p>To configure, type the following command in the command line:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./configure --prefix<span class="o">=</span>DIR --with-lapack<span class="o">=</span>LAPACK_LIBS
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>./configure --prefix<span class="o">=</span>DIR --with-lapack<span class="o">=</span>LAPACK_LIBS
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">DIR</span></code> is the installation directory (<code class="docutils literal notranslate"><span class="pre">/usr/local/</span></code> by default) and <code class="docutils literal notranslate"><span class="pre">LAPACK_LIBS</span></code> is lapack libraries to use (e.g. <code class="docutils literal notranslate"><span class="pre">--with-lapack=&quot;-llapack&quot;</span></code>).</p>
 <p>Then to compile and install proceed with:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> make
-<span class="gp">$</span> make install
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make
+<span class="gp">$ </span>make install
 </pre></div>
 </div>
 <p>You can check <a class="reference internal" href="getting_started/installation.html#installation"><span class="std std-ref">Installation</span></a> for more details.</p>
 <p>To ensure that all <code class="docutils literal notranslate"><span class="pre">python</span></code> packages needed by <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> are present on your computer you can run</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip3 install -r requirements.txt
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip3 install -r requirements.txt
 </pre></div>
 </div>
 <p>If you want to run unit tests, go to a project directory <code class="docutils literal notranslate"><span class="pre">src/bdsim/tests/</span></code> and type:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> make <span class="nb">test</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>make <span class="nb">test</span>
 </pre></div>
 </div>
 <p>To run simulation, prepare <code class="docutils literal notranslate"><span class="pre">.str</span></code> and <code class="docutils literal notranslate"><span class="pre">.json</span></code> input files (see <a class="reference internal" href="getting_started/preparing_input.html#preparing-input"><span class="std std-ref">Preparing input</span></a>) and type:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD.py INPUT_JSON_FILENAME
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>BD.py INPUT_JSON_FILENAME
 </pre></div>
 </div>
 <p>where instead of <code class="docutils literal notranslate"><span class="pre">INPUT_JSON_FILENAME</span></code> substitute the name of your input <code class="docutils literal notranslate"><span class="pre">.json</span></code> file.</p>
 <p>Provided that you have the restart <code class="docutils literal notranslate"><span class="pre">.rst</span></code> file and the trajectory <code class="docutils literal notranslate"><span class="pre">.xyz</span></code>, you can restart the simulation from the last save typing:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD-restart.py RESTART_FILENAME
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>BD-restart.py RESTART_FILENAME
 </pre></div>
 </div>
 <p>where instead of <code class="docutils literal notranslate"><span class="pre">RESTART_FILENAME</span></code> substitute the name of your restart file. For more details regarding running simulations check <a class="reference internal" href="getting_started/running_simulation.html#running-simulation"><span class="std std-ref">Running simulation</span></a>.</p>
@@ -235,12 +242,8 @@
 </tbody>
 </table>
 <p>You can choose the energy units by <code class="docutils literal notranslate"><span class="pre">&quot;energy_unit&quot;</span></code> keyword in input <code class="docutils literal notranslate"><span class="pre">.json</span></code> file. Default is “joule” (<em>J</em>), other options are “kcal/mol” (kilocalorie per mol, <em>kcal/mol</em>) and “eV” (electronvolt, <em>eV</em>). Force unit is then energy unit per angstrom.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The work on <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> is still in progress. Some functionalities may be temporally unavailable.</p>
-</div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Getting started</span></p>
+<p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/preparing_input.html">Preparing input</a></li>
@@ -248,7 +251,7 @@
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules/bead.html">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/box.html">Box</a></li>
@@ -260,7 +263,7 @@
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/license.html">License</a></li>

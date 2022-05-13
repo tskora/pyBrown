@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -82,13 +85,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/preparing_input.html">Preparing input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started/running_simulation.html">Running simulation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules/bead.html">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/box.html">Box</a></li>
@@ -98,7 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modules/output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/reactions.html">Reactions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/license.html">License</a></li>
@@ -223,6 +226,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/interactions.html#pyBrown.interactions.Interactions.compute_forces_and_energy">compute_forces_and_energy() (pyBrown.interactions.Interactions method)</a>
+</li>
+      <li><a href="modules/bead.html#pyBrown.bead.compute_pointer_immobile_pbc_matrix">compute_pointer_immobile_pbc_matrix() (in module pyBrown.bead)</a>
 </li>
       <li><a href="modules/bead.html#pyBrown.bead.compute_pointer_pbc_matrix">compute_pointer_pbc_matrix() (in module pyBrown.bead)</a>
 </li>
@@ -379,6 +384,12 @@
 </li>
       <li><a href="modules/bead.html#pyBrown.bead.pointer_pbc">pointer_pbc() (in module pyBrown.bead)</a>
 </li>
+      <li><a href="modules/bead.html#pyBrown.bead.pole_distance_pbc">pole_distance_pbc() (in module pyBrown.bead)</a>
+</li>
+      <li><a href="modules/bead.html#pyBrown.bead.pole_pointer">pole_pointer() (in module pyBrown.bead)</a>
+</li>
+      <li><a href="modules/bead.html#pyBrown.bead.pole_pointer_pbc">pole_pointer_pbc() (in module pyBrown.bead)</a>
+</li>
       <li><a href="modules/box.html#pyBrown.box.Box.propagate">propagate() (pyBrown.box.Box method)</a>
 </li>
       <li>
@@ -395,6 +406,8 @@
         <li><a href="modules/box.html#module-pyBrown.box">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pyBrown.diffusion
 
@@ -402,8 +415,6 @@
         <li><a href="modules/diffusion.html#module-pyBrown.diffusion">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pyBrown.input
 
@@ -470,9 +481,11 @@
 </li>
       <li><a href="modules/output.html#pyBrown.output.timing">timing() (in module pyBrown.output)</a>
 </li>
+      <li><a href="modules/bead.html#pyBrown.bead.Bead.translate">translate() (pyBrown.bead.Bead method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/bead.html#pyBrown.bead.Bead.translate">translate() (pyBrown.bead.Bead method)</a>
+      <li><a href="modules/bead.html#pyBrown.bead.Bead.translate_and_check_for_plane_crossing">translate_and_check_for_plane_crossing() (pyBrown.bead.Bead method)</a>
 </li>
       <li><a href="modules/bead.html#pyBrown.bead.Bead.translate_and_return_flux">translate_and_return_flux() (pyBrown.bead.Bead method)</a>
 </li>

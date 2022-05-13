@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -84,7 +87,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="preparing_input.html">Preparing input</a></li>
@@ -95,7 +98,7 @@
 </ul>
 </li>
 </ul>
-<p class="caption"><span class="caption-text">API</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../modules/bead.html">Bead</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/box.html">Box</a></li>
@@ -105,7 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../modules/output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/reactions.html">Reactions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/authors.html">Authors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/license.html">License</a></li>
@@ -181,14 +184,14 @@
 <div class="section" id="brownian-stokesian-dynamics-using-bd-py">
 <h2>Brownian/Stokesian dynamics using <code class="docutils literal notranslate"><span class="pre">BD.py</span></code><a class="headerlink" href="#brownian-stokesian-dynamics-using-bd-py" title="Permalink to this headline">¶</a></h2>
 <p>To run the simulations defined in <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> on a bead system defined in <code class="docutils literal notranslate"><span class="pre">inp.str</span></code> (and addressed in  <code class="docutils literal notranslate"><span class="pre">inp.json</span></code>)</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD.py inp.json
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>BD.py inp.json
 </pre></div>
 </div>
 </div>
 <div class="section" id="restarting-simulation-using-bd-restart-py">
 <h2>Restarting simulation using <code class="docutils literal notranslate"><span class="pre">BD-restart.py</span></code><a class="headerlink" href="#restarting-simulation-using-bd-restart-py" title="Permalink to this headline">¶</a></h2>
 <p>It is often the case that simulation is interrupted. <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> ensures that the hours or days of computing are not lost. With a frequency defined by user in <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> (keyword <code class="docutils literal notranslate"><span class="pre">&quot;rst_write_freq&quot;</span></code>) <code class="docutils literal notranslate"><span class="pre">BD.py</span></code> pickles its state to the file again defined by user in <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> (keyword <code class="docutils literal notranslate"><span class="pre">&quot;rst_Write_freq&quot;</span></code>). You can restart the simulation in a following way:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD-restart.py my_restart.rst
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>BD-restart.py my_restart.rst
 </pre></div>
 </div>
 <div class="admonition note">
@@ -199,14 +202,14 @@
 <div class="section" id="using-input-patch">
 <h2>Using input patch<a class="headerlink" href="#using-input-patch" title="Permalink to this headline">¶</a></h2>
 <p>Sometimes it is useful to change some values provided in initial <code class="docutils literal notranslate"><span class="pre">.json</span></code> when restarting the simulation. It is very common to do that with <code class="docutils literal notranslate"><span class="pre">&quot;number_of_steps&quot;</span></code> keyword. To do that, you can provide additional optional <code class="docutils literal notranslate"><span class="pre">.json</span></code> file to <code class="docutils literal notranslate"><span class="pre">BD-restart.py</span></code>.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> BD-restart.py my_restart.rst inp_patch.json
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>BD-restart.py my_restart.rst inp_patch.json
 </pre></div>
 </div>
 <p>In <code class="docutils literal notranslate"><span class="pre">inp_patch.json</span></code> provide only those <code class="docutils literal notranslate"><span class="pre">keyword:</span> <span class="pre">value</span></code> pairs which you want to change. The rest will stay as it was configured in initial <code class="docutils literal notranslate"><span class="pre">inp.json</span></code> file.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>In text above it is assumed that the <code class="docutils literal notranslate"><span class="pre">pyBrown</span></code> was properly installed. If not, you can still use it but always providing the path (absolute or relative) to the <code class="docutils literal notranslate"><span class="pre">BD.py</span></code> or <code class="docutils literal notranslate"><span class="pre">BD-restart.py</span></code> script, eg.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> /path/to/script/BD.py inp.json
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>/path/to/script/BD.py inp.json
 </pre></div>
 </div>
 </div>
