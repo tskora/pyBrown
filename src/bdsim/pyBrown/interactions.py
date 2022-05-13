@@ -106,6 +106,24 @@ class Interactions():
 	#-------------------------------------------------------------------------------
 
 	def compute_forces_and_energy(self, mobile_beads, pointers_mobile, F, immobile_beads = [], pointers_mobile_immobile = []):
+		"""Computes force and energy.
+		
+		:param mobile_beads: list of mobile beads
+		:type mobile_beads: [class: `pyBrown.bead.Bead`, ...]
+		:param pointers_mobile: array of pointing vectors among the mobile beads
+		:type pointers_mobile: class: `numpy.ndarray`
+		:param F: one-dimensional numpy array representing the total force vector, with dimension equal
+				  to the `3` times `len(mobile_beads)`. Its entries represent the force components acting
+				  on the beads,
+		:type F: class: `numpy.ndarray`
+		:param immobile_beads: list of immobile beads, defaults to `[]`
+		:type immobile_beads: [class: `pyBrown.bead.Bead`, ...]
+		:param pointers_mobile_immobile: array of pointing vectors between the mobile and immobile beads
+		:type pointers_mobile_immobile: class: `numpy.ndarray`
+
+		:return: interaction energy
+		:rtype: `float`
+		"""
 
 		assert len(F) == 3*len(mobile_beads), 'ERROR: invalid length of force vector'
 
