@@ -462,24 +462,6 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
-	def _rearrange_force_to_ommit_immobile_beads(self, beads, temporary_force, F):
-
-		i = 0
-
-		j = 0
-
-		while i < len(beads):
-
-			if beads[i].mobile:
-
-				F[3*j:3*(j+1)] += temporary_force[3*i:3*(i+1)]
-
-				j += 1
-
-			i += 1
-
-	#-------------------------------------------------------------------------------
-
 	def __str__(self):
 
 		string_template = 'Force: {}, energy: {}, auxiliary parameters: {}; {}-body {}'
@@ -498,6 +480,16 @@ class Interactions():
 #-------------------------------------------------------------------------------
 
 def set_interactions(input_data, beads):
+	"""Sets the interactions based on the input data. Returns a list of interactions.
+	
+	:param input_data: dictionary with data inputted to `pyBrown`
+	:type input_data: class: `dict`
+	:param beads: list of all the beads between the interactions are to be set
+	:type beads: [class: `pyBrown.bead.Bead`, ...]
+
+	:return: list of interactions (objects)
+	:rtype: [class: `pyBrown.interactions.Interactions`, ...]
+	"""
 
 	interactions_for_simulation = []
 

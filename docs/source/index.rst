@@ -76,6 +76,11 @@ You can choose the energy units by ``"energy_unit"`` keyword in input ``.json`` 
 .. warning::
     The work on ``pyBrown`` is still in progress. Some functionalities may be temporally unavailable.
 
+.. todo::
+    - propagation schemes different than Ermak and Midpoint,
+    - predefined 1-body force and energy,
+    - dihedral bonded interactions
+
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
