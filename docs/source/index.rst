@@ -88,6 +88,7 @@ You can choose the energy units by ``"energy_unit"`` keyword in input ``.json`` 
    getting_started/installation
    getting_started/preparing_input
    getting_started/running_simulation
+   getting_started/custom_potentials
 
 .. toctree::
    :maxdepth: 1
