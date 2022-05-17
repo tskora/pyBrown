@@ -81,8 +81,8 @@ For each angle the energy is incremented by a harmonic term:
 .. todo::
     Implement definition of dihedral potential *via* ``dihe`` lines.
 
-``.json`` file
-***************
+``.json`` file for ``BD.py``
+*****************************
 
 Simulation parameters are provided in a standard `JSON <https://www.json.org/json-en.html>`_ data format. It consists of multiple lines in a form of ``keyword: value`` pairs enclosed by a curly bracket. Some keywords are obligatory, but a majority is not -- for them default values will be loaded, if needed. ``pyBrown`` will inform you if it does not recognize some keywords in input ``.json`` file.
 
@@ -210,3 +210,6 @@ Some more specific options are activated by keywords which are of ``JSON`` struc
    - ``"y": [float, float]`` -- ``y`` range defining the region
    - ``"z": [float, float]`` -- ``z`` range defining the region
    - ``"output_concentration_filename"`` -- the name of the output ``.con`` file to which ``pyBrown`` writes the concentration in selected region
+
+``.json`` file for ``BD-NAM.py``
+*********************************

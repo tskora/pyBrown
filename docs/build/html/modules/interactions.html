@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/preparing_input.html">Preparing input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/running_simulation.html">Running simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/custom_potentials.html">Custom potentials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul class="current">
@@ -180,10 +181,64 @@
 <dt class="sig sig-object py" id="pyBrown.interactions.Interactions">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">Interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_force_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how_many_body</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.Interactions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is a class representing interactions between beads. It contains the functions
+used to evalute the force and energy. Apart from that, it contains the auxiliary
+force parameters used by the force and energy functions. Additionally, it contains the information
+about whether the interactions is bonded or not and how many bpdy the interaction is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>force</strong> (class: <cite>function</cite>) – function filling inputted vector with the values of forces acting on the
+respective beads computed using the pointer array, bead objects and information contained
+auxiliary force parameters.</p></li>
+<li><p><strong>energy</strong> (class: <cite>function</cite>) – function returning the energy, taking the same input as the force function</p></li>
+<li><p><strong>auxiliary_force_parameters</strong> (class: <cite>dict</cite>) – dictionary containing all the parameters from the input
+file which are of relevance for these particular interactions</p></li>
+<li><p><strong>bonded</strong> (<cite>bool</cite>) – whether the interaction is bonded or not</p></li>
+<li><p><strong>how_many_body</strong> (<cite>int</cite>) – how many beads are involved in a single term of the potential/force expression</p></li>
+</ul>
+</dd>
+</dl>
+<p>Constructor method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>force_function</strong> (class: <cite>function</cite>) – function filling inputted vector with the values of forces acting on the
+respective beads computed using the pointer array, bead objects and information contained
+auxiliary force parameters.</p></li>
+<li><p><strong>energy_function</strong> (class: <cite>function</cite>) – function returning the energy, taking the same input as the force function</p></li>
+<li><p><strong>auxiliary_force_parameters</strong> (class: <cite>dict</cite>) – dictionary containing all the parameters from the input
+file which are of relevance for these particular interactions, defaults to <cite>{}</cite></p></li>
+<li><p><strong>bonded</strong> (<cite>bool</cite>) – whether the interaction is bonded or not, defaults to <cite>False</cite></p></li>
+<li><p><strong>how_many_body</strong> (<cite>int</cite>) – how many beads are involved in a single term of the potential/force
+expression, defaults to <cite>2</cite></p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyBrown.interactions.Interactions.compute_forces_and_energy">
 <span class="sig-name descname"><span class="pre">compute_forces_and_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mobile_beads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers_mobile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">immobile_beads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pointers_mobile_immobile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.Interactions.compute_forces_and_energy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Computes force and energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mobile_beads</strong> ([class: <cite>pyBrown.bead.Bead</cite>, …]) – list of mobile beads</p></li>
+<li><p><strong>pointers_mobile</strong> (class: <cite>numpy.ndarray</cite>) – array of pointing vectors among the mobile beads</p></li>
+<li><p><strong>F</strong> (class: <cite>numpy.ndarray</cite>) – one-dimensional numpy array representing the total force vector, with dimension equal
+to the <cite>3</cite> times <cite>len(mobile_beads)</cite>. Its entries represent the force components acting
+on the beads,</p></li>
+<li><p><strong>immobile_beads</strong> ([class: <cite>pyBrown.bead.Bead</cite>, …]) – list of immobile beads, defaults to <cite>[]</cite></p></li>
+<li><p><strong>pointers_mobile_immobile</strong> (class: <cite>numpy.ndarray</cite>) – array of pointing vectors between the mobile and immobile beads</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>interaction energy</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>float</cite></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -260,7 +315,22 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="pyBrown.interactions.set_interactions">
 <span class="sig-prename descclassname"><span class="pre">pyBrown.interactions.</span></span><span class="sig-name descname"><span class="pre">set_interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyBrown.interactions.set_interactions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Sets the interactions based on the input data. Returns a list of interactions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data</strong> (class: <cite>dict</cite>) – dictionary with data inputted to <cite>pyBrown</cite></p></li>
+<li><p><strong>beads</strong> ([class: <cite>pyBrown.bead.Bead</cite>, …]) – list of all the beads between the interactions are to be set</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of interactions (objects)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[class: <cite>pyBrown.interactions.Interactions</cite>, …]</p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 
