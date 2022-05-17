@@ -233,9 +233,9 @@ def pointer_pbc(bead1, bead2, box_size):
 	"""Computes the voctor pointing from `bead1` to `bead2` (its closest translational replica)
 	
 	:param bead1: bead from which the vector points
-	:type bead1: class: `bead.Bead`
+	:type bead1: class: `pyBrown.bead.Bead`
 	:param bead2: bead to which the vector points
-	:type bead2: class: `bead.Bead`
+	:type bead2: class: `pyBrown.bead.Bead`
 	:param box_size: simulation box length
 	:type box_size: `float`
 	
@@ -348,9 +348,9 @@ def distance_pbc(bead1, bead2, box_size):
 	"""Computes the distance between `bead1` and `bead2` (its closest translational replica)
 
 	:param bead1: bead
-	:type bead1: class: `bead.Bead`
+	:type bead1: class: `pyBrown.bead.Bead`
 	:param bead2: bead
-	:type bead2: class: `bead.Bead`
+	:type bead2: class: `pyBrown.bead.Bead`
 	:param box_size: simulation box length
 	:type box_size: `float`
 
@@ -382,9 +382,9 @@ def overlap_pbc(bead1, bead2, box_size, epsilon = 0.0):
 	"""Checks if there is an overlap between `bead1` and `bead2` (its closest translational replica)
 	
 	:param bead1: bead
-	:type bead1: class: `bead.Bead`
+	:type bead1: class: `pyBrown.bead.Bead`
 	:param bead2: bead
-	:type bead2: class: `bead.Bead`
+	:type bead2: class: `pyBrown.bead.Bead`
 	:param box_size: simulation box length
 	:type box_size: `float`
 

@@ -76,6 +76,14 @@ where instead of ``RESTART_FILENAME`` substitute the name of your restart file. 
 
 You can choose the energy units by ``"energy_unit"`` keyword in input ``.json`` file. Default is "joule" (*J*), other options are "kcal/mol" (kilocalorie per mol, *kcal/mol*) and "eV" (electronvolt, *eV*). Force unit is then energy unit per angstrom.
 
+.. warning::
+    The work on ``pyBrown`` is still in progress. Some functionalities may be temporally unavailable.
+
+.. todo::
+    - propagation schemes different than Ermak and Midpoint,
+    - predefined 1-body force and energy,
+    - dihedral bonded interactions
+
 .. toctree::
    :maxdepth: 1
    :caption: Getting started
@@ -83,6 +91,7 @@ You can choose the energy units by ``"energy_unit"`` keyword in input ``.json`` 
    getting_started/installation
    getting_started/preparing_input
    getting_started/running_simulation
+   getting_started/custom_potentials
 
 .. toctree::
    :maxdepth: 1
