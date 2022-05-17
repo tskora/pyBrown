@@ -3,7 +3,7 @@
 Custom potentials
 -------------------
 
-You can define your own potentials and use them in ``pyBrown`` simulation. However, you have to align with particular naming scheme. There are two questions you have to answer at first: whether the potential is **bonded** (only bonded beads interact, eg. harmonic bonds, angle potentials) and **how-many-body** the potential is. In your file you have to define two functions: one for the force, and one for the energy per every interaction you want to define. The naming scheme is: ``some_name(_bonded)_NB_force``/``some_name(_bonded)_NB_energy``, where ``_bonded`` is used only whene the potential is bonded. Instead of N use how-many-body the potential is. Instead of ``some_name`` you can use any name you wish. For example look at the file ``src/bdsim/tests/foo.py``:
+You can define your own potentials and use them in ``pyBrown`` simulation. However, you have to align with particular naming scheme. There are two questions you have to answer at first: whether the potential is **bonded** (only bonded beads interact, eg. harmonic bonds, angle potentials) and **how-many-body** the potential is. In your ``python`` file you have to define two functions: one for the force, and one for the energy per every interaction you want to define. The naming scheme is: ``some_name(_bonded)_NB_force``/``some_name(_bonded)_NB_energy``, where ``_bonded`` is used only whene the potential is bonded. Instead of ``N`` provide the integer number saying how-many-body the potential is. Instead of ``some_name`` you can use any name you wish. For example look at the file ``src/bdsim/tests/foo.py``:
 
 .. code:: python
     
@@ -39,11 +39,11 @@ Energy function has to return a ``float`` value. Force function has to return a 
 Arguments
 **********
 
-When it comes to arguments, it depends on the how-many-body the interaction is and on the additional parameters you want to provide to the interactions (see :ref:`preparing-input`). The scheme looks like that:
+When it comes to arguments, it depends on how-many-body the interaction is and on the additional parameters you want to provide to the interactions (see :ref:`preparing-input`). The scheme looks like that:
 
 ``1B_force(bead1, ...)``
 
-``2B_force(ead1, bead2, pointer, ...)``
+``2B_force(bead1, bead2, pointer, ...)``
 
 ``3B_force(bead1, bead2, bead3, pointer12, pointer23, ...)``
 
@@ -57,4 +57,4 @@ When it comes to arguments, it depends on the how-many-body the interaction is a
 
 ``4B_energy(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, ...)``
 
-where instead of ... you have to put **all** the auxialiary interactions keyword you proviade via ``.json`` input file.
+where instead of ... you have to put **all** the auxialiary interactions keywords you proviade via ``.json`` input file (see :ref:`preparing-input`).
