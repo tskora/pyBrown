@@ -20,9 +20,76 @@ import numpy as np
 
 from pyBrown.bead import angle_pbc, get_bead_with_id
 
+	# :param force: function filling inputted vector with the values of forces acting on the
+	# respective beads computed using the pointer array, bead objects and information contained
+	# auxiliary force parameters.
+	# :type force: class: `function`
+	# :param energy: function returning the energy, taking the same input as the force function
+	# :type energy: class: `function`
+	# :param auxiliary_force_parameters: dictionary containing all the parameters from the input
+	# file which are of relevance for these particular interactions
+	# :type auxiliary_force_parameters: class: `dict`
+	# :param bonded: whether the interaction is bonded or not
+	# :type bonded: `bool`
+	# :param how_many_body: how many beads are involved in a single term of the potential/force
+	# expression
+	# :type how_many_body: `int`
+
+	# Constructor method
+
+	# :param force_function: function filling inputted vector with the values of forces acting on the
+	# respective beads computed using the pointer array, bead objects and information contained
+	# auxiliary force parameters.
+	# :type force_function: class: `function`
+	# :param energy_function: function returning the energy, taking the same input as the force function
+	# :type energy_function: class: `function`
+	# :param auxiliary_force_parameters: dictionary containing all the parameters from the input
+	# file which are of relevance for these particular interactions, defaults to `{}`
+	# :type auxiliary_force_parameters: class: `dict`
+	# :param bonded: whether the interaction is bonded or not, defaults to `False`
+	# :type bonded: `bool`
+	# :param how_many_body: how many beads are involved in a single term of the potential/force
+	# expression, defaults to `2`
+	# :type how_many_body: `int`
 #-------------------------------------------------------------------------------
 
 class Interactions():
+	"""This is a class representing interactions between beads. It contains the functions
+	used to evalute the force and energy. Apart from that, it contains the auxiliary
+	force parameters used by the force and energy functions. Additionally, it contains the information
+	about whether the interactions is bonded or not and how many bpdy the interaction is.
+
+	:param force: function filling inputted vector with the values of forces acting on the
+				  respective beads computed using the pointer array, bead objects and information contained
+				  auxiliary force parameters.
+	:type force: class: `function`
+	:param energy: function returning the energy, taking the same input as the force function
+	:type energy: class: `function`
+	:param auxiliary_force_parameters: dictionary containing all the parameters from the input
+									   file which are of relevance for these particular interactions
+	:type auxiliary_force_parameters: class: `dict`
+	:param bonded: whether the interaction is bonded or not
+	:type bonded: `bool`
+	:param how_many_body: how many beads are involved in a single term of the potential/force expression
+	:type how_many_body: `int`
+
+	Constructor method
+
+	:param force_function: function filling inputted vector with the values of forces acting on the
+						   respective beads computed using the pointer array, bead objects and information contained
+						   auxiliary force parameters.
+	:type force_function: class: `function`
+	:param energy_function: function returning the energy, taking the same input as the force function
+	:type energy_function: class: `function`
+	:param auxiliary_force_parameters: dictionary containing all the parameters from the input
+									   file which are of relevance for these particular interactions, defaults to `{}`
+	:type auxiliary_force_parameters: class: `dict`
+	:param bonded: whether the interaction is bonded or not, defaults to `False`
+	:type bonded: `bool`
+	:param how_many_body: how many beads are involved in a single term of the potential/force
+						  expression, defaults to `2`
+	:type how_many_body: `int`
+	"""
 
 	def __init__(self, force_function, energy_function, auxiliary_force_parameters = {}, bonded = False, how_many_body = 2):
 
@@ -39,6 +106,24 @@ class Interactions():
 	#-------------------------------------------------------------------------------
 
 	def compute_forces_and_energy(self, mobile_beads, pointers_mobile, F, immobile_beads = [], pointers_mobile_immobile = []):
+		"""Computes force and energy.
+		
+		:param mobile_beads: list of mobile beads
+		:type mobile_beads: [class: `pyBrown.bead.Bead`, ...]
+		:param pointers_mobile: array of pointing vectors among the mobile beads
+		:type pointers_mobile: class: `numpy.ndarray`
+		:param F: one-dimensional numpy array representing the total force vector, with dimension equal
+				  to the `3` times `len(mobile_beads)`. Its entries represent the force components acting
+				  on the beads,
+		:type F: class: `numpy.ndarray`
+		:param immobile_beads: list of immobile beads, defaults to `[]`
+		:type immobile_beads: [class: `pyBrown.bead.Bead`, ...]
+		:param pointers_mobile_immobile: array of pointing vectors between the mobile and immobile beads
+		:type pointers_mobile_immobile: class: `numpy.ndarray`
+
+		:return: interaction energy
+		:rtype: `float`
+		"""
 
 		assert len(F) == 3*len(mobile_beads), 'ERROR: invalid length of force vector'
 
@@ -377,24 +462,6 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
-	def _rearrange_force_to_ommit_immobile_beads(self, beads, temporary_force, F):
-
-		i = 0
-
-		j = 0
-
-		while i < len(beads):
-
-			if beads[i].mobile:
-
-				F[3*j:3*(j+1)] += temporary_force[3*i:3*(i+1)]
-
-				j += 1
-
-			i += 1
-
-	#-------------------------------------------------------------------------------
-
 	def __str__(self):
 
 		string_template = 'Force: {}, energy: {}, auxiliary parameters: {}; {}-body {}'
@@ -413,6 +480,16 @@ class Interactions():
 #-------------------------------------------------------------------------------
 
 def set_interactions(input_data, beads):
+	"""Sets the interactions based on the input data. Returns a list of interactions.
+	
+	:param input_data: dictionary with data inputted to `pyBrown`
+	:type input_data: class: `dict`
+	:param beads: list of all the beads between the interactions are to be set
+	:type beads: [class: `pyBrown.bead.Bead`, ...]
+
+	:return: list of interactions (objects)
+	:rtype: [class: `pyBrown.interactions.Interactions`, ...]
+	"""
 
 	interactions_for_simulation = []
 
