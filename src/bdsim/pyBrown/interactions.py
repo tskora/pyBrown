@@ -17,6 +17,7 @@
 import importlib
 import math
 import numpy as np
+import sys
 
 from pyBrown.bead import angle_pbc, get_bead_with_id
 
@@ -595,9 +596,15 @@ def _set_custom_interactions(input_data, interactions_for_simulation):
 
 	filename = input_data["custom_interactions_filename"]
 
+	modulename = input_data["custom_interactions_filename"].split('/')[-1]
+
+	filename_location = '/'.join( input_data["custom_interactions_filename"].split('/')[:-1] )
+
+	sys.path.append(filename_location)
+
 	aux = input_data["auxiliary_custom_interactions_keywords"]
 
-	custom_module = importlib.import_module( filename.split('.')[0] )
+	custom_module = importlib.import_module( modulename.split('.')[0] )
 
 	energy_functions = [ function_name for function_name in dir(custom_module) if function_name[0] != "_" if function_name[-6:] == "energy" ]
 
@@ -626,6 +633,8 @@ def _set_custom_interactions(input_data, interactions_for_simulation):
 		ef = eval( 'custom_module.' + energy_dictionary[key] )
 
 		interactions_for_simulation.append( Interactions(ff, ef, aux, bonded = bonded, how_many_body = how_many_body) )
+
+	sys.path.pop()
 
 #-------------------------------------------------------------------------------
 
