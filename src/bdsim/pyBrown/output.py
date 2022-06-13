@@ -105,11 +105,11 @@ def write_to_con_file(con_file, j, dt, concentration):
 
 #-------------------------------------------------------------------------------
 
-def write_to_enr_file(enr_file, j, dt, E):
+def write_to_enr_file(enr_file, j, dt, E, energy_unit_string):
 
 	if j == 0:
 
-		first_line_string = 'time/ps energy/J\n'
+		first_line_string = 'time/ps energy/{}\n'.format(energy_unit_string)
 
 		enr_file.write(first_line_string)
 
