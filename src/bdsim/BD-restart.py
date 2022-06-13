@@ -174,7 +174,7 @@ def main(restart_filename, json_filename):
 
 				if energy:
 					if j % n_enr == 0:
-						write_to_enr_file(enr_file, j, dt, box.E)
+						write_to_enr_file(enr_file, j, dt, box.E, i.input_data["energy_unit"])
 
 				if j != 0 and j % n_restart == 0:
 					write_to_restart_file(rst_filename, index, j, box, xyz_filename, extra_output_filenames)

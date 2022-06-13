@@ -178,7 +178,7 @@ def main(input_filename):
 
 				if energy:
 					if j % n_enr == 0:
-						write_to_enr_file(enr_file, j, dt, box.E)
+						write_to_enr_file(enr_file, j, dt, box.E, i.input_data["energy_unit"])
 
 				if restart:
 					if j != 0 and j % n_restart == 0:
