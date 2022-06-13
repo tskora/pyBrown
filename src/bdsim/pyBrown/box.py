@@ -21,7 +21,7 @@ from scipy.constants import Boltzmann
 
 from pyBrown.bead import compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix
 from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
-from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule
+from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule, eV_to_joule
 from pyBrown.output import timing
 from pyBrown.plane import Plane
 from pyBrown.reactions import set_reactions
@@ -238,6 +238,8 @@ class Box():
 
 			assert count_move_attempts < self.inp["max_move_attempts"], 'maximal number of move attepts exceeded'
 
+		if self.inp["verbose"]: print('move attempts: {}'.format(count_move_attempts))
+
 	#-------------------------------------------------------------------------------
 
 	def _midpoint_step(self, dt, build_Dff, build_Dnf, cholesky):
@@ -334,6 +336,8 @@ class Box():
 				break
 
 			assert count_move_attempts < self.inp["max_move_attempts"], 'maximal number of move attepts exceeded'
+
+		if self.inp["verbose"]: print('move attempts: {}'.format(count_move_attempts))
 
 	#-------------------------------------------------------------------------------
 
