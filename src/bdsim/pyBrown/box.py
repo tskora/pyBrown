@@ -458,10 +458,6 @@ class Box():
 	# @timing
 	def _compute_rij_matrix(self):
 
-		# if len(self.mobile_beads) == 0: self.rij = np.zeros((0,0))
-
-		# else: self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
-
 		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
 
 	#-------------------------------------------------------------------------------
