@@ -4,6 +4,8 @@ pyBrown
     *These motions were such as to satisfy me ... that they arose neither from currents in the fluid, nor from its gradual evaporation, but belonged to the particle itself*
     - `Robert Brown <https://en.wikipedia.org/wiki/Robert_Brown_(botanist,_born_1773)>`_
 
+`Github repository <https://github.com/tskora/pyBrown>`_
+
 .. rubric:: Overview
 
 ``pyBrown`` is a Brownian and Stokesian dynamics package and simulation tool. It is written mainly in ``python 3``, with the most computationally demanding functions written in ``C``. Brownian and Stokesian dynamics are computational methods to simulate systems driven by thermal fluctuations. Hydrodynamic interactions are taken into account using far-field *Rotne-Prager-Yamakawa* approximation but correcting for near-field *lubrication* effects is available as well.
