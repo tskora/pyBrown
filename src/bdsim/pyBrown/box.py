@@ -203,6 +203,11 @@ class Box():
 
 		self._deterministic_step(dt)
 
+		if self.is_wall:
+			# print(self.crossed_wall)
+			deterministic_lead_to_crossing = self.crossed_wall
+			self.crossed_wall = False
+
 		if self.inp["divergence_term"]:
 
 			if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
@@ -220,7 +225,11 @@ class Box():
 			self._stochastic_step(dt)
 
 			if self.is_wall:
-				if self.crossed_wall:
+				if self.crossed_wall and not deterministic_lead_to_crossing:
+					self._stochastic_step(dt, mult = -1)
+					self.crossed_wall = False
+					continue
+				elif not self.crossed_wall and deterministic_lead_to_crossing:
 					self._stochastic_step(dt, mult = -1)
 					self.crossed_wall = False
 					continue
