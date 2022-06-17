@@ -53,7 +53,8 @@ def main(input_filename):
 				"lennard_jones_alpha": 4.0, "energy_unit": "joule",
 				"custom_interactions": False,
 				"cichocki_correction": True,
-				"overlap_treshold": 0.0, "max_move_attempts": 1000000}
+				"overlap_treshold": 0.0, "overlap_radius": "hydrodynamic",
+				"max_move_attempts": 1000000}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
 				   [ "output_rst_filename", "rst_write_freq",

@@ -52,15 +52,21 @@ def compute_pointer_immobile_pbc_matrix_python(mobile_beads, immobile_beads, box
 
 #-------------------------------------------------------------------------------
 
-def check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix):
+def check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix, overlap_radius):
 
 	overlaps = False
 
 	for i in range(len(beads)-1):
 		for j in range(i+1, len(beads)):
 			pointer = beads[i].r - beads[j].r
-			radii_sum = beads[i].a + beads[j].a
-			radii_sum_pbc = box_length - radii_sum
+			if overlap_radius == "hydrodynamic":
+				radii_sum = beads[i].a + beads[j].a
+				radii_sum_pbc = box_length - radii_sum
+			elif overlap_radius == "hard_core":
+				radii_sum = beads[i].hard_core_radius + beads[j].hard_core_radius
+				radii_sum_pbc = box_length - radii_sum
+			else:
+				1/0
 
 			if connection_matrix[i][j]:
 				continue
@@ -72,7 +78,7 @@ def check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix
 			elif ( pointer[2] > radii_sum and pointer[2] < radii_sum_pbc ) or ( pointer[2] < -radii_sum and pointer[2] > -radii_sum_pbc ):
 				continue
 			else:
-				if overlap_pbc(beads[i], beads[j], box_length, overlap_treshold):
+				if overlap_pbc(beads[i], beads[j], box_length, overlap_radius, epsilon = overlap_treshold):
 					return True
 
 	return overlaps
@@ -83,15 +89,15 @@ class TestBead(unittest.TestCase):
 
 	def setUp(self):
 		
-		self.b0 = Bead([0.0, 0.0, 0.0], 1.0)
+		self.b0 = Bead([0.0, 0.0, 0.0], 1.0, hard_core_radius = 0.01)
 
-		self.b1 = Bead([0.1, 0.1, 0.1], 1.0)
+		self.b1 = Bead([0.1, 0.1, 0.1], 1.0, hard_core_radius = 0.01)
 
-		self.b2 = Bead([10.0, 10.0, 10.0], 1.0)
+		self.b2 = Bead([10.0, 10.0, 10.0], 1.0, hard_core_radius = 0.8)
 
-		self.b3 = Bead([2.0, 0.0, 0.0], 1.0)
+		self.b3 = Bead([2.0, 0.0, 0.0], 1.0, hard_core_radius = 0.8)
 
-		self.b4 = Bead([4.0, 0.0, 0.0], 3.0)
+		self.b4 = Bead([4.0, 0.0, 0.0], 3.0, hard_core_radius = 2.0)
 
 	#---------------------------------------------------------------------------
 
@@ -207,7 +213,7 @@ class TestBead(unittest.TestCase):
 
 	def test_if_going_through_xy_plane_is_crossing(self):
 
-		b_start = Bead([0.0, 0.0, -1.0], 0.0)
+		b_start = Bead([0.0, 0.0, -1.5], 0.0, hard_core_radius = 0.8)
 
 		translation_vector = np.array([0.0, 0.0, 2.0])
 
@@ -217,13 +223,17 @@ class TestBead(unittest.TestCase):
 
 		plane = Plane(plane_point, normal)
 
-		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hydrodynamic") )
+
+		b_start = Bead([0.0, 0.0, -1.5], 0.0, hard_core_radius = 0.5)
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_going_through_xz_plane_is_crossing(self):
 
-		b_start = Bead([0.0, 1.0, 0.0], 0.0)
+		b_start = Bead([0.0, 1.5, 0.0], 0.0, hard_core_radius = 0.8)
 
 		translation_vector = np.array([0.0, -2.0, 0.0])
 
@@ -233,13 +243,17 @@ class TestBead(unittest.TestCase):
 
 		plane = Plane(plane_point, normal)
 
-		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hydrodynamic") )
+
+		b_start = Bead([0.0, 1.5, 0.0], 0.0, hard_core_radius = 0.8)
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_going_through_yz_plane_is_crossing(self):
 
-		b_start = Bead([-1.0, 0.0, 0.0], 0.0)
+		b_start = Bead([-1.0, 0.0, 0.0], 0.0, hard_core_radius = 0.8)
 
 		translation_vector = np.array([2.0, 0.0, 0.0])
 
@@ -249,7 +263,11 @@ class TestBead(unittest.TestCase):
 
 		plane = Plane(plane_point, normal)
 
-		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hydrodynamic") )
+
+		b_start = Bead([-1.0, 0.0, 0.0], 0.0, hard_core_radius = 0.8)
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
@@ -269,53 +287,87 @@ class TestBead(unittest.TestCase):
 
 		plane_shift = Plane(plane_point_shift, normal)
 
-		self.assertFalse( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane]) )
+		self.assertFalse( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hydrodynamic") )
 
-		self.assertFalse( b_start.translate_and_check_for_plane_crossing(-translation_vector, [plane]) )
+		self.assertFalse( b_start.translate_and_check_for_plane_crossing(-translation_vector, [plane], overlap_radius = "hydrodynamic") )
 
-		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane_shift]) )
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane_shift], overlap_radius = "hydrodynamic") )
+
+	#---------------------------------------------------------------------------
+
+	def test_if_result_of_crossing_may_be_different_depending_on_overlap_radius(self):
+
+		b_start = Bead([0.0, 0.0, -2.0], 1.0, hard_core_radius = 0.8)
+
+		translation_vector = np.array([0.0, 0.0, 1.1])
+
+		normal = np.array([0.0, 0.0, 1.0])
+
+		plane_point = np.array([0.0, 0.0, 0.0])
+
+		plane = Plane(plane_point, normal)
+
+		self.assertTrue( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hydrodynamic") )
+
+		b_start = Bead([0.0, 0.0, -2.0], 1.0, hard_core_radius = 0.8)
+
+		self.assertFalse( b_start.translate_and_check_for_plane_crossing(translation_vector, [plane], overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_bead_overlaps_with_itself(self):
 
-		self.assertTrue( overlap(self.b0, self.b0) )
+		self.assertTrue( overlap(self.b0, self.b0, overlap_radius = "hydrodynamic") )
+
+		self.assertTrue( overlap(self.b0, self.b0, overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_bead_overlaps_with_itself_in_large_box(self):
 
-		self.assertTrue( overlap_pbc(self.b1, self.b1, 10000.0) )
+		self.assertTrue( overlap_pbc(self.b1, self.b1, 10000.0, overlap_radius = "hydrodynamic") )
+
+		self.assertTrue( overlap_pbc(self.b1, self.b1, 10000.0, overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_bead_overlaps_with_a_close_one_in_large_box(self):
 
-		self.assertTrue( overlap_pbc(self.b0, self.b1, 10000.0) )
+		self.assertTrue( overlap_pbc(self.b0, self.b1, 10000.0, overlap_radius = "hydrodynamic") )
+
+		self.assertFalse( overlap_pbc(self.b0, self.b1, 10000.0, overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def tesT_if_bead_overlaps_with_its_near_replica(self):
 
-		self.assertTrue( overlap_pbc(self.b0, self.b2, 10.0) )
+		self.assertTrue( overlap_pbc(self.b0, self.b2, 10.0, overlap_radius = "hydrodynamic") )
+
+		self.assertTrue( overlap_pbc(self.b0, self.b2, 10.0, overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_bead_oberlaps_with_its_fr_replica(self):
 
-		self.assertTrue( overlap_pbc(self.b0, self.b2, 0.1) )
+		self.assertTrue( overlap_pbc(self.b0, self.b2, 0.1, overlap_radius = "hydrodynamic") )
+
+		self.assertTrue( overlap_pbc(self.b0, self.b2, 0.1, overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_bead_does_not_overlap_with_separate_one(self):
 
-		self.assertFalse( overlap_pbc(self.b0, self.b2, 100.0) )
+		self.assertFalse( overlap_pbc(self.b0, self.b2, 100.0, overlap_radius = "hydrodynamic") )
+
+		self.assertFalse( overlap_pbc(self.b0, self.b2, 100.0, overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
 	def test_if_beads_overlap_when_they_touch_each_other_in_large_box(self):
 
-		self.assertTrue( overlap_pbc(self.b0, self.b3, 10000.0) )
+		self.assertTrue( overlap_pbc(self.b0, self.b3, 10000.0, overlap_radius = "hydrodynamic") )
+
+		self.assertFalse( overlap_pbc(self.b0, self.b3, 10000.0, overlap_radius = "hard_core") )
 
 	#---------------------------------------------------------------------------
 
@@ -427,41 +479,57 @@ class TestBead(unittest.TestCase):
 
 	def test_pole_pointer(self):
 
-		beada = Bead([0.0, 0.0, 0.0], 1.0)
+		beada = Bead([0.0, 0.0, 0.0], 1.0, hard_core_radius = 0.5)
 
-		beadb = Bead([0.0, 0.0, 2.0], 1.0)
+		beadb = Bead([0.0, 0.0, 2.0], 1.0, hard_core_radius = 0.4)
 
-		beadc = Bead([0.0, 0.0, 4.0], 1.0)
+		beadc = Bead([0.0, 0.0, 4.0], 1.0, hard_core_radius = 0.3)
 
-		beadd = Bead([0.0, 2.0, 2.0], 1.0)
+		beadd = Bead([0.0, 2.0, 2.0], 1.0, hard_core_radius = 0.2)
 
-		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0)), [ 0.0, 0.0, 1.0 ] )
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hydrodynamic")), [ 0.0, 0.0, 1.0 ] )
 
-		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0), 1.0 )
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hard_core")), [ 0.0, 0.0, 1.6 ] )
 
-		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0)), [ 0.0, 2.0, -1.0] )
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hydrodynamic"), 1.0 )
 
-		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0), np.sqrt(5) )
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hard_core"), 1.6 )
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hydrodynamic")), [ 0.0, 2.0, -1.0] )
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hard_core")), [ 0.0, 2.0, -0.4] )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hydrodynamic"), np.sqrt(5) )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hard_core"), np.sqrt(2**2 + 0.4**2) )
 
 	#---------------------------------------------------------------------------
 
 	def test_pole_pointer2(self):
 
-		beada = Bead([0.0, 0.0, 0.0], 0.5)
+		beada = Bead([0.0, 0.0, 0.0], 0.5, hard_core_radius = 1.0)
 
-		beadb = Bead([0.0, 0.0, 2.0], 1.5)
+		beadb = Bead([0.0, 0.0, 2.0], 1.5, hard_core_radius = 1.0)
 
-		beadc = Bead([0.0, 0.0, 4.0], 0.75)
+		beadc = Bead([0.0, 0.0, 4.0], 0.75, hard_core_radius = 1.0)
 
-		beadd = Bead([0.0, 2.0, 2.0], 1.0)
+		beadd = Bead([0.0, 2.0, 2.0], 1.0, hard_core_radius = 0.5)
 
-		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0)), [ 0.0, 0.0, 0.5 ] )
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hydrodynamic")), [ 0.0, 0.0, 0.5 ] )
 
-		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0), 0.5 )
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hard_core")), [ 0.0, 0.0, 1.0 ] )
 
-		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0)), [ 0.0, 2.0, -1.5] )
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hydrodynamic"), 0.5 )
 
-		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0), np.sqrt(6.25) )
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadc, 1000.0, overlap_radius = "hard_core"), 1.0 )
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hydrodynamic")), [ 0.0, 2.0, -1.5] )
+
+		self.assertSequenceEqual( list(pole_pointer_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hard_core")), [ 0.0, 2.0, -1.0] )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hydrodynamic"), np.sqrt(6.25) )
+
+		self.assertEqual( pole_distance_pbc(beada, beadb, beadd, 1000.0, overlap_radius = "hard_core"), np.sqrt(5) )
 
 	#---------------------------------------------------------------------------
 
@@ -526,9 +594,9 @@ class TestBead(unittest.TestCase):
 			connection_matrix = build_connection_matrix(beads)
 			self.assertSequenceEqual(list(connection_matrix.flatten()), list(np.transpose(np.zeros((10,10)).flatten())))
 
-			c_ish = check_overlaps(beads, box_length, overlap_treshold, connection_matrix)
+			c_ish = check_overlaps(beads, box_length, overlap_treshold, connection_matrix, overlap_radius = "hydrodynamic")
 
-			python_ish = check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix)
+			python_ish = check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix, overlap_radius = "hydrodynamic")
 
 			self.assertEqual(c_ish, python_ish)
 
@@ -564,9 +632,9 @@ class TestBead(unittest.TestCase):
 			self.assertSequenceEqual(list(connection_matrix.flatten()), list(np.transpose(connection_matrix.flatten())))
 			self.assertSequenceEqual(list(cm.flatten()), list(connection_matrix.flatten()))
 
-			c_ish = check_overlaps(beads, box_length, overlap_treshold, connection_matrix)
+			c_ish = check_overlaps(beads, box_length, overlap_treshold, connection_matrix, overlap_radius = "hydrodynamic")
 
-			python_ish = check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix)
+			python_ish = check_overlaps_python(beads, box_length, overlap_treshold, connection_matrix, overlap_radius = "hydrodynamic")
 
 			self.assertEqual(c_ish, python_ish)
 
@@ -582,13 +650,13 @@ class TestBead(unittest.TestCase):
 
 		connection_matrix = build_connection_matrix(beads)
 
-		self.assertTrue( check_overlaps(beads, box_length, overlap_treshold, connection_matrix) )
+		self.assertTrue( check_overlaps(beads, box_length, overlap_treshold, connection_matrix, overlap_radius = "hydrodynamic") )
 
 		beads[0].bonded_with.append( beads[1].bead_id )
 
 		connection_matrix = build_connection_matrix(beads)
 
-		self.assertFalse( check_overlaps(beads, box_length, overlap_treshold, connection_matrix) )
+		self.assertFalse( check_overlaps(beads, box_length, overlap_treshold, connection_matrix, overlap_radius = "hydrodynamic") )
 
 	#---------------------------------------------------------------------------
 

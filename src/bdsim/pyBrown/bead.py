@@ -133,7 +133,7 @@ class Bead():
 
 	#-------------------------------------------------------------------------------
 
-	def translate_and_check_for_plane_crossing(self, vector, planes):
+	def translate_and_check_for_plane_crossing(self, vector, planes, overlap_radius):
 
 		r0 = np.array( [self.r[0], self.r[1], self.r[2]] )
 
@@ -141,15 +141,21 @@ class Bead():
 
 		r1 = np.array( [self.r[0], self.r[1], self.r[2]] )
 
+		if overlap_radius == "hydrodynamic": radius = self.a
+		elif overlap_radius == "hard_core": radius = self.hard_core_radius
+		else:
+			print('invalid overlap_radius')
+			1/0
+
 		for plane in planes:
 
-			r0f = r0 + self.a*plane.normal_vector
+			r0f = r0 + radius*plane.normal_vector
 
-			r0b = r0 - self.a*plane.normal_vector
+			r0b = r0 - radius*plane.normal_vector
 
-			r1f = r1 + self.a*plane.normal_vector
+			r1f = r1 + radius*plane.normal_vector
 
-			r1b = r1 - self.a*plane.normal_vector
+			r1b = r1 - radius*plane.normal_vector
 
 			f0f = np.dot( plane.normal_vector, (r0f - plane.plane_point) ) > 0.0
 
@@ -195,7 +201,7 @@ class Bead():
 		if self.mobile: mobile_string = "mobile"
 		else: mobile_string = "immobile"
 
-		return "{}: {}, radius = {}, {}".format(self.label, self.r, self.a, mobile_string)
+		return "{}: {}, hydrodynamic radius = {}, {}".format(self.label, self.r, self.a, mobile_string)
 
 	#-------------------------------------------------------------------------------
 
@@ -208,7 +214,7 @@ class Bead():
 	def __eq__(self, p):
 
 		if isinstance( p, Bead ):
-			return ( np.all( self.r == p.r ) ) and ( self.a == p.a )
+			return ( np.all( self.r == p.r ) ) and ( self.a == p.a ) and ( self.hard_core_radius == p.hard_core_radius ) and ( self.label == p.label ) and ( self.epsilon_LJ == p.epsilon_LJ )
 		return False
 
 #-------------------------------------------------------------------------------
@@ -219,11 +225,19 @@ def pointer(bead1, bead2):
 
 #-------------------------------------------------------------------------------
 
-def pole_pointer(bead1, bead2, bead3):
+def pole_pointer(bead1, bead2, bead3, overlap_radius):
 
 	shift = bead2.r - bead1.r
 
-	shift *= bead2.a / np.linalg.norm(shift)
+	if overlap_radius == "hydrodynamic":
+		radius2 = bead2.a
+	elif overlap_radius == "hard_core":
+		radius2 = bead2.hard_core_radius
+	else:
+		print('invalid overlap_radius')
+		1/0
+
+	shift *= radius2 / np.linalg.norm(shift)
 
 	return bead3.r - bead2.r - shift
 
@@ -255,9 +269,9 @@ def pointer_pbc(bead1, bead2, box_size):
 
 #-------------------------------------------------------------------------------
 
-def pole_pointer_pbc(bead1, bead2, bead3, box_size):
+def pole_pointer_pbc(bead1, bead2, bead3, box_size, overlap_radius):
 
-	r = pole_pointer(bead1, bead2, bead3)
+	r = pole_pointer(bead1, bead2, bead3, overlap_radius)
 
 	for i in range(3):
 		while r[i] >= box_size/2:
@@ -364,21 +378,31 @@ def distance_pbc(bead1, bead2, box_size):
 
 #-------------------------------------------------------------------------------
 
-def pole_distance_pbc(bead1, bead2, bead3, box_size):
+def pole_distance_pbc(bead1, bead2, bead3, box_size, overlap_radius):
 
-	r = pole_pointer_pbc(bead1, bead2, bead3, box_size)
+	r = pole_pointer_pbc(bead1, bead2, bead3, box_size, overlap_radius)
 
 	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
 
 #-------------------------------------------------------------------------------
 
-def overlap(bead1, bead2):
+def overlap(bead1, bead2, overlap_radius):
 
-	return distance(bead1, bead2) <= bead1.a + bead2.a
+	if overlap_radius == "hydrodynamic":
+		radius1 = bead1.a
+		radius2 = bead2.a
+	elif overlap_radius == "hard_core":
+		radius1 = bead1.hard_core_radius
+		radius2 = bead2.hard_core_radius
+	else:
+		print('invalid overlap_radius')
+		1/0
+
+	return distance(bead1, bead2) <= radius1 + radius2
 
 #-------------------------------------------------------------------------------
 
-def overlap_pbc(bead1, bead2, box_size, epsilon = 0.0):
+def overlap_pbc(bead1, bead2, box_size, overlap_radius, epsilon = 0.0):
 	"""Checks if there is an overlap between `bead1` and `bead2` (its closest translational replica)
 	
 	:param bead1: bead
@@ -394,7 +418,17 @@ def overlap_pbc(bead1, bead2, box_size, epsilon = 0.0):
 
 	dist = distance_pbc(bead1, bead2, box_size)
 
-	return dist <= bead1.a + bead2.a + epsilon
+	if overlap_radius == "hydrodynamic":
+		radius1 = bead1.a
+		radius2 = bead2.a
+	elif overlap_radius == "hard_core":
+		radius1 = bead1.hard_core_radius
+		radius2 = bead2.hard_core_radius
+	else:
+		print('invalid overlap_radius')
+		1/0
+
+	return dist <= radius1 + radius2 + epsilon
 
 #-------------------------------------------------------------------------------
 
@@ -412,7 +446,7 @@ def build_connection_matrix(beads):
 
 #-------------------------------------------------------------------------------
 
-def check_overlaps(beads, box_length, overlap_treshold, connection_matrix):
+def check_overlaps(beads, box_length, overlap_treshold, connection_matrix, overlap_radius):
 
 	c_double = ctypes.c_double
 	c_int = ctypes.c_int
@@ -424,7 +458,11 @@ def check_overlaps(beads, box_length, overlap_treshold, connection_matrix):
 	v0 = array('d', r_list)
 	r = (c_double * len(v0)).from_buffer(v0)
 
-	a_list = [ b.a  for b in beads]
+	if overlap_radius == "hydrodynamic": a_list = [ b.a for b in beads]
+	elif overlap_radius == "hard_core": a_list = [ b.hard_core_radius for b in beads]
+	else:
+		print('invalid overlap_radius')
+		1/0
 	v1 = array('d', a_list)
 	a = (c_double * len(v1)).from_buffer(v1)
 
