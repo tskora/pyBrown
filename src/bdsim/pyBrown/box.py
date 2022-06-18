@@ -464,7 +464,7 @@ class Box():
 	# @timing
 	def _check_overlaps(self):
 
-		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"], self.connection_matrix)
+		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"], self.connection_matrix, self.inp["overlap_radius"])
 
 	#-------------------------------------------------------------------------------
 

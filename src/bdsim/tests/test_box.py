@@ -44,7 +44,8 @@ class TestBox(unittest.TestCase):
 					  	   "lennard_jones_12": False, "energy_unit": "joule",
 					  	   "custom_interactions": False, "debug": False, "verbose": False,
 					  	   "overlap_treshold": 0.0, "max_move_attempts": 1000000,
-					  	   "cichocki_correction": True, "divergence_term": False}
+					  	   "cichocki_correction": True, "divergence_term": False,
+					  	   "overlap_radius": "hydrodynamic"}
 
 		self.test_filename = 'test_box.txt'
 
