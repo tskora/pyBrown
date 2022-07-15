@@ -248,7 +248,6 @@ class Box():
 							self._deterministic_step(dt, mult = -1)
 					self.crossed_wall = False
 				else:
-					if count_move_attempts > 1: 1/0
 					break
 
 			else:
