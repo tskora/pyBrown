@@ -204,8 +204,8 @@ class Box():
 		self._deterministic_step(dt)
 
 		if self.is_wall:
-			# print(self.crossed_wall)
 			deterministic_lead_to_crossing = self.crossed_wall
+			self._deterministic_step(dt, mult = -1)
 			self.crossed_wall = False
 
 		if self.inp["divergence_term"]:
@@ -225,19 +225,26 @@ class Box():
 			self._stochastic_step(dt)
 
 			if self.is_wall:
-				if self.crossed_wall and not deterministic_lead_to_crossing:
+				if self.crossed_wall:
 					self._stochastic_step(dt, mult = -1)
 					self.crossed_wall = False
 					continue
-				elif not self.crossed_wall and deterministic_lead_to_crossing:
-					self._stochastic_step(dt, mult = -1)
-					self.crossed_wall = False
-					continue
+				if deterministic_lead_to_crossing:
+					self._deterministic_step(dt)
+					deterministic_still_lead_to_crossing = self.crossed_wall
+					if deterministic_still_lead_to_crossing:
+						self._deterministic_step(dt, mult = -1)
+						self.crossed_wall = False
+						continue
 
 			if self.overlaps:
 
 				if self._check_overlaps():
 					self._stochastic_step(dt, mult = -1)
+					if self.is_wall:
+						if deterministic_lead_to_crossing:
+							self._deterministic_step(dt, mult = -1)
+					self.crossed_wall = False
 				else:
 					break
 
