@@ -382,7 +382,7 @@ class Box():
 			if self.is_flux:
 				self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.planes )
 			elif self.is_wall:
-				crossed_wall_now = bead.translate_and_check_for_plane_crossing( vector[3 * i: 3 * (i + 1)], self.planes )
+				crossed_wall_now = bead.translate_and_check_for_plane_crossing( vector[3 * i: 3 * (i + 1)], self.planes, self.inp["overlap_radius"] )
 				self.crossed_wall = self.crossed_wall or crossed_wall_now
 			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
 
