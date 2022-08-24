@@ -31,7 +31,7 @@ Sometimes it is useful to change some values provided in initial ``.json`` when 
 
 .. code-block:: console
 
-    $ BD-restart.py my_restart.rst inp_patch.json
+    $ BD-restart.py -j inp_patch.json my_restart.rst
 
 In ``inp_patch.json`` provide only those ``keyword: value`` pairs which you want to change. The rest will stay as it was configured in initial ``inp.json`` file.
 
