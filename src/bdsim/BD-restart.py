@@ -18,6 +18,7 @@
 
 import click
 import pickle
+import sys
 import time
 
 from contextlib import ExitStack
@@ -39,6 +40,14 @@ def main(restart_filename, json_filename):
 
 	timestamp( 'Reading restart from {} file', restart_filename )
 
+	if json_filename != None:
+		timestamp( 'Reading input patch from {} file', json_filename )
+		input_patch = InputData(json_filename).input_data
+
+		if "custom_interactions_filename" in input_patch.keys():
+			filename_location = '/'.join( input_patch["custom_interactions_filename"].split('/')[:-1] )
+			sys.path.append(filename_location)
+
 	with open(restart_filename, 'rb') as restart_file:
 		index_rst = pickle.load(restart_file)
 		j_rst = pickle.load(restart_file)
@@ -53,14 +62,15 @@ def main(restart_filename, json_filename):
 	timestamp( 'Input data loaded from the restart file:\n{}', input_data )
 
 	if json_filename != None:
-		timestamp( 'Reading input patch from {} file', json_filename )
-		input_patch = InputData(json_filename).input_data
 		for key in input_patch.keys():
 			if key in input_data.keys():
 				timestamp('Keyword {} updated: from {} to {}', key, input_data[key], input_patch[key])
 			else:
 				timestamp('Keyword {} introduced: {}', key, input_patch[key])
 			input_data[key] = input_patch[key]
+
+		if "custom_interactions_filename" in input_patch.keys():
+			sys.path.pop()
 
 	timestamp( 'Input data patched with the json file:\n{}', input_data )
 
