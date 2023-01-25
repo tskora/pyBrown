@@ -138,7 +138,7 @@ def read_str_file(input_str_filename):
                 lennard_jones_energy = float(line_segments[9])
                 mass = float(line_segments[10])
 
-                beads.append( Bead(coords = coords, hydrodynamic_radius = hydrodynamic_radius, label = label, hard_core_radius = lennard_jones_radius, epsilon_LJ = lennard_jones_energy, bead_id = bead_id) )
+                beads.append( Bead(coords = coords, hydrodynamic_radius = hydrodynamic_radius, label = label, hard_core_radius = lennard_jones_radius, charge = charge, epsilon_LJ = lennard_jones_energy, bead_id = bead_id) )
 
             if line_segments[0] == 'bond':
                 id1 = int( line_segments[1] )

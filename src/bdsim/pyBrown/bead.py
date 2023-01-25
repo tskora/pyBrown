@@ -71,13 +71,14 @@ class Bead():
 	:type mobile: `bool`
 	"""
 
-	def __init__(self, coords, hydrodynamic_radius, label = "XXX", hard_core_radius = None, epsilon_LJ = 0.0, mobile = True, bead_id = None):
+	def __init__(self, coords, hydrodynamic_radius, label = "XXX", hard_core_radius = None, charge = 0.0, epsilon_LJ = 0.0, mobile = True, bead_id = None):
 
 		self.r = np.array(coords)
 		self.a = hydrodynamic_radius
 		self.label = label
 		self.mobile = mobile
 		self.hard_core_radius = hard_core_radius if hard_core_radius is not None else self.a
+		self.charge = charge
 		self.epsilon_LJ = epsilon_LJ
 		self.bead_id = bead_id
 

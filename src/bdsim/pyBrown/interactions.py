@@ -17,6 +17,7 @@
 import importlib
 import math
 import numpy as np
+import scipy.constants
 import sys
 
 from pyBrown.bead import angle_pbc, get_bead_with_id
@@ -498,6 +499,10 @@ def set_interactions(input_data, beads):
 
 		_set_lennard_jones_interactions(input_data, interactions_for_simulation)
 
+	if input_data["dlvo"]:
+
+		_set_dlvo_interactions(input_data, interactions_for_simulation)
+
 	if _are_bonds(beads):
 
 		_set_harmonic_bond_interactions(input_data, interactions_for_simulation)
@@ -583,6 +588,22 @@ def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
 	elif input_data["lennard_jones_12"]:
 
 		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
+
+	interactions_for_simulation.append(i)
+
+#-------------------------------------------------------------------------------
+
+def _set_dlvo_interactions(input_data, interactions_for_simulation):
+
+	if not input_data["dlvo"]:
+
+		return
+
+	aux_keywords = [ "dielectric_constant", "inverse_debye_length" ]
+
+	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
+
+	i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
 
 	interactions_for_simulation.append(i)
 
@@ -817,6 +838,32 @@ def LJ_6_12_force(bead1, bead2, pointer, lennard_jones_alpha):
 	versor = pointer / dist
 
 	return lennard_jones_alpha*epsilon/dist*(6*s6-12*s12)*versor
+
+#-------------------------------------------------------------------------------
+
+def DLVO_energy(bead1, bead2, pointer, dielectric_constant, inverse_debye_length):
+
+	dist2 = _dist2_from_pointer(pointer)
+
+	dist = math.sqrt(dist2)
+
+	coulomb = bead1.charge * bead2.charge * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * dielectric_constant * dist )
+
+	return joule_to_kcal_per_mole( coulomb / ( ( 1 + inverse_debye_length*bead1.a ) * ( 1 + inverse_debye_length*bead2.a ) ) * np.exp(-inverse_debye_length*(dist-bead1.a-bead2.a)  ) ) * 10**10
+
+#-------------------------------------------------------------------------------
+
+def DLVO_force(bead1, bead2, pointer, dielectric_constant, inverse_debye_length):
+
+	dist2 = _dist2_from_pointer(pointer)
+
+	dist = math.sqrt(dist2)
+
+	versor = pointer/dist
+
+	E = DLVO_energy(bead1, bead2, pointer, dielectric_constant, inverse_debye_length)
+
+	return -( inverse_debye_length*E + E/dist ) * versor
 
 #-------------------------------------------------------------------------------
 

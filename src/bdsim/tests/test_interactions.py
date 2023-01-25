@@ -16,6 +16,7 @@
 
 import numpy as np
 import os
+import scipy.constants
 import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
@@ -23,8 +24,10 @@ import unittest
 from pyBrown.bead import Bead, pointer, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix
 from pyBrown.interactions import Interactions, LJ_6_attractive_energy, LJ_6_attractive_force,\
 								 LJ_12_repulsive_energy, LJ_12_repulsive_force,\
-								 LJ_6_12_energy, LJ_6_12_force, harmonic_bond_force, \
-								 harmonic_bond_energy, harmonic_angle_force, harmonic_angle_energy, \
+								 LJ_6_12_energy, LJ_6_12_force, DLVO_energy, DLVO_force, \
+								 harmonic_bond_force, harmonic_bond_energy, \
+								 harmonic_angle_force, harmonic_angle_energy, \
+								 joule_to_kcal_per_mole, \
 								 _set_custom_interactions
 
 #-------------------------------------------------------------------------------
@@ -1430,6 +1433,8 @@ class TestInteractions(unittest.TestCase):
 
 		self.assertSequenceEqual(list(F), [0.0, 0.0, -12.0*self.alpha*self.epsilon/self.d])
 
+	#---------------------------------------------------------------------------
+
 	def test_force_and_energy_of_LJ_12_particles_in_sigma_12_immobile(self):
 
 		box_length = 1000000.0
@@ -1494,6 +1499,8 @@ class TestInteractions(unittest.TestCase):
 
 		self.assertSequenceEqual(list(Fa + Fr), [0.0, 0.0, -6.0*self.alpha*self.epsilon/self.d, 0.0, 0.0, 6.0*self.alpha*self.epsilon/self.d])
 
+	#---------------------------------------------------------------------------
+
 	def test_force_and_energy_of_LJ_6_12_particles_in_sigma_1_immobile(self):
 
 		box_length = 1000000.0
@@ -1539,6 +1546,8 @@ class TestInteractions(unittest.TestCase):
 
 		self.assertSequenceEqual(list(Fa + Fr), [0.0, 0.0, 6.0*self.alpha*self.epsilon/self.d])
 
+	#---------------------------------------------------------------------------
+
 	def test_force_and_energy_of_LJ_6_12_particles_in_sigma_2_immobile(self):
 
 		box_length = 1000000.0
@@ -1583,6 +1592,8 @@ class TestInteractions(unittest.TestCase):
 		self.assertSequenceEqual(list(F), [0.0, 0.0, -6.0*self.alpha*self.epsilon/self.d])
 
 		self.assertSequenceEqual(list(Fa + Fr), [0.0, 0.0, -6.0*self.alpha*self.epsilon/self.d])
+
+	#---------------------------------------------------------------------------
 
 	def test_force_and_energy_of_LJ_6_12_particles_in_sigma_12_immobile(self):
 
@@ -2245,6 +2256,134 @@ class TestInteractions(unittest.TestCase):
 		for j in range(9):
 
 			self.assertAlmostEqual(F[j], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_dlvo_force_and_energy_of_neutral_particles(self):
+
+		box_length = 1000000.0
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		b2 = Bead([3.0, 0.0, 0.0], 1.0, charge = 0.0, epsilon_LJ = self.epsilon)
+
+		beads = [self.b1, b2]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.1}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertEqual(E, 0.0)
+
+		for j in range(6):
+
+			self.assertAlmostEqual(F[j], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_coulomb_force_and_energy_of_identical_particles(self):
+
+		box_length = 1000000.0
+
+		rdist = 3.0
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		b2 = Bead([0.0, 0.0, 0.0], 1.0, charge = 1.0, epsilon_LJ = self.epsilon)
+
+		b3 = Bead([rdist, 0.0, 0.0], 1.0, charge = 1.0, epsilon_LJ = self.epsilon)
+
+		beads = [b2, b3]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+
+		self.assertAlmostEqual(F[0], -joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		beads = [b3, b2]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+
+		self.assertAlmostEqual(F[0], joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], -joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_coulomb_force_and_energy_of_opposite_particles(self):
+
+		box_length = 1000000.0
+
+		rdist = 3.0
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		b2 = Bead([0.0, 0.0, 0.0], 1.0, charge = 1.0, epsilon_LJ = self.epsilon)
+
+		b3 = Bead([rdist, 0.0, 0.0], 1.0, charge = -1.0, epsilon_LJ = self.epsilon)
+
+		beads = [b2, b3]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, -joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+
+		self.assertAlmostEqual(F[0], joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], -joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
 
 	#---------------------------------------------------------------------------
 
