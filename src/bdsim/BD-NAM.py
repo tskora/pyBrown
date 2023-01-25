@@ -50,7 +50,7 @@ def main(input_filename):
 				"external_force": [0.0, 0.0, 0.0],
 				"lennard_jones_6": False, "lennard_jones_12": False,
 				"lennard_jones_alpha": 4.0,
-				"dlvo": False, "dielectric_constant": 1.0, "inverse_debye_length": 0.1,
+				"dlvo": False, "dielectric_constant": 78.54, "inverse_debye_length": 0.1,
 				"energy_unit": "joule",
 				"custom_interactions": False,
 				"cichocki_correction": True,

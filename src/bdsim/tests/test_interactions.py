@@ -2387,6 +2387,172 @@ class TestInteractions(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
+	def test_coulomb_force_and_energy_of_2e_and_4e_particles(self):
+
+		box_length = 1000000.0
+
+		rdist = 3.0
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		b2 = Bead([0.0, 0.0, 0.0], 1.0, charge = 2.0, epsilon_LJ = self.epsilon)
+
+		b3 = Bead([rdist, 0.0, 0.0], 1.0, charge = 4.0, epsilon_LJ = self.epsilon)
+
+		beads = [b2, b3]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, 8*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+
+		self.assertAlmostEqual(F[0], -8*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], 8*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		beads = [b3, b2]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, 8*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+
+		self.assertAlmostEqual(F[0], 8*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], -8*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_coulomb_force_and_energy_of_3e_and_m6e_particles(self):
+
+		box_length = 1000000.0
+
+		rdist = 3.0
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		b2 = Bead([0.0, 0.0, 0.0], 1.0, charge = 3.0, epsilon_LJ = self.epsilon)
+
+		b3 = Bead([rdist, 0.0, 0.0], 1.0, charge = -6.0, epsilon_LJ = self.epsilon)
+
+		beads = [b2, b3]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, -18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+
+		self.assertAlmostEqual(F[0], 18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], -18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		beads = [b3, b2]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, -18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+
+		self.assertAlmostEqual(F[0], -18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], 18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_dlvo_force_and_energy_of_identical_particles_default_epsilon_and_kappa(self):
+
+		box_length = 1000000.0
+
+		rdist = 3.0
+
+		F = np.zeros(6)
+
+		E = 0.0
+
+		b2 = Bead([0.0, 0.0, 0.0], 1.0, charge = 1.0, epsilon_LJ = self.epsilon)
+
+		b3 = Bead([rdist, 0.0, 0.0], 1.0, charge = 1.0, epsilon_LJ = self.epsilon)
+
+		beads = [b2, b3]
+
+		rij = compute_pointer_pbc_matrix(beads, box_length)
+
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 78.54, "inverse_debye_length": 0.1}, bonded = False, how_many_body = 2)
+
+		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+		self.assertAlmostEqual(E, joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * 78.54 * rdist * ( 1 + 0.1 )**2 ) * np.exp(-0.1*(rdist-2))), places = 7 )
+
+		self.assertAlmostEqual(F[0], -E*(0.1+1/rdist), places = 7)
+
+		self.assertAlmostEqual(F[1], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[2], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[3], E*(0.1+1/rdist), places = 7)
+
+		self.assertAlmostEqual(F[4], 0.0, places = 7)
+
+		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+	
 	def test_setting_custom_interactions(self):
 
 		input_data = {"custom_interactions": True,
