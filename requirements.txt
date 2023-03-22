@@ -1,5 +1,0 @@
-click==7.1.2
-numpy==1.19.4
-scipy==1.5.4
-sphinx_rtd_theme==0.5.2
-tqdm==4.54.1

@@ -21,9 +21,20 @@ import numpy as np
 from array import array
 from ctypes.util import find_library
 
-lib_name = "pyBrown"
-lib_path = find_library(lib_name)
-lib = ctypes.cdll.LoadLibrary( lib_path )
+# # lib_name = "pyBrown"
+# lib_name = "pyBrown.cpython-38-x86_64-linux-gnu.so"
+# # add = ctypes.cdll.LoadLibrary("pyBrown")
+# lib_path = find_library(lib_name)
+# print(lib_path)
+# # print(lib_path)
+# # lib = ctypes.cdll.LoadLibrary( lib_path )
+import os
+import pyBrown
+basepath = os.path.dirname(pyBrown.__file__)
+print(basepath)
+# # print(basepath)
+# # lib = ctypes.cdll.LoadLibrary( '../../'+lib_name )
+lib = ctypes.cdll.LoadLibrary( '/usr/local/lib/python3.8/dist-packages/pyBrown-0.1.0-py3.8-linux-x86_64.egg/libpyBrown.cpython-38-x86_64-linux-gnu.so' )
 
 #-------------------------------------------------------------------------------
 

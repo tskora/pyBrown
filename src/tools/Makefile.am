@@ -1,1 +1,0 @@
-dist_bin_SCRIPTS = average-me.py  average-mexp.py
