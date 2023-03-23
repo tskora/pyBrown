@@ -17,11 +17,11 @@
 import numpy as np
 import os
 import sys
-sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
+
 import unittest
 
-from pyBrown.bead import Bead, pointer, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix
-from pyBrown.interactions import Interactions, LJ_6_attractive_energy, LJ_6_attractive_force,\
+from pybrown.bead import Bead, pointer, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix
+from pybrown.interactions import Interactions, LJ_6_attractive_energy, LJ_6_attractive_force,\
 								 LJ_12_repulsive_energy, LJ_12_repulsive_force,\
 								 LJ_6_12_energy, LJ_6_12_force, harmonic_bond_force, \
 								 harmonic_bond_energy, harmonic_angle_force, harmonic_angle_energy, \
@@ -1188,7 +1188,7 @@ class TestInteractions(unittest.TestCase):
 
 	def test_force_and_energy_of_angle_against_derivative(self):
 
-		from pyBrown.bead import angle_pbc
+		from pybrown.bead import angle_pbc
 
 		box_length = 1000000.0
 

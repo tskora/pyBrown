@@ -22,14 +22,14 @@ import os
 import pickle
 import shutil
 import sys
-sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
+
 import unittest
 
 from scipy.constants import Boltzmann
 
-from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.box import Box
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
+from pybrown.bead import Bead, compute_pointer_pbc_matrix
+from pybrown.box import Box
+from pybrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
 
 #-------------------------------------------------------------------------------
 

@@ -18,12 +18,11 @@ import numpy as np
 import copy as cp
 import numpy as np
 import os.path
-# import sys
-# sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
+
 import unittest
 
-from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, pole_pointer_pbc, pole_distance_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
-from pyBrown.plane import Plane
+from pybrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, pole_pointer_pbc, pole_distance_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
+from pybrown.plane import Plane
 
 #-------------------------------------------------------------------------------
 

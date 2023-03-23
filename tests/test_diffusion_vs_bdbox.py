@@ -18,11 +18,11 @@ import math
 import numpy as np
 import os.path
 import sys
-sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
+
 import unittest
 
-from pyBrown.bead import Bead, compute_pointer_pbc_matrix
-from pyBrown.diffusion import RPY_Smith_M_matrix
+from pybrown.bead import Bead, compute_pointer_pbc_matrix
+from pybrown.diffusion import RPY_Smith_M_matrix
 
 #-------------------------------------------------------------------------------
 
