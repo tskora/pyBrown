@@ -24,9 +24,9 @@ import time
 from contextlib import ExitStack
 from tqdm import tqdm
 
-from pyBrown.box import Box
-from pyBrown.input import read_str_file, InputData
-from pyBrown.output import timestamp, write_to_xyz_file, write_to_restart_file,\
+from pybrown.box import Box
+from pybrown.input import read_str_file, InputData
+from pybrown.output import timestamp, write_to_xyz_file, write_to_restart_file,\
 						   write_to_con_file, write_to_enr_file, write_to_flux_file,\
 						   truncate_output_file_during_restart
 

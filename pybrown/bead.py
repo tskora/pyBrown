@@ -22,7 +22,7 @@ from array import array
 
 from distutils import sysconfig
 suffix = sysconfig.get_config_var('EXT_SUFFIX')
-lib = ctypes.cdll.LoadLibrary( 'libpyBrown'+suffix )
+lib = ctypes.cdll.LoadLibrary( 'libpybrown'+suffix )
 
 #-------------------------------------------------------------------------------
 

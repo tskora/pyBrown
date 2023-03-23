@@ -3,13 +3,13 @@ from setuptools import setup, find_packages, Extension
 with open('README.md') as f:
     long_description = f.read()
 
-extensions = [Extension("libpyBrown",
-                       ["pyBrown/cbead.c", "pyBrown/diff_tensor.c"],
+extensions = [Extension("libpybrown",
+                       ["pybrown/cbead.c", "pybrown/diff_tensor.c"],
                        libraries=['blas','lapack', 'm'],
-                       include_dirs=['pyBrown/'],
+                       include_dirs=['pybrown/'],
               )
 ]
-setup(name='pyBrown',
+setup(name='pybrown',
       version='0.1.0',
       description='Brownian dynamics simulation package',
       author='Tomasz Skora',
@@ -22,15 +22,15 @@ setup(name='pyBrown',
       },
       license='GNU GPL',
       install_requires = ['click','scipy','numpy','tqdm'],
-      packages=['pyBrown'],
+      packages=['pybrown'],
       zip_safe=False,
       ext_modules=extensions,
       entry_points={
         'console_scripts': [
-            'pybrown-bd = pyBrown.BD:main',
-            'pybrown-bd-restart = pyBrown.BD_restart:main',
-            'pybrown-bd-nam = pyBrown.BD_NAM:main',
-            'pybrown-bd-nam-restart = pyBrown.BD_NAM_restart:main',
+            'pybrown_bd = pybrown.BD:main',
+            'pybrown_bd_restart = pybrown.BD_restart:main',
+            'pybrown_bd_nam = pybrown.BD_NAM:main',
+            'pybrown_bd_nam_restart = pybrown.BD_NAM_restart:main',
         ],
       }
 )

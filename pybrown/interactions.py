@@ -19,7 +19,7 @@ import math
 import numpy as np
 import sys
 
-from pyBrown.bead import angle_pbc, get_bead_with_id
+from pybrown.bead import angle_pbc, get_bead_with_id
 
 	# :param force: function filling inputted vector with the values of forces acting on the
 	# respective beads computed using the pointer array, bead objects and information contained

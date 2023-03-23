@@ -17,7 +17,7 @@
 import numpy as np
 import json
 
-from pyBrown.bead import Bead
+from pybrown.bead import Bead
 
 #-------------------------------------------------------------------------------
 

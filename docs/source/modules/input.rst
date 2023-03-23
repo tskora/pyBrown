@@ -1,7 +1,7 @@
 Input
 ======
 
-.. automodule:: pyBrown.input
+.. automodule:: pybrown.input
    :members:
    :undoc-members:
    :show-inheritance:

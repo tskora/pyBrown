@@ -1,7 +1,7 @@
 Diffusion
 ==========
 
-.. automodule:: pyBrown.diffusion
+.. automodule:: pybrown.diffusion
    :members:
    :undoc-members:
    :show-inheritance:

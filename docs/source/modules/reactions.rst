@@ -1,7 +1,7 @@
 Reactions
 ===========
 
-.. automodule:: pyBrown.reactions
+.. automodule:: pybrown.reactions
    :members:
    :undoc-members:
    :show-inheritance:

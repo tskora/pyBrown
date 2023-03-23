@@ -1,7 +1,7 @@
 Output
 =======
 
-.. automodule:: pyBrown.output
+.. automodule:: pybrown.output
    :members:
    :undoc-members:
    :show-inheritance:

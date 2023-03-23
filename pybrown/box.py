@@ -19,12 +19,12 @@ import numpy as np
 
 from scipy.constants import Boltzmann
 
-from pyBrown.bead import compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix
-from pyBrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
-from pyBrown.interactions import set_interactions, kcal_per_mole_to_joule, eV_to_joule
-from pyBrown.output import timing
-from pyBrown.plane import Plane
-from pyBrown.reactions import set_reactions
+from pybrown.bead import compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix
+from pybrown.diffusion import RPY_M_matrix, RPY_Smith_M_matrix, JO_R_lubrication_correction_matrix
+from pybrown.interactions import set_interactions, kcal_per_mole_to_joule, eV_to_joule
+from pybrown.output import timing
+from pybrown.plane import Plane
+from pybrown.reactions import set_reactions
 
 #-------------------------------------------------------------------------------
 

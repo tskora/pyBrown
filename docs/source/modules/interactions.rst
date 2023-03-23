@@ -1,7 +1,7 @@
 Interactions
 =============
 
-.. automodule:: pyBrown.interactions
+.. automodule:: pybrown.interactions
    :members:
    :undoc-members:
    :show-inheritance:
