@@ -19,11 +19,10 @@ import numpy as np
 import os.path	
 
 from array import array
-from ctypes.util import find_library
 
-lib_name = "pyBrown"
-lib_path = find_library(lib_name)
-lib = ctypes.cdll.LoadLibrary( lib_path )
+from distutils import sysconfig
+suffix = sysconfig.get_config_var('EXT_SUFFIX')
+lib = ctypes.cdll.LoadLibrary( 'libpyBrown'+suffix )
 
 #-------------------------------------------------------------------------------
 

@@ -14,12 +14,12 @@ import sphinx_rtd_theme
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../src/bdsim/'))
+sys.path.insert(0, os.path.abspath('../../pyBrown/'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'pyBrown'
-copyright = '2021, Tomasz Skóra'
+copyright = '2021-, Tomasz Skóra'
 author = 'Tomasz Skóra'
 
 # The full version, including alpha/beta/rc tags
