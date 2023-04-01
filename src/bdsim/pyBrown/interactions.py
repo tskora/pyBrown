@@ -599,7 +599,7 @@ def _set_dlvo_interactions(input_data, interactions_for_simulation):
 
 		return
 
-	aux_keywords = [ "dielectric_constant", "inverse_debye_length" ]
+	aux_keywords = [ "dielectric_constant", "inverse_debye_length", "energy_unit" ]
 
 	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
 
@@ -841,7 +841,7 @@ def LJ_6_12_force(bead1, bead2, pointer, lennard_jones_alpha):
 
 #-------------------------------------------------------------------------------
 
-def DLVO_energy(bead1, bead2, pointer, dielectric_constant, inverse_debye_length):
+def DLVO_energy(bead1, bead2, pointer, dielectric_constant, inverse_debye_length, energy_unit):
 
 	dist2 = _dist2_from_pointer(pointer)
 
@@ -849,11 +849,27 @@ def DLVO_energy(bead1, bead2, pointer, dielectric_constant, inverse_debye_length
 
 	coulomb = bead1.charge * bead2.charge * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * dielectric_constant * dist )
 
-	return joule_to_kcal_per_mole( coulomb / ( ( 1 + inverse_debye_length*bead1.a ) * ( 1 + inverse_debye_length*bead2.a ) ) * np.exp(-inverse_debye_length*(dist-bead1.a-bead2.a)  ) ) * 10**10
+	energy_in_joules = coulomb / ( ( 1 + inverse_debye_length*bead1.a ) * ( 1 + inverse_debye_length*bead2.a ) ) * np.exp(-inverse_debye_length*(dist-bead1.a-bead2.a)  ) * 10**10
+
+	if energy_unit == "joule":
+
+		return energy_in_joules
+
+	elif energy_unit == "kcal/mol":
+
+		return joule_to_kcal_per_mole(energy_in_joules)
+
+	elif energy_unit == "eV":
+
+		return joule_to_eV(energy_in_joules)
+
+	else:
+
+		1/0
 
 #-------------------------------------------------------------------------------
 
-def DLVO_force(bead1, bead2, pointer, dielectric_constant, inverse_debye_length):
+def DLVO_force(bead1, bead2, pointer, dielectric_constant, inverse_debye_length, energy_unit):
 
 	dist2 = _dist2_from_pointer(pointer)
 
@@ -861,7 +877,7 @@ def DLVO_force(bead1, bead2, pointer, dielectric_constant, inverse_debye_length)
 
 	versor = pointer/dist
 
-	E = DLVO_energy(bead1, bead2, pointer, dielectric_constant, inverse_debye_length)
+	E = DLVO_energy(bead1, bead2, pointer, dielectric_constant, inverse_debye_length, energy_unit)
 
 	return -( inverse_debye_length*E + E/dist ) * versor
 

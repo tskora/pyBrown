@@ -144,6 +144,9 @@ Forces
 - ``"lennard_jones_6": bool`` -- switching on/off the Lennard-Jones :math:`\propto r^{-6}` attraction between beads (multiplicative coefficients and Lennard-Jones radii of every bead are defined in ``.str`` input file, see :ref:`preparing-input`), default: ``false``
 - ``"lennard_jones_12": bool`` -- switching on/off the Lennard-Jones :math:`\propto r^{-12}` repulsion between beads (multiplicative coefficients and Lennard-Jones radii of every bead are defined in ``.str`` input file, see :ref:`preparing-input`), default: ``false``
 - ``"lennard_jones_alpha": float`` -- Lennard-Jones interaction scaling, if set to ``4.0``, ``ε`` parameter from ``.str`` is equal to depth of combined LJ6-LJ12 potencial, default: ``4.0``
+- ``"dlvo": bool`` -- switching on/off DLVO screened electrostatic interactions between beads (charges of every bead are defined in ``.str`` input file, see :ref:`preparing-input`), default: ``false``
+- ``"dielectric_constant": float`` -- dielectric constant relative to vacuum, default: ``78.54``,
+- ``"inverse_debye_length": float`` -- inverse Debye length (*Å^-1*) responsible for exponential screening of electrostatic interactions, default: ``0.1``
 - ``"custom_interactions": bool`` -- switching on/off reading of energy and force from custom external file, default: ``false``
 - ``"custom_interactions_filename": string`` -- the name of the input ``.py`` file from which custom expressions for energy and force are loaded
 - ``"auxiliary_custom_interactions_keywords": {}`` -- extra parameters for the custom energy and force
@@ -158,6 +161,7 @@ Propagation
 - ``"m_midpoint": int`` -- inverse of a fraction of the time step made in a prediction part of midpoint algorithm (setting to ``2`` means that half of a time step will be made in a prediction part), default: ``100``
 - ``"check_overlaps": boolean`` -- whether to check overlaps in every simulation step, default: ``true``
 - ``"overlap_treshold": float`` -- how small distance is treated as overlap, default: ``0.0``
+- ``"overlap_radius": string`` -- which radius decides that there is an overlap, options: ``hydrodynamic`` or ``hard_core`` (Lennard-Jones), default: ``"hydrodynamic"``
 
 .. warning::
 

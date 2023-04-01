@@ -2273,7 +2273,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.1}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.1, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2303,7 +2303,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2329,7 +2329,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2367,7 +2367,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2405,7 +2405,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2431,7 +2431,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2469,7 +2469,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2495,19 +2495,19 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 1.0, "inverse_debye_length": 0.0, "energy_unit": "joule"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
-		self.assertAlmostEqual(E, -18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist )), places = 7 )
+		self.assertAlmostEqual(E, -18*10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist ), places = 7 )
 
-		self.assertAlmostEqual(F[0], -18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+		self.assertAlmostEqual(F[0], -18*10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 ), places = 7)
 
 		self.assertAlmostEqual(F[1], 0.0, places = 7)
 
 		self.assertAlmostEqual(F[2], 0.0, places = 7)
 
-		self.assertAlmostEqual(F[3], 18*joule_to_kcal_per_mole(10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 )), places = 7)
+		self.assertAlmostEqual(F[3], 18*10**10 * scipy.constants.e**2 / ( 4 * np.pi * scipy.constants.epsilon_0 * rdist**2 ), places = 7)
 
 		self.assertAlmostEqual(F[4], 0.0, places = 7)
 
@@ -2533,7 +2533,7 @@ class TestInteractions(unittest.TestCase):
 
 		rij = compute_pointer_pbc_matrix(beads, box_length)
 
-		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 78.54, "inverse_debye_length": 0.1}, bonded = False, how_many_body = 2)
+		i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 78.54, "inverse_debye_length": 0.1, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
 
 		E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
 
@@ -2550,6 +2550,49 @@ class TestInteractions(unittest.TestCase):
 		self.assertAlmostEqual(F[4], 0.0, places = 7)
 
 		self.assertAlmostEqual(F[5], 0.0, places = 7)
+
+	#---------------------------------------------------------------------------
+
+	def test_dlvo_against_derivative(self):
+
+		box_length = 1000000.0
+
+		rdists = np.linspace(22.0, 50.0, 10000)
+
+		drdist = rdists[1] - rdists[0]
+
+		obtained_energy = []
+
+		obtained_force = []
+
+		for rdist in rdists:
+
+			F = np.zeros(6)
+
+			E = 0.0
+
+			b2 = Bead([0.0, 0.0, 0.0], 1.0, charge = 1.0, epsilon_LJ = self.epsilon)
+
+			b3 = Bead([rdist, 0.0, 0.0], 1.0, charge = 2.0, epsilon_LJ = self.epsilon)
+
+			beads = [b2, b3]
+
+			rij = compute_pointer_pbc_matrix(beads, box_length)
+
+			i = Interactions(DLVO_force, DLVO_energy, auxiliary_force_parameters = {"dielectric_constant": 78.54, "inverse_debye_length": 0.1, "energy_unit": "kcal/mol"}, bonded = False, how_many_body = 2)
+
+			E += i.compute_forces_and_energy(mobile_beads = beads, immobile_beads = [], pointers_mobile = rij, pointers_mobile_immobile = [], F = F)
+
+			obtained_energy.append(E)
+
+			obtained_force.append(F[:3])
+
+		expected_force = -np.gradient(obtained_energy) / drdist
+
+		obtained_force_magnitude = np.array([np.linalg.norm(force) for force in obtained_force])
+
+		for index in range(1,len(expected_force)-1):
+			self.assertAlmostEqual(obtained_force_magnitude[index], expected_force[index], places = 7)
 
 	#---------------------------------------------------------------------------
 	
