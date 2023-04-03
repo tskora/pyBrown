@@ -20,7 +20,7 @@ import numpy as np
 import scipy.constants
 import sys
 
-from pyBrown.bead import angle_pbc, get_bead_with_id
+from pyBrown.bead import angle_pbc, dihedral_pbc, get_bead_with_id
 
 	# :param force: function filling inputted vector with the values of forces acting on the
 	# respective beads computed using the pointer array, bead objects and information contained
@@ -354,7 +354,6 @@ class Interactions():
 				if beadk.mobile: F[3*k:3*(k+1)] += f[6:]
 
 				E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
-
 
 		for i in range(len(immobile_beads)):
 
@@ -726,6 +725,26 @@ def harmonic_angle_energy(bead1, bead2, bead3, pointer12, pointer23, box_length)
 	angle *= np.pi / 180.0
 
 	return 0.5 * force_constant * (angle - angle_eq)**2
+
+#-------------------------------------------------------------------------------
+
+def harmonic_dihedral_force(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, box_length):
+
+	return np.zeros(12)
+
+#-------------------------------------------------------------------------------
+
+def harmonic_dihedral_energy(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, box_length):
+
+	dihedral_eq, force_constant = bead1.dihedraled_how[(bead2.bead_id, bead3.bead_id, bead4.bead_id)]
+
+	dihedral = dihedral_pbc(pointer12, pointer23, pointer34)
+
+	dihedral_eq *= np.pi / 180.0
+
+	dihedral *= np.pi / 180.0
+
+	return 0.5 * force_constant * (dihedral - dihedral_eq)**2
 
 #-------------------------------------------------------------------------------
 

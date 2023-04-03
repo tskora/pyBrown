@@ -294,6 +294,18 @@ def angle_pbc(r12, r23):
 
 #-------------------------------------------------------------------------------
 
+def dihedral_pbc(r12, r23, r34):
+
+	dist12 = math.sqrt( r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2] )
+
+	dist23 = math.sqrt( r23[0]*r23[0] + r23[1]*r23[1] + r23[2]*r23[2] )
+
+	dist34 = math.sqrt( r34[0]*r34[0] + r34[1]*r34[1] + r34[2]*r34[2] )
+
+	return np.rad2deg( np.arctan2(dist23*np.dot(r12, np.cross(r23, r34)), np.dot(np.cross(r12, r23), np.cross(r23, r34))) )
+
+#-------------------------------------------------------------------------------
+
 def compute_pointer_pbc_matrix(beads, box_length):
 
 	c_double = ctypes.c_double

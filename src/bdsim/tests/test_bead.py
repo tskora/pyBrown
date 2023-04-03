@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.abspath( os.path.join(os.path.dirname(__file__), '..') ))
 import unittest
 
-from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, pole_pointer_pbc, pole_distance_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc
+from pyBrown.bead import Bead, overlap, overlap_pbc, distance, distance_pbc, pointer_pbc, pole_pointer_pbc, pole_distance_pbc, compute_pointer_pbc_matrix, compute_pointer_immobile_pbc_matrix, check_overlaps, build_connection_matrix, angle_pbc, dihedral_pbc
 from pyBrown.plane import Plane
 
 #-------------------------------------------------------------------------------
@@ -699,6 +699,65 @@ class TestBead(unittest.TestCase):
 		bead3 = Bead([0.0, 0.0, 6.0], 1.0)
 
 		self.assertEqual(angle_pbc(bead2.r-bead1.r, bead3.r-bead2.r), 180.0)
+
+	#---------------------------------------------------------------------------
+
+	def test_angle_pbc_90_pbc(self):
+
+		bead1 = Bead([0.0, 50.0, 50.0], 1.0)
+		bead2 = Bead([0.0, 50.0, 52.5], 1.0)
+		bead3 = Bead([0.0, 51.0, 52.5], 1.0)
+
+		beads = [bead1, bead2, bead3]
+
+		rij = compute_pointer_pbc_matrix(beads, 26.0)
+
+		self.assertEqual(angle_pbc(bead2.r-bead1.r, bead3.r-bead2.r), 90.0)
+		self.assertEqual(angle_pbc(rij[0][1], rij[1][2]), 90.0)
+
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_linear(self):
+
+		bead1 = Bead([0.0, 0.0, 0.0], 1.0)
+		bead2 = Bead([0.0, 0.0, 2.5], 1.0)
+		bead3 = Bead([0.0, 0.0, 4.0], 1.0)
+		bead4 = Bead([0.0, 0.0, 8.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 0.0)
+
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_0(self):
+
+		bead1 = Bead([10.0, 0.0, -15.0], 1.0)
+		bead2 = Bead([0.0, 0.0, -5.0], 1.0)
+		bead3 = Bead([0.0, 0.0, 5.0], 1.0)
+		bead4 = Bead([10.0, 0.0, 15.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 0.0)
+
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_180(self):
+
+		bead1 = Bead([-10.0, 0.0, -15.0], 1.0)
+		bead2 = Bead([0.0, 0.0, -5.0], 1.0)
+		bead3 = Bead([0.0, 0.0, 5.0], 1.0)
+		bead4 = Bead([10.0, 0.0, 15.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 180.0)
+
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_180_2(self):
+
+		bead1 = Bead([10.0, 0.0, -15.0], 1.0)
+		bead2 = Bead([0.0, 0.0, -5.0], 1.0)
+		bead3 = Bead([0.0, 0.0, 5.0], 1.0)
+		bead4 = Bead([-10.0, 0.0, 15.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 180.0)
 
 #-------------------------------------------------------------------------------
 
