@@ -44,7 +44,8 @@ class TestBox(unittest.TestCase):
 					  	   "lennard_jones_12": False, "energy_unit": "joule",
 					  	   "custom_interactions": False, "debug": False, "verbose": False,
 					  	   "overlap_treshold": 0.0, "max_move_attempts": 1000000,
-					  	   "cichocki_correction": True, "divergence_term": False}
+					  	   "cichocki_correction": True, "divergence_term": False,
+					  	   "dimensions": 3}
 
 		self.test_filename = 'test_box.txt'
 
@@ -79,6 +80,42 @@ class TestBox(unittest.TestCase):
 			for _ in range(M//2): b.propagate( 0.001 )
 
 			restarted = [ bead.r[i] for bead in b.beads for i in range(3) ]
+
+			self.assertSequenceEqual( original, restarted )
+
+	#---------------------------------------------------------------------------
+
+	def test_seed_sync_2d(self):
+
+		self.mock_input["seed"] = 3
+		self.mock_input["dimensions"] = 2
+		self.mock_input["external_force"] = [0, 0]
+
+		beads = [ Bead(np.array([i, j], float), 0.1) for i in range(5) for j in range(5) ]
+
+		b = Box(beads, self.mock_input)
+
+		for M in range(4, 20):
+
+			for _ in range(M): b.propagate( 0.001 )
+
+			with open(self.test_filename, 'wb') as test_file:
+
+				pickle.dump(b, test_file)
+
+			for _ in range(M//2): b.propagate( 0.001 )
+
+			original = [ bead.r[i] for bead in b.beads for i in range(2) ]
+
+			del b
+
+			with open(self.test_filename, 'rb') as test_file:
+
+				b = pickle.load(test_file)
+
+			for _ in range(M//2): b.propagate( 0.001 )
+
+			restarted = [ bead.r[i] for bead in b.beads for i in range(2) ]
 
 			self.assertSequenceEqual( original, restarted )
 

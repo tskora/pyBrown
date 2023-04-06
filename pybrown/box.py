@@ -44,6 +44,8 @@ class Box():
 		self.beads = beads
 		self.inp = input_data
 		self.box_length = self.inp["box_length"]
+		self.dims = self.inp["dimensions"]
+		assert all([bead.dims == self.dims for bead in self.beads])
 
 		self._initialize_pseudorandom_number_generation()
 
@@ -380,11 +382,11 @@ class Box():
 
 		for i, bead in enumerate( self.mobile_beads ):
 			if self.is_flux:
-				self.net_flux[bead.label] += bead.translate_and_return_flux( vector[3 * i: 3 * (i + 1)], self.planes )
+				self.net_flux[bead.label] += bead.translate_and_return_flux( vector[self.dims * i: self.dims * (i + 1)], self.planes )
 			elif self.is_wall:
-				crossed_wall_now = bead.translate_and_check_for_plane_crossing( vector[3 * i: 3 * (i + 1)], self.planes )
+				crossed_wall_now = bead.translate_and_check_for_plane_crossing( vector[self.dims * i: self.dims * (i + 1)], self.planes )
 				self.crossed_wall = self.crossed_wall or crossed_wall_now
-			else: bead.translate( vector[3 * i: 3 * (i + 1)] )
+			else: bead.translate( vector[self.dims * i: self.dims * (i + 1)] )
 
 		if self.inp["debug"]: print('translation vector: {}\n'.format(vector.tolist()))
 
@@ -392,9 +394,9 @@ class Box():
 
 	def _generate_random_vector(self):
 
-		self.N = self.pseudorandom_number_generator.normal(0.0, 1.0, 3 * len(self.mobile_beads))
+		self.N = self.pseudorandom_number_generator.normal(0.0, 1.0, self.dims * len(self.mobile_beads))
 
-		self.draw_count += 3 * len(self.mobile_beads)
+		self.draw_count += self.dims * len(self.mobile_beads)
 
 		if self.inp["debug"]: print('random vector: {}\n'.format(self.N.tolist()))
 
@@ -464,21 +466,21 @@ class Box():
 	# @timing
 	def _check_overlaps(self):
 
-		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"], self.connection_matrix)
+		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"], self.connection_matrix, dims = self.dims)
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
 	def _compute_rij_matrix(self):
 
-		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length)
+		self.rij = compute_pointer_pbc_matrix(self.mobile_beads, self.box_length, dims = self.dims)
 
 	#-------------------------------------------------------------------------------
 
 	# @timing
 	def _compute_rik_matrix(self):
 
-		self.rik = compute_pointer_immobile_pbc_matrix(self.mobile_beads, self.immobile_beads, self.box_length)
+		self.rik = compute_pointer_immobile_pbc_matrix(self.mobile_beads, self.immobile_beads, self.box_length, dims = self.dims)
 
 	#-------------------------------------------------------------------------------
 
@@ -487,7 +489,7 @@ class Box():
 
 		if self.hydrodynamics == "nohi":
 
-			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//3].a for i in range(3*len(self.mobile_beads)) ] ) / self.viscosity
+			self.D = self.kBT * 10**19 / 6 / np.pi / np.array( [ self.mobile_beads[i//self.dims].a for i in range(self.dims*len(self.mobile_beads)) ] ) / self.viscosity
 
 			if self.inp["debug"]: print('far field diffusion matrix: {}\n'.format(self.D.tolist()))
 
@@ -593,7 +595,7 @@ class Box():
 						if build_Dnf:
 							self._compute_Dtot_matrix()
 
-				self.divergence_term += self.D[:][3*i + j]
+				self.divergence_term += self.D[:][self.dims*i + j]
 
 				bead.translate(-vector)
 
@@ -710,24 +712,24 @@ class Box():
 		for i, bead in enumerate(self.mobile_beads):
 			if self.is_external_force_region_x:
 				if bead.r[0] < self.Fex_region_x[0] or bead.r[0] > self.Fex_region_x[1]:
-					self.F[3*i:3*i+3] = np.zeros(3)
+					self.F[self.dims*i:self.dims*i+self.dims] = np.zeros(self.dims)
 					continue
 			if self.is_external_force_region_y:
 				if bead.r[1] < self.Fex_region_y[0] or bead.r[1] > self.Fex_region_y[1]:
-					self.F[3*i:3*i+3] = np.zeros(3)
+					self.F[self.dims*i:self.dims*i+self.dims] = np.zeros(self.dims)
 					continue
 			if self.is_external_force_region_z:
 				if bead.r[2] < self.Fex_region_z[0] or bead.r[2] > self.Fex_region_z[1]:
-					self.F[3*i:3*i+3] = np.zeros(3)
+					self.F[self.dims*i:self.dims*i+self.dims] = np.zeros(self.dims)
 					continue
-			self.F[3*i:3*i+3] = self.Fex
+			self.F[self.dims*i:self.dims*i+self.dims] = self.Fex
 
 	#-------------------------------------------------------------------------------
 
 	def _initialize_force(self):
 
 		self.Fex = np.array( self.inp["external_force"] )
-		self.F = np.zeros( 3*len(self.mobile_beads) )
+		self.F = np.zeros( self.dims*len(self.mobile_beads) )
 		self.E = 0.0
 		self._handle_external_force_restricted_to_region()
 

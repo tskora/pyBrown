@@ -24,7 +24,7 @@ static double distance_pbc(double rx, double ry, double rz, double box_length);
 
 // -------------------------------------------------------------------------------
 
-void pointer_pbc_matrix(double* positions, int number_of_beads, double box_length, double* pointers)
+void pointer_pbc_matrix(double* positions, int number_of_beads, double box_length, double* pointers, int dims)
 {
 	register int i = 0;
 	register int j = 0;
@@ -37,56 +37,65 @@ void pointer_pbc_matrix(double* positions, int number_of_beads, double box_lengt
 	{
 		for (i = j + 1; i < number_of_beads; i++)
 		{
-			temp = calloc(3, sizeof(double));
+			temp = calloc(dims, sizeof(double));
 
-			*temp = *(positions+3*i) - *(positions+3*j);
+			*temp = *(positions+dims*i) - *(positions+dims*j);
 
 			while (*temp >= box_length/2.0)
 			{
 				*temp -= box_length;
 			}
-			while (*temp <= -box_length/2.0)
+			while (*temp < -box_length/2.0)
 			{
 				*temp += box_length;
 			}
 
-			*(temp+1) = *(positions+3*i+1) - *(positions+3*j+1);
+			*(temp+1) = *(positions+dims*i+1) - *(positions+dims*j+1);
 
 			while (*(temp+1) >= box_length/2.0)
 			{
 				*(temp+1) -= box_length;
 			}
-			while (*(temp+1) <= -box_length/2.0)
+			while (*(temp+1) < -box_length/2.0)
 			{
 				*(temp+1) += box_length;
 			}
 
-			*(temp+2) = *(positions+3*i+2) - *(positions+3*j+2);
-
-			while (*(temp+2) >= box_length/2.0)
+			if (dims == 3)
 			{
-				*(temp+2) -= box_length;
-			}
-			while (*(temp+2) <= -box_length/2.0)
-			{
-				*(temp+2) += box_length;
+				*(temp+2) = *(positions+dims*i+2) - *(positions+dims*j+2);
+
+				while (*(temp+2) >= box_length/2.0)
+				{
+					*(temp+2) -= box_length;
+				}
+				while (*(temp+2) < -box_length/2.0)
+				{
+					*(temp+2) += box_length;
+				}
 			}
 
-			shifted_pointers = pointers + 3*i + 3*j*number_of_beads;
+			shifted_pointers = pointers + dims*i + dims*j*number_of_beads;
 
 			*shifted_pointers = *temp;
 
 			*(shifted_pointers+1) = *(temp+1);
 
-			*(shifted_pointers+2) = *(temp+2);
+			if (dims == 3)
+			{
+				*(shifted_pointers+2) = *(temp+2);
+			}
 
-			shifted_pointers = pointers + 3*j + 3*i*number_of_beads;
+			shifted_pointers = pointers + dims*j + dims*i*number_of_beads;
 
 			*shifted_pointers = -*temp;
 
 			*(shifted_pointers+1) = -*(temp+1);
 
-			*(shifted_pointers+2) = -*(temp+2);
+			if (dims == 3)
+			{
+				*(shifted_pointers+2) = -*(temp+2);
+			}
 
 			free(temp);
 
@@ -96,7 +105,7 @@ void pointer_pbc_matrix(double* positions, int number_of_beads, double box_lengt
 
 // -------------------------------------------------------------------------------
 
-void pointer_immobile_pbc_matrix(double* positions_mobile, double* positions_immobile, int number_of_mobile, int number_of_immobile, double box_length, double* pointers)
+void pointer_immobile_pbc_matrix(double* positions_mobile, double* positions_immobile, int number_of_mobile, int number_of_immobile, double box_length, double* pointers, int dims)
 {
 	register int i = 0;
 	register int j = 0;
@@ -109,48 +118,54 @@ void pointer_immobile_pbc_matrix(double* positions_mobile, double* positions_imm
 	{
 		for (i = 0; i < number_of_mobile; i++)
 		{
-			temp = calloc(3, sizeof(double));
+			temp = calloc(dims, sizeof(double));
 
-			*temp = *(positions_immobile+3*j) - *(positions_mobile+3*i);
+			*temp = *(positions_immobile+dims*j) - *(positions_mobile+dims*i);
 
 			while (*temp >= box_length/2.0)
 			{
 				*temp -= box_length;
 			}
-			while (*temp <= -box_length/2.0)
+			while (*temp < -box_length/2.0)
 			{
 				*temp += box_length;
 			}
 
-			*(temp+1) = *(positions_immobile+3*j+1) - *(positions_mobile+3*i+1);
+			*(temp+1) = *(positions_immobile+dims*j+1) - *(positions_mobile+dims*i+1);
 
 			while (*(temp+1) >= box_length/2.0)
 			{
 				*(temp+1) -= box_length;
 			}
-			while (*(temp+1) <= -box_length/2.0)
+			while (*(temp+1) < -box_length/2.0)
 			{
 				*(temp+1) += box_length;
 			}
 
-			*(temp+2) = *(positions_immobile+3*j+2) - *(positions_mobile+3*i+2);
-
-			while (*(temp+2) >= box_length/2.0)
+			if (dims == 3)
 			{
-				*(temp+2) -= box_length;
-			}
-			while (*(temp+2) <= -box_length/2.0)
-			{
-				*(temp+2) += box_length;
+				*(temp+2) = *(positions_immobile+dims*j+2) - *(positions_mobile+dims*i+2);
+
+				while (*(temp+2) >= box_length/2.0)
+				{
+					*(temp+2) -= box_length;
+				}
+				while (*(temp+2) <= -box_length/2.0)
+				{
+					*(temp+2) += box_length;
+				}
 			}
 
-			shifted_pointers = pointers + 3*j + 3*i*number_of_immobile;
+			shifted_pointers = pointers + dims*j + dims*i*number_of_immobile;
 
 			*shifted_pointers = *temp;
 
 			*(shifted_pointers+1) = *(temp+1);
 
-			*(shifted_pointers+2) = *(temp+2);
+			if (dims == 3)
+			{
+				*(shifted_pointers+2) = *(temp+2);
+			}
 
 			free(temp);
 		}
@@ -166,7 +181,7 @@ static int is_there_bond_between(int* connection_matrix, int number_of_beads, in
 
 // -------------------------------------------------------------------------------
 
-int check_overlaps(double* positions, double *as, int number_of_beads, double box_length, double overlap_treshold, int* connection_matrix)
+int check_overlaps(double* positions, double *as, int number_of_beads, double box_length, double overlap_treshold, int* connection_matrix, int dims)
 {
 	register int i = 0;
 	register int j = 0;
@@ -177,11 +192,18 @@ int check_overlaps(double* positions, double *as, int number_of_beads, double bo
 	{
 		for (i = j + 1; i < number_of_beads; i++)
 		{
-			rx = *(positions + 3*i) - *(positions + 3*j);
+			rx = *(positions + dims*i) - *(positions + dims*j);
 
-			ry = *(positions + 3*i + 1) - *(positions + 3*j + 1);
+			ry = *(positions + dims*i + 1) - *(positions + dims*j + 1);
 
-			rz = *(positions + 3*i + 2) - *(positions + 3*j + 2);
+			if (dims == 3)
+			{
+				rz = *(positions + dims*i + 2) - *(positions + dims*j + 2);
+			}
+			else
+			{
+				rz = 0.0;
+			}
 
 			radii_sum = *(as+i) + *(as+j);
 
@@ -234,7 +256,7 @@ static double distance_pbc(double rx, double ry, double rz, double box_length)
 	{
 		rx -= box_length;
 	}
-	while (rx <= -box_length/2.0)
+	while (rx < -box_length/2.0)
 	{
 		rx += box_length;
 	}
@@ -242,7 +264,7 @@ static double distance_pbc(double rx, double ry, double rz, double box_length)
 	{
 		ry -= box_length;
 	}
-	while (ry <= -box_length/2.0)
+	while (ry < -box_length/2.0)
 	{
 		ry += box_length;
 	}
@@ -250,7 +272,7 @@ static double distance_pbc(double rx, double ry, double rz, double box_length)
 	{
 		rz -= box_length;
 	}
-	while (rz <= -box_length/2.0)
+	while (rz < -box_length/2.0)
 	{
 		rz += box_length;
 	}

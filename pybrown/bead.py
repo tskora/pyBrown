@@ -73,6 +73,7 @@ class Bead():
 	def __init__(self, coords, hydrodynamic_radius, label = "XXX", hard_core_radius = None, epsilon_LJ = 0.0, mobile = True, bead_id = None):
 
 		self.r = np.array(coords)
+		self.dims = len(self.r)
 		self.a = hydrodynamic_radius
 		self.label = label
 		self.mobile = mobile
@@ -175,7 +176,7 @@ class Bead():
 		:type box_length: `float`
 		"""
 
-		for i in range(3):
+		for i in range(self.dims):
 			while self.r[i] < -box_length / 2:
 				self.r[i] += box_length
 			while self.r[i] >= box_length / 2:
@@ -242,9 +243,10 @@ def pointer_pbc(bead1, bead2, box_size):
 	:rtype: class: `numpy.ndarray(3)`
 	"""
 
+	assert bead1.dims == bead2.dims
 	r = pointer(bead1, bead2)
 
-	for i in range(3):
+	for i in range(bead1.dims):
 		while r[i] >= box_size/2:
 			r[i] -= box_size
 		while r[i] <= -box_size/2:
@@ -256,9 +258,10 @@ def pointer_pbc(bead1, bead2, box_size):
 
 def pole_pointer_pbc(bead1, bead2, bead3, box_size):
 
+	assert bead1.dims == bead2.dims and bead1.dims == bead3.dims
 	r = pole_pointer(bead1, bead2, bead3)
 
-	for i in range(3):
+	for i in range(bead1.dims):
 		while r[i] >= box_size/2:
 			r[i] -= box_size
 		while r[i] <= -box_size/2:
@@ -270,40 +273,48 @@ def pole_pointer_pbc(bead1, bead2, bead3, box_size):
 
 def angle_pbc(r12, r23):
 
-	dist12 = math.sqrt( r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2] )
+	assert len(r12) == len(r23)
 
-	dist23 = math.sqrt( r23[0]*r23[0] + r23[1]*r23[1] + r23[2]*r23[2] )
-
-	return np.rad2deg( np.arccos( -( r12[0]*r23[0] + r12[1]*r23[1] + r12[2]*r23[2] ) / dist12 / dist23 ) )
+	if len(r12) == 3:
+		dist12 = math.sqrt( r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2] )
+		dist23 = math.sqrt( r23[0]*r23[0] + r23[1]*r23[1] + r23[2]*r23[2] )
+		return np.rad2deg( np.arccos( -( r12[0]*r23[0] + r12[1]*r23[1] + r12[2]*r23[2] ) / dist12 / dist23 ) )
+	elif len(r12) == 2:
+		dist12 = math.sqrt( r12[0]*r12[0] + r12[1]*r12[1] )
+		dist23 = math.sqrt( r23[0]*r23[0] + r23[1]*r23[1] )	
+		return np.rad2deg( np.arccos( -( r12[0]*r23[0] + r12[1]*r23[1] ) / dist12 / dist23 ) )
+	else:
+		1/0
 
 #-------------------------------------------------------------------------------
 
-def compute_pointer_pbc_matrix(beads, box_length):
+def compute_pointer_pbc_matrix(beads, box_length, dims = 3):
 
 	c_double = ctypes.c_double
 
 	N = len(beads)
 	N_c = ctypes.c_int(N)
+	dims_c = ctypes.c_int(dims)
 
 	r_list = [ ri  for b in beads for ri in b.r]
 	v0 = array('d', r_list)
 	r = (c_double * len(v0)).from_buffer(v0)
 
-	p_list = [0.0]*N*N*3
+	p_list = [0.0]*N*N*dims
 	v1 = array('d', p_list)
 	p = (c_double * len(v1)).from_buffer(v1)
 
 	box_length_c = ctypes.c_double(box_length)
 
-	lib.pointer_pbc_matrix(r, N_c, box_length_c, p)
+	lib.pointer_pbc_matrix(r, N_c, box_length_c, p, dims_c)
 
-	rij = np.reshape(p, (N, N, 3))
+	rij = np.reshape(p, (N, N, dims))
 
 	return rij
 
 #-------------------------------------------------------------------------------
 
-def compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, box_length):
+def compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, box_length, dims = 3):
 
 	c_double = ctypes.c_double
 
@@ -313,6 +324,8 @@ def compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, box_length
 	N_immob = len(immobile_beads)
 	N_immob_c = ctypes.c_int(N_immob)
 
+	dims_c = ctypes.c_int(dims)
+
 	r_mob_list = [ ri  for b in mobile_beads for ri in b.r]
 	v0 = array('d', r_mob_list)
 	r_mob = (c_double * len(v0)).from_buffer(v0)
@@ -321,15 +334,15 @@ def compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, box_length
 	v1 = array('d', r_immob_list)
 	r_immob = (c_double * len(v1)).from_buffer(v1)
 
-	p_list = [0.0]*N_mob*N_immob*3
+	p_list = [0.0]*N_mob*N_immob*dims
 	v2 = array('d', p_list)
 	p = (c_double * len(v2)).from_buffer(v2)
 
 	box_length_c = ctypes.c_double(box_length)
 
-	lib.pointer_immobile_pbc_matrix(r_mob, r_immob, N_mob_c, N_immob_c, box_length_c, p)
+	lib.pointer_immobile_pbc_matrix(r_mob, r_immob, N_mob_c, N_immob_c, box_length_c, p, dims_c)
 
-	rik = np.reshape(p, (N_mob, N_immob, 3))
+	rik = np.reshape(p, (N_mob, N_immob, dims))
 
 	return rik
 
@@ -337,9 +350,12 @@ def compute_pointer_immobile_pbc_matrix(mobile_beads, immobile_beads, box_length
 
 def distance(bead1, bead2):
 
+	assert bead1.dims == bead2.dims
 	r = pointer(bead1, bead2)
 
-	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
+	if len(r) == 3: return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
+	elif len(r) == 2: return math.sqrt( r[0]*r[0] + r[1]*r[1] )
+	else: 1/0
 
 #-------------------------------------------------------------------------------
 
@@ -359,7 +375,9 @@ def distance_pbc(bead1, bead2, box_size):
 
 	r = pointer_pbc(bead1, bead2, box_size)
 
-	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
+	if len(r) == 3:	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
+	elif len(r) == 2:	return math.sqrt( r[0]*r[0] + r[1]*r[1] )
+	else: 1/0
 
 #-------------------------------------------------------------------------------
 
@@ -367,13 +385,15 @@ def pole_distance_pbc(bead1, bead2, bead3, box_size):
 
 	r = pole_pointer_pbc(bead1, bead2, bead3, box_size)
 
-	return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
+	if len(r) == 3: return math.sqrt( r[0]*r[0] + r[1]*r[1] + r[2]*r[2] )
+	elif len(r) == 2: return math.sqrt( r[0]*r[0] + r[1]*r[1])
+	else: 1/0
 
 #-------------------------------------------------------------------------------
 
-def overlap(bead1, bead2):
+def overlap(bead1, bead2, epsilon = 0.0):
 
-	return distance(bead1, bead2) <= bead1.a + bead2.a
+	return distance(bead1, bead2) <= bead1.a + bead2.a + epsilon
 
 #-------------------------------------------------------------------------------
 
@@ -411,13 +431,15 @@ def build_connection_matrix(beads):
 
 #-------------------------------------------------------------------------------
 
-def check_overlaps(beads, box_length, overlap_treshold, connection_matrix):
+def check_overlaps(beads, box_length, overlap_treshold, connection_matrix, dims = 3):
 
 	c_double = ctypes.c_double
 	c_int = ctypes.c_int
 
 	N = len(beads)
 	N_c = ctypes.c_int(N)
+
+	dims_c = ctypes.c_int(dims)
 
 	r_list = [ ri  for b in beads for ri in b.r]
 	v0 = array('d', r_list)
@@ -435,7 +457,7 @@ def check_overlaps(beads, box_length, overlap_treshold, connection_matrix):
 	v2 = array('i', connection_matrix_list)
 	connection_matrix_c = (c_int * len(v2)).from_buffer(v2)
 	
-	overlaps = lib.check_overlaps(r, a, N_c, box_length_c, overlap_treshold_c, connection_matrix_c)
+	overlaps = lib.check_overlaps(r, a, N_c, box_length_c, overlap_treshold_c, connection_matrix_c, dims_c)
 
 	return overlaps == 1
 

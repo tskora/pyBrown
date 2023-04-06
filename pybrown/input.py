@@ -110,7 +110,7 @@ class InputData:
 
 #-------------------------------------------------------------------------------
 
-def read_str_file(input_str_filename):
+def read_str_file(input_str_filename, dims = 3):
     """Reads bead positions and parameters.
 
     :param input_str_filename: the name of the input `.str` file with bead initial coordinates and parameters
@@ -131,7 +131,7 @@ def read_str_file(input_str_filename):
             if line_segments[0] == 'sub':
                 label = line_segments[1]
                 bead_id = int(line_segments[2])
-                coords = np.array([ float(line_segments[i]) for i in range(3, 6) ])
+                coords = np.array([ float(line_segments[i]) for i in range(3, 6-(3-dims)) ])
                 hydrodynamic_radius = float(line_segments[6])
                 charge = float(line_segments[7])
                 lennard_jones_radius = float(line_segments[8]) / 2

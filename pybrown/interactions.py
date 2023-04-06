@@ -92,7 +92,7 @@ class Interactions():
 	:type how_many_body: `int`
 	"""
 
-	def __init__(self, force_function, energy_function, auxiliary_force_parameters = {}, bonded = False, how_many_body = 2):
+	def __init__(self, force_function, energy_function, auxiliary_force_parameters = {}, bonded = False, how_many_body = 2, dims = 3):
 
 		self.force = force_function
 
@@ -103,6 +103,8 @@ class Interactions():
 		self.bonded = bonded
 
 		self.how_many_body = how_many_body
+
+		self.dims = dims
 
 	#-------------------------------------------------------------------------------
 
@@ -126,7 +128,7 @@ class Interactions():
 		:rtype: `float`
 		"""
 
-		assert len(F) == 3*len(mobile_beads), 'ERROR: invalid length of force vector'
+		assert len(F) == self.dims*len(mobile_beads), 'ERROR: invalid length of force vector'
 
 		if self.how_many_body == 1:
 
@@ -174,7 +176,7 @@ class Interactions():
 
 			f = self._compute_1B_force(mobile_beads[i])
 
-			F[3*i:3*(i+1)] += f
+			F[self.dims*i:self.dims*(i+1)] += f
 
 			E += self._compute_1B_energy(mobile_beads[i])
 
@@ -202,9 +204,9 @@ class Interactions():
 
 					f = self._compute_2B_force(beadi, beadj, pointerij)
 
-					F[3*i:3*(i+1)] += f
+					F[self.dims*i:self.dims*(i+1)] += f
 
-					F[3*j:3*(j+1)] -= f
+					F[self.dims*j:self.dims*(j+1)] -= f
 
 					E += self._compute_2B_energy(beadi, beadj, pointerij)
 
@@ -218,7 +220,7 @@ class Interactions():
 
 					f = self._compute_2B_force(beadi, beadj, pointerij)
 
-					F[3*i:3*(i+1)] += f
+					F[self.dims*i:self.dims*(i+1)] += f
 
 					E += self._compute_2B_energy(beadi, beadj, pointerij)
 
@@ -238,7 +240,7 @@ class Interactions():
 
 					f = self._compute_2B_force(beadi, beadj, pointerij)
 
-					F[3*j:3*(j+1)] -= f
+					F[self.dims*j:self.dims*(j+1)] -= f
 
 					E += self._compute_2B_energy(beadi, beadj, pointerij)
 
@@ -262,9 +264,9 @@ class Interactions():
 
 				f = self._compute_2B_force(beadi, beadj, pointerij)
 
-				F[3*i:3*(i+1)] += f
+				F[self.dims*i:self.dims*(i+1)] += f
 
-				F[3*j:3*(j+1)] -= f
+				F[self.dims*j:self.dims*(j+1)] -= f
 
 				E += self._compute_2B_energy(beadi, beadj, pointerij)
 
@@ -280,7 +282,7 @@ class Interactions():
 
 				f = self._compute_2B_force(beadi, beadj, pointerij)
 
-				F[3*i:3*(i+1)] += f
+				F[self.dims*i:self.dims*(i+1)] += f
 
 				E += self._compute_2B_energy(beadi, beadj, pointerij)
 
@@ -346,11 +348,11 @@ class Interactions():
 
 				f = self._compute_3B_force(beadi, beadj, beadk, pointerij, pointerjk)
 
-				F[3*i:3*(i+1)] += f[:3]
+				F[self.dims*i:self.dims*(i+1)] += f[:self.dims]
 
-				if beadj.mobile: F[3*j:3*(j+1)] += f[3:6]
+				if beadj.mobile: F[self.dims*j:self.dims*(j+1)] += f[self.dims:2*self.dims]
 
-				if beadk.mobile: F[3*k:3*(k+1)] += f[6:]
+				if beadk.mobile: F[self.dims*k:self.dims*(k+1)] += f[2*self.dims:]
 
 				E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
 
@@ -405,9 +407,9 @@ class Interactions():
 
 				f = self._compute_3B_force(beadi, beadj, beadk, pointerij, pointerjk)
 
-				if beadj.mobile: F[3*j:3*(j+1)] += f[3:6]
+				if beadj.mobile: F[self.dims*j:self.dims*(j+1)] += f[self.dims:2*self.dims]
 
-				if beadk.mobile: F[3*k:3*(k+1)] += f[6:]
+				if beadk.mobile: F[self.dims*k:self.dims*(k+1)] += f[2*self.dims:]
 
 				E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
 
@@ -666,6 +668,8 @@ def harmonic_bond_energy(bead1, bead2, pointer):
 
 def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
+	assert len(pointer12) == len(pointer23)
+
 	angle_eq, force_constant = bead1.angled_how[(bead2.bead_id, bead3.bead_id)]
 
 	angle = angle_pbc(pointer12, pointer23)
@@ -682,13 +686,13 @@ def harmonic_angle_force(bead1, bead2, bead3, pointer12, pointer23, box_length):
 
 	dist_23 = math.sqrt(dist2_23)
 
-	scaffold = np.zeros(9)
+	scaffold = np.zeros(3*len(pointer12))
 
-	scaffold[:3] = ( pointer23 / dist_23 + np.cos(angle) * pointer12 / dist_12 ) / dist_12
+	scaffold[:len(pointer12)] = ( pointer23 / dist_23 + np.cos(angle) * pointer12 / dist_12 ) / dist_12
 
-	scaffold[3:6] = (pointer12 - pointer23) / dist_12 / dist_23 - np.cos(angle) * ( pointer12 / dist2_12 - pointer23 / dist2_23 )
+	scaffold[len(pointer12):2*len(pointer12)] = (pointer12 - pointer23) / dist_12 / dist_23 - np.cos(angle) * ( pointer12 / dist2_12 - pointer23 / dist2_23 )
 
-	scaffold[6:] = -pointer12 / dist_12 / dist_23 - np.cos(angle) * pointer23 / dist2_23
+	scaffold[2*len(pointer12):] = -pointer12 / dist_12 / dist_23 - np.cos(angle) * pointer23 / dist2_23
 
 	return force_constant * (angle - angle_eq) / np.sin(angle) * scaffold
 

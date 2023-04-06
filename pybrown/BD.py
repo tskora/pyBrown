@@ -53,6 +53,7 @@ def main(input_filename):
 				"lennard_jones_alpha": 4.0, "energy_unit": "joule",
 				"custom_interactions": False,
 				"cichocki_correction": True,
+				"dimensions": 3,
 				"overlap_treshold": 0.0, "max_move_attempts": 1000000}
 
 	all_keywords = required_keywords + list(defaults.keys()) +\
@@ -148,7 +149,7 @@ def main(input_filename):
 
 		start = time.time()
 
-		bs = read_str_file(str_filename)
+		bs = read_str_file(str_filename, dims = inp["dimensions"])
 
 		box = Box(bs, i.input_data)
 
