@@ -149,7 +149,7 @@ def main(input_filename):
 
 		start = time.time()
 
-		bs = read_str_file(str_filename, dims = inp["dimensions"])
+		bs = read_str_file(str_filename, dims = i.input_data["dimensions"])
 
 		box = Box(bs, i.input_data)
 
