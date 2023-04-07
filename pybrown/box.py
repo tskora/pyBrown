@@ -60,9 +60,11 @@ class Box():
 			self._decompose_D_matrix()
 
 		if self.hydrodynamics == "rpy_smith" or self.hydrodynamics == "rpy_smith_lub":
+			assert self.dims == 3, 'Hydrodynamic interactions are implemented only in 3 dimensions'
 			self._set_ewald_summation_parameters()
 
 		if self.hydrodynamics == "rpy_lub" or self.hydrodynamics == "rpy_smith_lub":
+			assert self.dims == 3, 'Hydrodynamic interactions are implemented only in 3 dimensions'
 			self.lubrication_cutoff = self.inp["lubrication_cutoff"]
 			self.cichocki_correction = self.inp["cichocki_correction"]
 
@@ -688,6 +690,7 @@ class Box():
 
 		self.is_external_force_region = False
 		if "external_force_region" in self.inp.keys():
+			assert self.dims == 3, 'Force restricted to region works only in 3 dimensions'
 			self.is_external_force_region = True
 			if "x" in self.inp["external_force_region"].keys():
 				self.is_external_force_region_x = True
@@ -729,6 +732,7 @@ class Box():
 	def _initialize_force(self):
 
 		self.Fex = np.array( self.inp["external_force"] )
+		assert len(self.Fex) == self.dims
 		self.F = np.zeros( self.dims*len(self.mobile_beads) )
 		self.E = 0.0
 		self._handle_external_force_restricted_to_region()

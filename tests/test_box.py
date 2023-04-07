@@ -155,6 +155,42 @@ class TestBox(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
+	def test_seed_sync_implicit_2d(self):
+
+		self.mock_input["seed"] = None
+		self.mock_input["dimensions"] = 2
+		self.mock_input["external_force"] = [0, 0]
+
+		beads = [ Bead(np.array([i, j], float), 0.1) for i in range(5) for j in range(5) ]
+
+		b = Box(beads, self.mock_input)
+
+		for M in range(4, 20):
+
+			for _ in range(M): b.propagate( 0.001 )
+
+			with open(self.test_filename, 'wb') as test_file:
+
+				pickle.dump(b, test_file)
+
+			for _ in range(M//2): b.propagate( 0.001 )
+
+			original = [ bead.r[i] for bead in b.beads for i in range(2) ]
+
+			del b
+
+			with open(self.test_filename, 'rb') as test_file:
+
+				b = pickle.load(test_file)
+
+			for _ in range(M//2): b.propagate( 0.001 )
+
+			restarted = [ bead.r[i] for bead in b.beads for i in range(2) ]
+
+			self.assertSequenceEqual( original, restarted )
+
+	#---------------------------------------------------------------------------
+
 	def test_length_of_force_vector_with_immobile_particles(self):
 
 		self.mock_input["seed"] = None
@@ -168,6 +204,24 @@ class TestBox(unittest.TestCase):
 		b = Box(beads, self.mock_input)
 
 		self.assertEqual( len(b.F), 3*(5*5*5-125/5) )
+
+	#---------------------------------------------------------------------------
+
+	def test_length_of_force_vector_with_immobile_particles_2d(self):
+
+		self.mock_input["seed"] = None
+		self.mock_input["dimensions"] = 2
+		self.mock_input["external_force"] = [0, 0]
+
+		beads = [ Bead(np.array([i, j], float), 0.1) for i in range(5) for j in range(5) ]
+
+		for i, bead in enumerate(beads):
+
+			if i%5==0: bead.mobile = False
+
+		b = Box(beads, self.mock_input)
+
+		self.assertEqual( len(b.F), 2*(5*5-25/5) )
 
 	#---------------------------------------------------------------------------
 
@@ -275,6 +329,34 @@ class TestBox(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
+	def test_random_numbers_2d(self):
+
+		self.mock_input["seed"] = 7
+		self.mock_input["dimensions"] = 2
+		self.mock_input["external_force"] = [0,0]
+
+		N = 100
+
+		np.random.seed(7)
+
+		beads = [ Bead(np.array([0.0, 0.0], float), 1.0),
+				  Bead(np.array([3.0, 0.0], float), 1.0),
+				  Bead(np.array([0.0, 3.0], float), 1.0) ]
+
+		ref = np.random.normal(0.0, 1.0, (N, 2*len(beads)))
+
+		b = Box(beads, self.mock_input)
+
+		for i in range(len(beads)):
+
+			b._generate_random_vector()
+
+			for j in range(2): self.assertEqual(b.N[j], ref[i][j])
+
+			self.assertEqual(b.draw_count, (i+1)*2*len(beads))
+
+	#---------------------------------------------------------------------------
+
 	def test_ermak_nohi(self):
 
 		self.mock_input["seed"] = 0
@@ -322,6 +404,62 @@ class TestBox(unittest.TestCase):
 			for i in range(len(beads)):
 
 				for j in range(3):
+
+					self.assertEqual( beads[i].r[j], beads_copy[i].r[j] )
+
+	#---------------------------------------------------------------------------
+
+	def test_ermak_nohi_2d(self):
+
+		self.mock_input["seed"] = 17
+
+		self.mock_input["propagation_scheme"] = "ermak"
+
+		self.mock_input["hydrodynamics"] = "nohi"
+
+		self.mock_input["dimensions"] = 2
+
+		self.mock_input["external_force"] = [0,0]
+
+		Nit = 100
+
+		coords = [-6.0, -3.0, 0.0, 3.0, 6.0, 14.0]
+
+		dt = 1e-10
+
+		beads = [ Bead(np.array([x, y], float), 1.0) for x in coords for y in coords ]
+
+		beads_copy = cp.deepcopy( beads )
+
+		np.random.seed( self.mock_input["seed"] )
+
+		N = np.random.normal(0.0, 1.0, Nit*2*len(beads))
+
+		b = Box(beads, self.mock_input)
+
+		for iteration in range(Nit):
+
+			pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"], dims = 2)
+
+			b.propagate(dt)
+
+			D = Boltzmann * self.mock_input["T"] * 10**19 / ( 6.0 * np.pi * self.mock_input["viscosity"] ) * np.ones(2*len(beads))
+
+			B = np.sqrt(D)
+
+			Ni = N[2*iteration*len(beads):2*(iteration+1)*len(beads)]
+
+			BX = B * Ni * math.sqrt(2*dt)
+
+			for i in range(2*len(beads)): self.assertEqual(b.N[i], Ni[i])
+
+			for i, bead in enumerate(beads_copy):
+
+				bead.translate( BX[2*i:2*(i+1)] )
+
+			for i in range(len(beads)):
+
+				for j in range(2):
 
 					self.assertEqual( beads[i].r[j], beads_copy[i].r[j] )
 
