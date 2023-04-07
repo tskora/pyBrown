@@ -167,7 +167,7 @@ def main(input_filename):
 				if i.input_data["debug"]: print('STEP {}\n'.format(j))
 
 				if j % n_write == 0:
-					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
+					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads, dims = i.input_data["dimensions"])
 
 				if concentration:
 					write_to_con_file(con_file, j, dt, box.concentration)

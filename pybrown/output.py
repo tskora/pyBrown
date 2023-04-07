@@ -60,12 +60,14 @@ def truncate_output_file_during_restart(filename, line):
 
 #-------------------------------------------------------------------------------
 
-def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads):
+def write_to_xyz_file(xyz_file, xyz_filename, j, dt, beads, dims = 3):
 
 	xyz_file.write('{}\n'.format(len(beads)))
 	xyz_file.write('{} time [ps] {}\n'.format(xyz_filename, j*dt))
 	for bead in beads:
-		xyz_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+		if dims == 3: xyz_file.write('{} {} {} {}\n'.format(bead.label, *bead.r))
+		elif dims == 2: xyz_file.write('{} {} {} 0.0\n'.format(bead.label, *bead.r))
+		else: 1/0
 
 #-------------------------------------------------------------------------------
 

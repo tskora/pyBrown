@@ -172,7 +172,7 @@ def main(restart_filename, json_filename):
 				if input_data["debug"]: print('STEP {}\n'.format(j))
 
 				if j % n_write == 0:
-					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
+					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads, dims = input_data["dimensions"])
 
 				if concentration:
 					write_to_con_file(con_file, j, dt, box.concentration)
@@ -184,7 +184,7 @@ def main(restart_filename, json_filename):
 
 				if energy:
 					if j % n_enr == 0:
-						write_to_enr_file(enr_file, j, dt, box.E, i.input_data["energy_unit"])
+						write_to_enr_file(enr_file, j, dt, box.E, input_data["energy_unit"])
 
 				if j != 0 and j % n_restart == 0:
 					write_to_restart_file(rst_filename, index, j, box, xyz_filename, extra_output_filenames)

@@ -111,7 +111,7 @@ def main(input_filename):
 
 		start = time.time()
 
-		bs = read_str_file(str_filename)
+		bs = read_str_file(str_filename, dims = i.input_data["dimensions"])
 
 		box = Box(bs, i.input_data)
 
@@ -126,7 +126,7 @@ def main(input_filename):
 			while True:
 
 				if j % n_write == 0:
-					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads)
+					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads, dims = i.input_data["dimensions"])
 
 				box.propagate(dt, j%n_diff == 0, j%n_lub == 0, j%n_chol == 0)
 
