@@ -482,7 +482,7 @@ class Interactions():
 
 #-------------------------------------------------------------------------------
 
-def set_interactions(input_data, beads):
+def set_interactions(input_data, beads, dims = 3):
 	"""Sets the interactions based on the input data. Returns a list of interactions.
 	
 	:param input_data: dictionary with data inputted to `pyBrown`
@@ -498,19 +498,19 @@ def set_interactions(input_data, beads):
 
 	if input_data["lennard_jones_6"] or input_data["lennard_jones_12"]:
 
-		_set_lennard_jones_interactions(input_data, interactions_for_simulation)
+		_set_lennard_jones_interactions(input_data, interactions_for_simulation, dims = dims)
 
 	if _are_bonds(beads):
 
-		_set_harmonic_bond_interactions(input_data, interactions_for_simulation)
+		_set_harmonic_bond_interactions(input_data, interactions_for_simulation, dims = dims)
 
 	if _are_angles(beads):
 
-		_set_harmonic_angle_interactions(input_data, interactions_for_simulation)
+		_set_harmonic_angle_interactions(input_data, interactions_for_simulation, dims = dims)
 
 	if input_data["custom_interactions"]:
 
-		_set_custom_interactions(input_data, interactions_for_simulation)
+		_set_custom_interactions(input_data, interactions_for_simulation, dims = dims)
 
 	return interactions_for_simulation
 
@@ -536,19 +536,19 @@ def _are_angles(beads):
 
 #-------------------------------------------------------------------------------
 
-def _set_harmonic_bond_interactions(input_data, interactions_for_simulation):
+def _set_harmonic_bond_interactions(input_data, interactions_for_simulation, dims = 3):
 
 	aux_keywords = [  ]
 
 	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
 
-	i = Interactions(harmonic_bond_force, harmonic_bond_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = True)
+	i = Interactions(harmonic_bond_force, harmonic_bond_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = True, dims = dims)
 
 	interactions_for_simulation.append(i)
 
 #-------------------------------------------------------------------------------
 
-def _set_harmonic_angle_interactions(input_data, interactions_for_simulation):
+def _set_harmonic_angle_interactions(input_data, interactions_for_simulation, dims = 3):
 
 	if False:
 
@@ -558,13 +558,13 @@ def _set_harmonic_angle_interactions(input_data, interactions_for_simulation):
 
 	aux = { keyword: input_data[keyword] for keyword in aux_keywords }
 
-	i = Interactions(harmonic_angle_force, harmonic_angle_energy, auxiliary_force_parameters = aux, how_many_body = 3, bonded = True)
+	i = Interactions(harmonic_angle_force, harmonic_angle_energy, auxiliary_force_parameters = aux, how_many_body = 3, bonded = True, dims = dims)
 
 	interactions_for_simulation.append(i)
 
 #-------------------------------------------------------------------------------
 
-def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
+def _set_lennard_jones_interactions(input_data, interactions_for_simulation, dims = 3):
 
 	if not input_data["lennard_jones_6"] and not input_data["lennard_jones_12"]:
 
@@ -576,21 +576,21 @@ def _set_lennard_jones_interactions(input_data, interactions_for_simulation):
 
 	if input_data["lennard_jones_6"] and input_data["lennard_jones_12"]:
 
-		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
+		i = Interactions(LJ_6_12_force, LJ_6_12_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False, dims = dims)
 
 	elif input_data["lennard_jones_6"]:
 
-		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
+		i = Interactions(LJ_6_attractive_force, LJ_6_attractive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False, dims = dims)
 
 	elif input_data["lennard_jones_12"]:
 
-		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False)
+		i = Interactions(LJ_12_repulsive_force, LJ_12_repulsive_energy, auxiliary_force_parameters = aux, how_many_body = 2, bonded = False, dims = dims)
 
 	interactions_for_simulation.append(i)
 
 #-------------------------------------------------------------------------------
 
-def _set_custom_interactions(input_data, interactions_for_simulation):
+def _set_custom_interactions(input_data, interactions_for_simulation, dims = 3):
 
 	if not input_data["custom_interactions"]:
 
@@ -634,7 +634,7 @@ def _set_custom_interactions(input_data, interactions_for_simulation):
 
 		ef = eval( 'custom_module.' + energy_dictionary[key] )
 
-		interactions_for_simulation.append( Interactions(ff, ef, aux, bonded = bonded, how_many_body = how_many_body) )
+		interactions_for_simulation.append( Interactions(ff, ef, aux, bonded = bonded, how_many_body = how_many_body, dims = dims) )
 
 	sys.path.pop()
 
@@ -849,7 +849,11 @@ def joule_to_eV(value):
 #-------------------------------------------------------------------------------
 
 def _dist2_from_pointer(pointer):
-
-	return pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	if len(pointer) == 3:
+		return pointer[0]*pointer[0] + pointer[1]*pointer[1] + pointer[2]*pointer[2]
+	elif len(pointer) == 2:
+		return pointer[0]*pointer[0] + pointer[1]*pointer[1]
+	else:
+		1/0
 
 #-------------------------------------------------------------------------------

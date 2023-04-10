@@ -741,7 +741,7 @@ class Box():
 
 	def _initialize_interactions(self):
 
-		self.interactions = set_interactions(self.inp, self.beads)
+		self.interactions = set_interactions(self.inp, self.beads, dims = self.dims)
 
 	#-------------------------------------------------------------------------------
 
