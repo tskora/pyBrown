@@ -15,4 +15,5 @@ PYTHON_LIB = $(PYTHON_LIB_DIR)/bead.py\
 # via the configure script with --enable-system-python option
 install-exec-hook:
 	mkdir -p `python3 -m site --user-site`
+	echo "Installing python libraries to `python3 -m site --user-site`"
 	cp -rf --parents $(PYTHON_LIB) `python3 -m site --user-site`

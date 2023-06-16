@@ -714,6 +714,7 @@ uninstall-am: uninstall-dist_binSCRIPTS
 # via the configure script with --enable-system-python option
 install-exec-hook:
 	mkdir -p `python3 -m site --user-site`
+	echo "Installing python libraries to `python3 -m site --user-site`"
 	cp -rf --parents $(PYTHON_LIB) `python3 -m site --user-site`
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
