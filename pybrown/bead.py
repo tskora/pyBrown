@@ -419,7 +419,7 @@ def overlap_pbc(bead1, bead2, box_size, epsilon = 0.0):
 
 def build_connection_matrix(beads):
 
-	connection_matrix = np.zeros((len(beads), len(beads)), dtype = int)
+	connection_matrix = np.zeros((len(beads), len(beads)), dtype = np.int32)
 
 	for i in range(len(beads)):
 
@@ -438,6 +438,8 @@ def check_overlaps(beads, box_length, overlap_treshold, connection_matrix, dims 
 	c_double = ctypes.c_double
 	c_int = ctypes.c_int
 
+	lib.check_overlaps.argtypes = [ctypes.POINTER(c_double),ctypes.POINTER(c_double),c_int,c_double,c_double,np.ctypeslib.ndpointer(dtype=np.int32, ndim=1, flags='C_CONTIGUOUS'),c_int]
+
 	N = len(beads)
 	N_c = ctypes.c_int(N)
 
@@ -455,10 +457,12 @@ def check_overlaps(beads, box_length, overlap_treshold, connection_matrix, dims 
 
 	overlap_treshold_c = ctypes.c_double(overlap_treshold)
 
-	connection_matrix_list = [ connection_matrix[i][j] for i in range(N) for j in range(N) ]
-	v2 = array('i', connection_matrix_list)
-	connection_matrix_c = (c_int * len(v2)).from_buffer(v2)
-	
+	# connection_matrix_list = connection_matrix.ravel().tolist()
+	# v2 = array('i', connection_matrix_list)
+	# connection_matrix_c = (c_int * len(connection_matrix_list)).from_buffer(v2)
+
+	connection_matrix_c = connection_matrix.ravel()#.ctypes.data_as(ctypes.POINTER(c_int))
+
 	overlaps = lib.check_overlaps(r, a, N_c, box_length_c, overlap_treshold_c, connection_matrix_c, dims_c)
 
 	return overlaps == 1

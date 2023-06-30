@@ -150,7 +150,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	# @timing
+	@timing
 	def propagate(self, dt, build_Dff = True, build_Dnf = True, cholesky = True):
 		"""Single propagation of dynamics
 
@@ -465,7 +465,7 @@ class Box():
 
 	#-------------------------------------------------------------------------------
 
-	# @timing
+	@timing
 	def _check_overlaps(self):
 
 		return check_overlaps(self.beads, self.box_length, self.inp["overlap_treshold"], self.connection_matrix, dims = self.dims)

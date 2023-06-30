@@ -569,7 +569,7 @@ class TestBead(unittest.TestCase):
 
 			self.assertEqual(c_ish, python_ish)
 
-	#---------------------------------------------------------------------------
+	# ---------------------------------------------------------------------------
 
 	def test_overlap_vs_bonds(self):
 

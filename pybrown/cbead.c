@@ -192,6 +192,12 @@ int check_overlaps(double* positions, double *as, int number_of_beads, double bo
 	{
 		for (i = j + 1; i < number_of_beads; i++)
 		{
+
+			if ( is_there_bond_between(connection_matrix, number_of_beads, j, i) )
+			{
+				continue;
+			}
+
 			rx = *(positions + dims*i) - *(positions + dims*j);
 
 			ry = *(positions + dims*i + 1) - *(positions + dims*j + 1);
@@ -208,11 +214,6 @@ int check_overlaps(double* positions, double *as, int number_of_beads, double bo
 			radii_sum = *(as+i) + *(as+j);
 
 			radii_sum_pbc = box_length - radii_sum;
-
-			if ( is_there_bond_between(connection_matrix, number_of_beads, j, i) )
-			{
-				continue;
-			}
 
 			if ( ( (rx > radii_sum) && (rx < radii_sum_pbc) ) || ( (rx < -radii_sum) && (rx > -radii_sum_pbc) ) )
 			{
