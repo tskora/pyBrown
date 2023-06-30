@@ -140,7 +140,26 @@ class TestDiffusion(unittest.TestCase):
 
 		for i in range(N):
 			for j in range(N):
-				self.assertAlmostEqual(M_1[i][j], M_2[(i+3)%N][(j+3)%N], places = 7)		
+				self.assertAlmostEqual(M_1[i][j], M_2[(i+3)%N][(j+3)%N], places = 7)	
+
+	#-------------------------------------------------------------------------------
+
+	def test_M_RPY_Smith_sign_symmetry(self):
+
+		box_length = 30.0
+		alpha = np.sqrt(np.pi)
+		m = 2
+		n = 2
+
+		beads_1 = [ Bead(np.random.normal(0.0, 5.0, 3), 1.0) for i in range(20) ]
+		pointers_1 = compute_pointer_pbc_matrix(beads_1, box_length)
+
+		M_1 = RPY_Smith_M_matrix(beads_1, pointers_1, box_length, alpha, m, n)
+		M_2 = RPY_Smith_M_matrix(beads_1, -pointers_1, box_length, alpha, m, n)
+
+		for i in range(60):
+			for j in range(60):
+				self.assertAlmostEqual(M_1[i][j], M_2[i][j], places = 7)	
 
 #-------------------------------------------------------------------------------
 

@@ -427,6 +427,8 @@ def build_connection_matrix(beads):
 
 			if beads[i].is_there_bond_between(beads[j]): connection_matrix[i][j] = connection_matrix[j][i] = 1
 
+			if not (beads[i].mobile or beads[j].mobile): connection_matrix[i][j] = connection_matrix[j][i] = 1
+
 	return connection_matrix
 
 #-------------------------------------------------------------------------------
