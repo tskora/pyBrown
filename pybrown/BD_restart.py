@@ -172,7 +172,8 @@ def main(restart_filename, json_filename):
 				if input_data["debug"]: print('STEP {}\n'.format(j))
 
 				if j % n_write == 0:
-					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads, dims = input_data["dimensions"])
+					if input_data["xyz_only_mobile"]: write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.mobile_beads, dims = input_data["dimensions"])
+					else: write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads, dims = input_data["dimensions"])
 
 				if concentration:
 					write_to_con_file(con_file, j, dt, box.concentration)

@@ -42,6 +42,7 @@ def main(input_filename):
 	defaults = {"debug": False, "verbose": False, "hydrodynamics": "nohi",
 				"ewald_alpha": np.sqrt(np.pi), "ewald_real": 0, "ewald_imag": 0,
 				"diff_freq": 1, "lub_freq": 1, "chol_freq": 1, "xyz_write_freq": 1,
+				"xyz_only_mobile": False,
 				"lubrication_cutoff": 1,
 				"progress_bar": False,
 				"seed": None, "immobile_labels": [],
@@ -167,7 +168,8 @@ def main(input_filename):
 				if i.input_data["debug"]: print('STEP {}\n'.format(j))
 
 				if j % n_write == 0:
-					write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads, dims = i.input_data["dimensions"])
+					if i.input_data["xyz_only_mobile"]: write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.mobile_beads, dims = i.input_data["dimensions"])
+					else: write_to_xyz_file(xyz_file, xyz_filename, j, dt, box.beads, dims = i.input_data["dimensions"])
 
 				if concentration:
 					write_to_con_file(con_file, j, dt, box.concentration)
