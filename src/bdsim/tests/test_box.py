@@ -510,6 +510,65 @@ class TestBox(unittest.TestCase):
 
 							self.assertAlmostEqual( beads[i].r[j], beads_copy[i].r[j], places = 9 )
 
+
+
+
+
+
+
+
+
+
+
+
+#---------------------------------------------------------------------------
+
+	def test_inner_time_midpoint_rpy_smith_lub(self):
+
+		lubrication_cutoff = 10
+
+		self.mock_input["seed"] = 0
+
+		self.mock_input["propagation_scheme"] = "midpoint"
+
+		self.mock_input["hydrodynamics"] = "rpy_smith_lub"
+
+		self.mock_input["lubrication_cutoff"] = lubrication_cutoff
+
+		self.mock_input["ewald_alpha"] = np.sqrt( np.pi )
+
+		Nit = 100
+
+		coords = [-2.2, 0.0, 2.2]
+
+		ms = [ 2.0, 10.0, 100.0 ]
+
+		dt = 1e-10
+
+		for n in range(3):
+
+			for m in ms:
+
+				self.mock_input["ewald_real"] = n
+
+				self.mock_input["ewald_imag"] = n
+
+				self.mock_input["m_midpoint"] = m
+
+				beads = [ Bead(np.array([x, y, z], float), 1.0) for x in coords for y in coords for z in coords ]
+
+				np.random.seed( self.mock_input["seed"] )
+
+				N = np.random.normal(0.0, 1.0, Nit*3*len(beads))
+
+				b = Box(beads, self.mock_input)
+
+				for iteration in range(Nit):
+
+					b.propagate(dt)
+
+					self.assertAlmostEqual((iteration+1)*dt, b.time, places = 9)
+
 	#---------------------------------------------------------------------------
 
 	def tearDown(self):
