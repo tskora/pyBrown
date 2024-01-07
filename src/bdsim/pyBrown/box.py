@@ -424,7 +424,7 @@ class Box():
 
 		for reaction in self.reactions:
 
-			reaction.check_for_reactions(mobile_beads = self.mobile_beads, immobile_beads = self.immobile_beads, pointers_mobile = self.rij, pointers_mobile_immobile = self.rik)
+			reaction.check_for_reactions(mobile_beads = self.mobile_beads, immobile_beads = self.immobile_beads, pointers_mobile = self.rij, pointers_mobile_immobile = self.rik, time = self.time)
 
 			if reaction.end_simulation:
 

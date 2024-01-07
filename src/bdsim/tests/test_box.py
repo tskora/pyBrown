@@ -517,9 +517,37 @@ class TestBox(unittest.TestCase):
 
 
 
+	def test_inner_time_ermak_nohi(self):
 
+		self.mock_input["seed"] = 0
 
+		self.mock_input["propagation_scheme"] = "ermak"
 
+		self.mock_input["hydrodynamics"] = "nohi"
+
+		Nit = 100
+
+		coords = [-6.0, -3.0, 0.0, 3.0, 6.0]
+
+		dt = 1e-10
+
+		beads = [ Bead(np.array([x, y, z], float), 1.0) for x in coords for y in coords for z in coords ]
+
+		beads_copy = cp.deepcopy( beads )
+
+		np.random.seed( self.mock_input["seed"] )
+
+		N = np.random.normal(0.0, 1.0, Nit*3*len(beads))
+
+		b = Box(beads, self.mock_input)
+
+		for iteration in range(Nit):
+
+			pointers = compute_pointer_pbc_matrix(beads_copy, self.mock_input["box_length"])
+
+			b.propagate(dt)
+
+			self.assertAlmostEqual((iteration+1)*dt, b.time, places = 9)
 
 #---------------------------------------------------------------------------
 

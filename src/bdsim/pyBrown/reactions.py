@@ -41,9 +41,11 @@ class Reactions():
 
 	#-------------------------------------------------------------------------------
 
-	def check_for_reactions(self, mobile_beads, pointers_mobile, immobile_beads = [], pointers_mobile_immobile = []):
+	def check_for_reactions(self, mobile_beads, pointers_mobile, immobile_beads = [], pointers_mobile_immobile = [], time = None):
 
 		self.refresh_box = False
+
+		self.time = time
 
 		beads = mobile_beads + immobile_beads
 
@@ -122,6 +124,10 @@ class Reactions():
 			elif single_condition.strip().split(' ')[0] == 'random':
 
 				self._parse_random_condition(single_condition)
+
+			elif single_condition.strip().split(' ')[0] == 'time':
+
+				self._parse_time_condition(single_condition)
 
 			else:
 
@@ -209,6 +215,22 @@ class Reactions():
 
 		self.condition_types.append("random")
 
+#-------------------------------------------------------------------------------
+
+	def _parse_time_condition(self, single_condition):
+
+		dist_condition_dictionary = {}
+
+		_, sign, string_time = single_condition.strip().split(' ')
+
+		cutoff_time = float(string_time)
+
+		time_condition_tuple = (sign, cutoff_time)
+
+		self.conditions.append(time_condition_tuple)
+
+		self.condition_types.append("time")
+
 	#-------------------------------------------------------------------------------
 
 	def _parse_effect_string(self, effect_string):
@@ -234,6 +256,8 @@ class Reactions():
 			elif condition_type == "angle": answer = answer and self._reaction_criterion_angle(ntuple, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, condition)
 
 			elif condition_type == "random": answer = answer and self._reaction_criterion_random(condition)
+
+			elif condition_type == "time": answer = answer and self._reaction_criterion_time(condition)
 
 			else: 1/0
 
@@ -392,6 +416,40 @@ class Reactions():
 		self.draw_count += 1
 
 		return ( a < probability )
+
+	#-------------------------------------------------------------------------------
+
+	def _reaction_criterion_time(self, condition):
+
+		sign, cutoff_time = condition
+
+		cutoff_time = float(cutoff_time)
+
+		if sign == ">":
+
+			if self.time <= cutoff_time:
+
+				return False
+
+		if sign == ">=":	
+
+			if self.time < cutoff_time:
+
+				return False
+
+		if sign == "<=":
+
+			if self.time > cutoff_time:
+
+				return False
+
+		if sign == "<":
+
+			if self.time >= cutoff_time:
+
+				return False
+
+		return True
 
 	#-------------------------------------------------------------------------------
 
