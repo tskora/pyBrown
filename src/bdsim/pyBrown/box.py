@@ -108,6 +108,8 @@ class Box():
 				self.planes.append( Plane(plane_point = walls["plane_point"][index], normal_vector = walls["normal"][index]) )
 			print(self.planes)
 
+		self.time = 0.0
+
 	#-------------------------------------------------------------------------------
 
 	def _refresh_box(self):
@@ -196,6 +198,8 @@ class Box():
 		self._keep_beads_in_box()
 
 		if self.is_concentration: self._compute_concentration_in_region()
+
+		self.time += dt
 
 	#-------------------------------------------------------------------------------
 
@@ -442,7 +446,7 @@ class Box():
 
 		for reaction in self.reactions:
 
-			reaction.check_for_reactions(mobile_beads = self.mobile_beads, immobile_beads = self.immobile_beads, pointers_mobile = self.rij, pointers_mobile_immobile = self.rik)
+			reaction.check_for_reactions(mobile_beads = self.mobile_beads, immobile_beads = self.immobile_beads, pointers_mobile = self.rij, pointers_mobile_immobile = self.rik, time = self.time)
 
 			if reaction.end_simulation:
 

@@ -44,7 +44,8 @@ class TestReactions(unittest.TestCase):
 			['example_reaction', 'A+B+C->?', 'dist A B > 0.4, dist B C <= 0.3', 'end_simulation'],
 			['example_reaction', 'A+B+C->D+E', 'dist A B > 0.4, dist B C <= 0.3, pole_dist B A C < 1.28', 'end_simulation'],
 			['example_reaction', 'A+A->?', 'dist A A <= 0.1, random 0.5', 'end_simulation'],
-			['example_reaction', 'A+B->C', 'dist A B <= 2.5', 'end_simulation']
+			['example_reaction', 'A+B->C', 'dist A B <= 2.5', 'end_simulation'],
+			['example_reaction', 'A+B->C', 'dist A B <= 2.5, time > 20.0', 'end_simulation']
 		]
 
 	#---------------------------------------------------------------------------
@@ -164,6 +165,52 @@ class TestReactions(unittest.TestCase):
 		self.assertEqual(r.number_of_substrates, 2)
 
 		self.assertEqual(r.substrates_count['A'], 2)
+
+	#---------------------------------------------------------------------------
+
+	def test_reaction_string_parsing6(self):
+
+		r = Reactions(*self.reaction_strings[5])
+
+		self.assertSequenceEqual(r.substrates, ['A', 'B'])
+
+		self.assertSequenceEqual(r.products, ['C'])
+
+		self.assertSequenceEqual(r.condition_types, ["dist"])
+
+		self.assertSequenceEqual(r.conditions[0]['A B'], ('<=', 2.5))
+
+		self.assertSequenceEqual(r.conditions[0]['B A'], ('<=', 2.5))
+
+		self.assertEqual(r.number_of_substrates, 2)
+
+		self.assertEqual(r.substrates_count['A'], 1)
+
+		self.assertEqual(r.substrates_count['B'], 1)
+
+	#---------------------------------------------------------------------------
+
+	def test_reaction_string_parsing7(self):
+
+		r = Reactions(*self.reaction_strings[6])
+
+		self.assertSequenceEqual(r.substrates, ['A', 'B'])
+
+		self.assertSequenceEqual(r.products, ['C'])
+
+		self.assertSequenceEqual(r.condition_types, ["dist", "time"])
+
+		self.assertSequenceEqual(r.conditions[0]['A B'], ('<=', 2.5))
+
+		self.assertSequenceEqual(r.conditions[0]['B A'], ('<=', 2.5))
+
+		self.assertSequenceEqual(r.conditions[1], ('>', 20.0))
+
+		self.assertEqual(r.number_of_substrates, 2)
+
+		self.assertEqual(r.substrates_count['A'], 1)
+
+		self.assertEqual(r.substrates_count['B'], 1)
 
 	#---------------------------------------------------------------------------
 
@@ -492,6 +539,26 @@ class TestReactions(unittest.TestCase):
 
 	#---------------------------------------------------------------------------
 
+	def test_reaction_criterion7(self):
+
+		r = Reactions(*self.reaction_strings[6])
+
+		r.time = 0.0
+
+		self.assertFalse( r._reaction_criterion([0, 1], self.beads, [], self.rij, []) )
+
+		self.beads[1].translate([0.0, 0.0, -1])
+
+		self.rij = compute_pointer_pbc_matrix(self.beads, 10000.0)
+
+		self.assertFalse( r._reaction_criterion([0, 1], self.beads, [], self.rij, []) )
+
+		r.time = 30.0
+
+		self.assertTrue( r._reaction_criterion([0, 1], self.beads, [], self.rij, []) )
+
+	#---------------------------------------------------------------------------
+
 	def test_check_for_reactions(self):
 
 		r = Reactions(*self.reaction_strings[0])
@@ -581,6 +648,26 @@ class TestReactions(unittest.TestCase):
 		r.check_for_reactions(beads, rij)
 
 		self.assertTrue( r.end_simulation )
+
+	#---------------------------------------------------------------------------
+
+	def test_check_for_reactions7(self):
+
+		beads = [ Bead([0.0, 0.0, 0.0], 1.0, label = 'A'),
+				  Bead([0.0, 0.0, 2.0], 1.0, label = 'B') ]
+
+		rij = compute_pointer_pbc_matrix(beads, 10000.0)
+
+		r = Reactions('example_reaction', 'A+B->?', 'dist A B < 100.0, time > 100.0', 'end_simulation')
+
+		for i in range(200):
+
+			r.check_for_reactions(beads, rij, time = i)
+
+			self.assertEqual(i, r.time)
+
+			if i <= 100.0: self.assertFalse( r.end_simulation )
+			else: self.assertTrue( r.end_simulation )
 
 	#---------------------------------------------------------------------------
 
