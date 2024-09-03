@@ -163,6 +163,18 @@ class Interactions():
 
 				1/0
 
+		if self.how_many_body == 4:
+
+			if self.bonded:
+
+				E = self._compute_4B_bonded_force_and_energy(mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F)
+
+			elif not self.bonded:
+
+				print('not implemented')
+
+				1/0
+
 		return E
 
 	#-------------------------------------------------------------------------------
@@ -415,6 +427,134 @@ class Interactions():
 
 	#-------------------------------------------------------------------------------
 
+	def _compute_4B_bonded_force_and_energy(self, mobile_beads, immobile_beads, pointers_mobile, pointers_mobile_immobile, F):
+
+		# TODO: CORRECT ITERATIONS OVER ALL DIHEDRAL BONDED QUADRUPLES
+
+		E = 0.0
+
+		# for i in range(len(mobile_beads)):
+
+		# 	beadi = mobile_beads[i]
+
+		# 	for idx1, idx2 in beadi.angled_with:
+
+		# 		j = get_bead_with_id(mobile_beads, idx1)
+
+		# 		k = get_bead_with_id(mobile_beads, idx2)
+
+		# 		if j is not None:
+
+		# 			beadj = mobile_beads[j]
+
+		# 			pointerij = pointers_mobile[i][j]
+
+		# 		else:
+
+		# 			j = get_bead_with_id(immobile_beads, idx1)
+
+		# 			beadj = immobile_beads[j]
+
+		# 			pointerij = pointers_mobile_immobile[i][j]
+
+		# 		if k is not None:
+
+		# 			beadk = mobile_beads[k]
+
+		# 			if beadj.mobile:
+
+		# 				pointerjk = pointers_mobile[j][k]
+
+		# 			else:
+
+		# 				pointerjk = -pointers_mobile_immobile[k][j]
+
+		# 		else:
+
+		# 			k = get_bead_with_id(immobile_beads, idx2)
+
+		# 			beadk = immobile_beads[k]
+
+		# 			if beadj.mobile:
+
+		# 				pointerjk = pointers_mobile_immobile[j][k]
+
+		# 			else:
+
+		# 				pointerik = pointers_mobile_immobile[i][k]
+
+		# 				pointerjk = pointerik - pointerij
+
+		# 		f = self._compute_3B_force(beadi, beadj, beadk, pointerij, pointerjk)
+
+		# 		F[3*i:3*(i+1)] += f[:3]
+
+		# 		if beadj.mobile: F[3*j:3*(j+1)] += f[3:6]
+
+		# 		if beadk.mobile: F[3*k:3*(k+1)] += f[6:]
+
+		# 		E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
+
+		# for i in range(len(immobile_beads)):
+
+		# 	beadi = immobile_beads[i]
+
+		# 	for idx1, idx2 in beadi.angled_with:
+
+		# 		j = get_bead_with_id(mobile_beads, idx1)
+
+		# 		k = get_bead_with_id(mobile_beads, idx2)
+
+		# 		if j is None and k is None: continue
+
+		# 		elif ( j is not None ) and ( k is not None ):
+
+		# 			beadj = mobile_beads[j]
+
+		# 			beadk = mobile_beads[k]
+
+		# 			pointerij = -pointers_mobile_immobile[j][i]
+
+		# 			pointerjk = pointers_mobile[j][k]
+
+		# 		elif j is not None:
+
+		# 			beadj = mobile_beads[j]
+
+		# 			k = get_bead_with_id(immobile_beads, idx2)
+
+		# 			beadk = immobile_beads[k]
+
+		# 			pointerij = -pointers_mobile_immobile[j][i]
+
+		# 			pointerjk = pointers_mobile_immobile[j][k]
+
+		# 		else:
+
+		# 			j = get_bead_with_id(immobile_beads, idx1)
+
+		# 			beadj = immobile_beads[j]
+
+		# 			beadk = mobile_beads[k]
+
+		# 			pointerjk = -pointers_mobile_immobile[k][j]
+
+		# 			pointerik = -pointers_mobile_immobile[k][i]
+
+		# 			pointerij = pointerik - pointerjk
+
+		# 		f = self._compute_3B_force(beadi, beadj, beadk, pointerij, pointerjk)
+
+		# 		if beadj.mobile: F[3*j:3*(j+1)] += f[3:6]
+
+		# 		if beadk.mobile: F[3*k:3*(k+1)] += f[6:]
+
+		# 		E += self._compute_3B_energy(beadi, beadj, beadk, pointerij, pointerjk)
+
+		return E
+
+	#-------------------------------------------------------------------------------
+
 	def _compute_1B_force(self, bead1):
 
 		return self.force(bead1, **self.auxiliary_force_parameters)
@@ -510,6 +650,10 @@ def set_interactions(input_data, beads):
 
 		_set_harmonic_angle_interactions(input_data, interactions_for_simulation)
 
+	if _are_dihedrals(beads):
+
+		_set_harmonic_dihedral_interactions(input_data, interactions_for_simulation)
+
 	if input_data["custom_interactions"]:
 
 		_set_custom_interactions(input_data, interactions_for_simulation)
@@ -533,6 +677,16 @@ def _are_angles(beads):
 	for bead in beads:
 
 		if len(bead.angled_with) > 0: return True
+
+	return False
+
+#-------------------------------------------------------------------------------
+
+def _are_dihedrals(beads):
+
+	for bead in beads:
+
+		if len(bead.dihed_with) > 0: return True
 
 	return False
 
@@ -730,11 +884,15 @@ def harmonic_angle_energy(bead1, bead2, bead3, pointer12, pointer23, box_length)
 
 def harmonic_dihedral_force(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, box_length):
 
+	# TODO: express the force mathematically
+
 	return np.zeros(12)
 
 #-------------------------------------------------------------------------------
 
 def harmonic_dihedral_energy(bead1, bead2, bead3, bead4, pointer12, pointer23, pointer34, box_length):
+
+	# TODO: test this expression to verify corrext behavior around 0/360
 
 	dihedral_eq, force_constant = bead1.dihedraled_how[(bead2.bead_id, bead3.bead_id, bead4.bead_id)]
 
@@ -744,7 +902,9 @@ def harmonic_dihedral_energy(bead1, bead2, bead3, bead4, pointer12, pointer23, p
 
 	dihedral *= np.pi / 180.0
 
-	return 0.5 * force_constant * (dihedral - dihedral_eq)**2
+	dihedral_diff = np.min([np.abs(dihedral-dihedral_eq), np.abs(2*np.pi-dihedral-dihedral_eq)])
+
+	return 0.5 * force_constant * dihedral_diff**2
 
 #-------------------------------------------------------------------------------
 

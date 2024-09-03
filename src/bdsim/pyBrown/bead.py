@@ -88,6 +88,9 @@ class Bead():
 		self.angled_with = []
 		self.angled_how = {}
 
+		self.dihed_with = []
+		self.dihed_how = {}
+
 	#-------------------------------------------------------------------------------
 
 	def translate(self, vector):
