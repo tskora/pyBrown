@@ -302,7 +302,11 @@ def dihedral_pbc(r12, r23, r34):
 
 	dist34 = math.sqrt( r34[0]*r34[0] + r34[1]*r34[1] + r34[2]*r34[2] )
 
-	return np.rad2deg( np.arctan2(dist23*np.dot(r12, np.cross(r23, r34)), np.dot(np.cross(r12, r23), np.cross(r23, r34))) )
+	dihe = np.rad2deg( np.arctan2(dist23*np.dot(r12, np.cross(r23, r34)), np.dot(np.cross(r12, r23), np.cross(r23, r34))) )
+
+	if dihe < 0.0: dihe += 360.0
+
+	return dihe
 
 #-------------------------------------------------------------------------------
 

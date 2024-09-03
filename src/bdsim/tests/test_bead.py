@@ -759,6 +759,51 @@ class TestBead(unittest.TestCase):
 
 		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 180.0)
 
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_90(self):
+
+		bead1 = Bead([10.0, 0.0, -15.0], 1.0)
+		bead2 = Bead([0.0, 0.0, -5.0], 1.0)
+		bead3 = Bead([0.0, 0.0, 5.0], 1.0)
+		bead4 = Bead([0.0, 10.0, 15.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 90.0)
+
+
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_270(self):
+
+		bead1 = Bead([10.0, 0.0, -15.0], 1.0)
+		bead2 = Bead([0.0, 0.0, -5.0], 1.0)
+		bead3 = Bead([0.0, 0.0, 5.0], 1.0)
+		bead4 = Bead([0.0, -10.0, 15.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 270.0)
+
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_350(self):
+
+		bead1 = Bead([10.0, 0.0, -15.0], 1.0)
+		bead2 = Bead([0.0, 0.0, -5.0], 1.0)
+		bead3 = Bead([0.0, 0.0, 5.0], 1.0)
+		bead4 = Bead([10*np.cos(np.deg2rad(350)), 10.0*np.sin(np.deg2rad(350)), 15.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 350.0)
+
+	#---------------------------------------------------------------------------
+
+	def test_dihedral_pbc_10(self):
+
+		bead1 = Bead([10.0, 0.0, -15.0], 1.0)
+		bead2 = Bead([0.0, 0.0, -5.0], 1.0)
+		bead3 = Bead([0.0, 0.0, 5.0], 1.0)
+		bead4 = Bead([10*np.cos(np.deg2rad(10)), 10.0*np.sin(np.deg2rad(10)), 15.0], 1.0)
+
+		self.assertEqual(dihedral_pbc(bead2.r-bead1.r, bead3.r-bead2.r, bead4.r-bead3.r), 10.0)
+
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
